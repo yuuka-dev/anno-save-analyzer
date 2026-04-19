@@ -20,6 +20,7 @@ from anno_save_analyzer.trade import partners_for_item
 from anno_save_analyzer.trade.aggregate import ItemSummary, PartnerSummary, RouteSummary
 
 from ..i18n import Localizer
+from ..sparkline import sparkline
 from ..state import TuiState
 
 
@@ -99,11 +100,35 @@ class TradeStatisticsScreen(Screen):
             t("statistics.col.net_qty"),
             t("statistics.col.net_gold"),
             t("statistics.col.events"),
+            t("statistics.col.trend"),
         )
-        # row_key に guid 文字列を付けて後で partner 検索できるようにする
+        # 各物資の累積数量 sparkline を先に算出．1 物資 = 1 sparkline string．
+        trends = self._build_item_trends()
         for s in self._state.item_summaries:
-            table.add_row(*self._format_item_row(s), key=str(s.item.guid))
+            row = (*self._format_item_row(s), trends.get(s.item.guid, ""))
+            table.add_row(*row, key=str(s.item.guid))
         return table
+
+    def _build_item_trends(self) -> dict[int, str]:
+        """item GUID → 累積数量 sparkline 文字列 (width=12)．
+
+        timestamp 昇順に累積を取る．timestamp 無しイベントは既存順を維持．
+        """
+        series: dict[int, list[tuple[int, int]]] = {}
+        for ev in self._state.events:
+            if ev.timestamp_tick is None:
+                continue
+            series.setdefault(ev.item.guid, []).append((ev.timestamp_tick, ev.amount))
+        out: dict[int, str] = {}
+        for guid, rows in series.items():
+            rows.sort(key=lambda r: r[0])
+            cumulative: list[int] = []
+            running = 0
+            for _tick, amt in rows:
+                running += amt
+                cumulative.append(running)
+            out[guid] = sparkline(cumulative)
+        return out
 
     def _render_routes_table(self) -> DataTable:
         table = DataTable(id="routes-table")
