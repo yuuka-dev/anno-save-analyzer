@@ -73,8 +73,8 @@ class TradeStatisticsScreen(Screen):
         islands_by_sid = self._state.islands_by_session
         for sid, key in zip(self._state.session_ids, keys, strict=False):
             session_node = tree.root.add(t(key, index=sid), expand=True)
-            for island_id in islands_by_sid.get(sid, ()):
-                session_node.add_leaf(t("statistics.island_label", id=island_id))
+            for island in islands_by_sid.get(sid, ()):
+                session_node.add_leaf(island.city_name)
         return tree
 
     def _render_items_table(self) -> DataTable:

@@ -12,9 +12,10 @@ from dataclasses import dataclass, field
 from pathlib import Path
 
 from anno_save_analyzer.parser.filedb import (
+    PlayerIsland,
     detect_version,
     extract_sessions,
-    list_inner_area_managers,
+    list_player_islands,
     parse_tag_section,
 )
 from anno_save_analyzer.parser.pipeline import extract_inner_filedb
@@ -59,9 +60,9 @@ class TuiState:
     # session_id (= "0" / "1" ...) → locale lookup key (例 "session.anno117.latium")
     # localizer 経由で「Latium / ラティウム」等にレンダリングする．
     session_locale_keys: tuple[str, ...] = field(default_factory=tuple)
-    # session_id → AreaManager_<N> の N 群．Statistics 画面の Tree で
-    # session > AreaManager の階層を組むのに使う．
-    islands_by_session: dict[str, tuple[int, ...]] = field(default_factory=dict)
+    # session_id → プレイヤー保有島 (CityName 持ち) のリスト．
+    # Statistics 画面の Tree で session > island の階層に使う．
+    islands_by_session: dict[str, tuple[PlayerIsland, ...]] = field(default_factory=dict)
 
 
 def build_overview(
@@ -140,10 +141,10 @@ def load_state(
 
 def _collect_islands_by_session(
     save_path: Path, session_ids: tuple[str, ...]
-) -> dict[str, tuple[int, ...]]:
-    """内側 Session ごとに ``AreaManager_<N>`` を列挙．
+) -> dict[str, tuple[PlayerIsland, ...]]:
+    """内側 Session ごとに「プレイヤー保有島」（CityName 持ち）を列挙．
 
-    Anno のセーブでは 1 島 = 1 ``AreaManager``．tag 辞書を読むだけでよい．
+    NPC や空島は除外．書記長の dogfooding 時の見た目を「自分の島だけ」にする．
     """
     if not session_ids:
         return {}
@@ -157,7 +158,7 @@ def _collect_islands_by_session(
     section = parse_tag_section(outer, version)
     inner_payloads = extract_sessions(outer, version=version, tag_section=section)
 
-    by_session: dict[str, tuple[int, ...]] = {}
+    by_session: dict[str, tuple[PlayerIsland, ...]] = {}
     for sid, inner in zip(session_ids, inner_payloads, strict=False):
-        by_session[sid] = list_inner_area_managers(inner)
+        by_session[sid] = list_player_islands(inner)
     return by_session

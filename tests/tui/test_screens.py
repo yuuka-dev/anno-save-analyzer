@@ -66,10 +66,16 @@ class TestStatisticsScreen:
             assert routes_table is not None
 
     async def test_statistics_tree_renders_island_leaves(self, tui_state, tmp_path) -> None:
-        """islands_by_session に値を入れて Tree に Island #N が出ることを確認．"""
+        """islands_by_session に値を入れて Tree に島名が出ることを確認．"""
+        from anno_save_analyzer.parser.filedb import PlayerIsland
         from anno_save_analyzer.tui.state import TuiState
 
-        islands = dict.fromkeys(tui_state.session_ids, (1, 2, 3))
+        sample_islands = (
+            PlayerIsland(city_name="大阪民国"),
+            PlayerIsland(city_name="シベリア"),
+            PlayerIsland(city_name="グンマー帝国"),
+        )
+        islands = dict.fromkeys(tui_state.session_ids, sample_islands)
         new_state = TuiState(
             save_path=tui_state.save_path,
             title=tui_state.title,
