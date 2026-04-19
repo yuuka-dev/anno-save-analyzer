@@ -39,15 +39,15 @@ class TestTradeListCommand:
         assert first["item"]["guid"] in {2088, 2073, 2142}
 
     def test_locale_changes_item_name(self, tmp_path: Path) -> None:
-        # packaged ja yaml に 2088=木材 入ってる
+        # packaged ja yaml で 2088=イワシ (GUID 2088 は Sardines)
         save = _make_save(tmp_path)
         result = runner.invoke(
             app, ["trade", "list", str(save), "--title", "anno117", "--locale", "ja"]
         )
         assert result.exit_code == 0
         payload = json.loads(result.stdout)
-        wood = next(p for p in payload if p["item"]["guid"] == 2088)
-        assert wood["item"]["name"] == "木材"
+        sardines = next(p for p in payload if p["item"]["guid"] == 2088)
+        assert sardines["item"]["name"] == "イワシ"
 
 
 class TestTradeSummaryCommand:
