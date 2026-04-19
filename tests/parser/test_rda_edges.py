@@ -11,6 +11,7 @@ from __future__ import annotations
 import struct
 import zlib
 from pathlib import Path
+from typing import BinaryIO
 
 import pytest
 
@@ -433,9 +434,7 @@ class TestBlockErrors:
         with pytest.raises(RDAParseError, match="underflow"), RDAArchive(rda_path):
             pass
 
-    def test_directory_eof_raises_via_truncated_stream(
-        self, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
-    ) -> None:
+    def test_directory_eof_raises_via_truncated_stream(self, tmp_path: Path) -> None:
         """directory バイト列を正規に読み取ろうとしたら短く返ってきた場合の guard．
 
         実 RDA では先行の underflow チェックや ``block_offset < file_size`` 不変条件で
@@ -445,19 +444,29 @@ class TestBlockErrors:
         rda_path = tmp_path / "ok.rda"
         rda_path.write_bytes(_build_single_block_rda([("a.txt", b"a")]))
 
-        real_read = None
+        class ShortReadStream:
+            def __init__(self, raw: BinaryIO) -> None:
+                self._raw = raw
 
-        def short_read(self_stream, size: int = -1) -> bytes:  # type: ignore[no-untyped-def]
-            data = real_read(size)
-            # directory バイトを読むサイズ (560 = V2.2 DirEntry) のとき切り詰める
-            if size == dir_entry_size(RDAVersion.V2_2):
-                return data[:-1]
-            return data
+            def read(self, size: int = -1) -> bytes:
+                data = self._raw.read(size)
+                # directory バイトを読むサイズ (560 = V2.2 DirEntry) のとき切り詰める
+                if size == dir_entry_size(RDAVersion.V2_2):
+                    return data[:-1]
+                return data
+
+            def seek(self, offset: int, whence: int = 0) -> int:
+                return self._raw.seek(offset, whence)
+
+            def tell(self) -> int:
+                return self._raw.tell()
+
+            def close(self) -> None:
+                self._raw.close()
 
         # ファイルを手動で開いて短縮 read を仕込む．RDAArchive 同様に自前ライフタイム管理
-        stream = open(rda_path, "rb")  # noqa: SIM115
-        real_read = stream.read
-        monkeypatch.setattr(stream, "read", lambda size=-1: short_read(stream, size))
+        raw_stream = open(rda_path, "rb")  # noqa: SIM115
+        stream = ShortReadStream(raw_stream)
         try:
             version = RDAVersion.V2_2
             stream.seek(len(_v22_header()) + 8)  # skip header
