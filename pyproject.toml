@@ -23,6 +23,7 @@ optimizer = ["ortools>=9.0"]
 tui = ["textual>=0.80", "textual-plotext>=0.2"]
 web = ["fastapi", "uvicorn"]
 viz = ["duckdb"]
+notebook = ["jupyterlab>=4.0"]
 
 [project.scripts]
 anno-save-analyzer = "anno_save_analyzer.cli.__main__:app"
