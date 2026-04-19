@@ -1,0 +1,73 @@
+# ---- Claude Code ----
+# ユーザーレベル (~/.claude/CLAUDE.md) のみで管理方針のため，
+# プロジェクト直下の CLAUDE.md も含めて commit 除外
+.claude/
+CLAUDE.md
+
+# ---- Python ----
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+*.egg-info/
+*.egg
+MANIFEST
+
+# ---- venv / uv ----
+.venv/
+venv/
+env/
+.uv-cache/
+
+# ---- build / dist ----
+build/
+dist/
+wheels/
+pip-wheel-metadata/
+*.whl
+
+# ---- テスト / 型検査 / カバレッジ ----
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+.coverage.*
+htmlcov/
+coverage.xml
+nosetests.xml
+
+# ---- エディタ / OS ----
+.vscode/
+.idea/
+*.swp
+*.swo
+.DS_Store
+Thumbs.db
+
+# ---- Anno セーブ解析特有 ----
+# 外部実行ファイル（tools/ 配下の FileDBReader.exe, RDAExplorerGUI.exe など）
+tools/
+# セーブデータサンプル（書記長の個人資産，公開しない）
+sample.a7s
+sample.a8s
+data/samples/
+# 展開中間生成物
+output/
+*.a7s.extracted/
+*.a8s.extracted/
+*.xml.tmp
+
+# ---- 環境変数 ----
+.env
+.env.local
+*.env
+
+# ---- ログ ----
+*.log
+logs/
+
+# ---- 上流参照 ----
+# refs/RDAExplorer は GPL-v3．本プロジェクト (MIT) との license 混在を避けるため
+# ローカル read-only 参照のみ扱いとし，commit しない．
+refs/

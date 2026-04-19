@@ -1,0 +1,33 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "anno-save-analyzer"
+version = "0.1.5"
+description = "Anno 1800 / 117 セーブデータ解析ツール"
+readme = "README.md"
+requires-python = ">=3.12"
+license = { text = "MIT" }
+authors = [{ name = "Proletariat Yuuka", email = "sounyan.is.the.angel@gmail.com" }]
+dependencies = [
+    "lxml>=6.0",
+    "pyyaml>=6.0",
+    "pydantic>=2.0",
+    "pandas>=2.0",
+]
+
+[project.optional-dependencies]
+optimizer = ["ortools>=9.0"]
+web = ["fastapi", "uvicorn"]
+viz = ["duckdb"]
+
+[dependency-groups]
+dev = ["pytest>=8.0", "ruff>=0.5", "mypy>=1.10"]
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/anno_save_analyzer"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["src"]
