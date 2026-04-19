@@ -24,6 +24,10 @@ from .block import (
 from .exceptions import EncryptedBlockError, RDAParseError
 from .header import FileHeader, RDAVersion, read_file_header
 
+# ブロックチェーン走査時のループ検出上限．異常な .a7s で無限ループになるのを防ぐ防御値．
+# テスト時に monkeypatch で下げてループ検出を発動させる．
+MAX_BLOCK_CHAIN_LENGTH = 1_000_000
+
 
 @dataclass(frozen=True)
 class RDAEntry:
@@ -190,8 +194,10 @@ class RDAArchive:
         guard = 0
         while current < file_size:
             guard += 1
-            if guard > 1_000_000:
-                raise RDAParseError("block chain loop detected (>1M iterations)")
+            if guard > MAX_BLOCK_CHAIN_LENGTH:
+                raise RDAParseError(
+                    f"block chain loop detected (>{MAX_BLOCK_CHAIN_LENGTH} iterations)"
+                )
 
             stream.seek(current)
             block = read_block_info(stream, version)
