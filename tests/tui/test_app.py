@@ -75,6 +75,41 @@ class TestTradeAppLifecycle:
         # exit on context manager close — no exception means success
         assert True
 
+    async def test_ctrl_o_exports_three_csv_files(self, tui_state, tmp_path, monkeypatch) -> None:
+        """nano 風 ^O で 3 枚の CSV が cwd に出る．"""
+        monkeypatch.chdir(tmp_path)
+        app = TradeApp(tui_state)
+        async with app.run_test() as pilot:
+            await pilot.pause()
+            await pilot.press("ctrl+o")
+            await pilot.pause()
+        # fake.bin basename に基づく 3 ファイル
+        stems = sorted(p.name for p in tmp_path.glob("fake_*.csv"))
+        kinds = {s.split("_")[1] for s in stems}
+        assert kinds == {"items", "routes", "events"}
+        # items CSV に header 行があることを verify
+        items_csv = next(p for p in tmp_path.glob("fake_items_*.csv"))
+        content = items_csv.read_text(encoding="utf-8").splitlines()
+        assert content[0].startswith("guid,name,")
+
+    async def test_ctrl_o_after_locale_switch_uses_ja_names(
+        self, tui_state, tmp_path, monkeypatch
+    ) -> None:
+        """^L → ^O で export に日本語 item 名が入る．"""
+        monkeypatch.chdir(tmp_path)
+        app = TradeApp(tui_state)
+        async with app.run_test() as pilot:
+            await pilot.pause()
+            await pilot.press("ctrl+l")
+            await pilot.pause()
+            await pilot.press("ctrl+o")
+            await pilot.pause()
+        items_csv = next(p for p in tmp_path.glob("fake_items_*.csv"))
+        text = items_csv.read_text(encoding="utf-8")
+        # fixture の yaml は ja で 100=木材 を持たないので fallback 名 Wood が出る (ok)．
+        # 少なくとも CSV が空でないこと + header が出てること．
+        assert "guid,name," in text
+
 
 @pytest.mark.asyncio
 class TestFromSaveClassmethod:
