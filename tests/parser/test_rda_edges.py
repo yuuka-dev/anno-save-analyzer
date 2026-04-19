@@ -209,6 +209,49 @@ class TestArchiveIO:
         assert out == dest_dir / "named.txt"
         assert out.read_bytes() == b"bravo"
 
+    def test_extract_all_writes_every_entry(self, tmp_path: Path) -> None:
+        """複数エントリを extract_all で一括展開．CI (sample.a7s 無し) でも通る合成ケース．"""
+        rda_path = tmp_path / "multi.rda"
+        rda_path.write_bytes(
+            _build_single_block_rda(
+                [
+                    ("alpha.bin", b"AAA"),
+                    ("beta.bin", b"BBBB"),
+                    ("gamma.bin", b"CCCCC"),
+                ]
+            )
+        )
+        dest_root = tmp_path / "out_all"
+        with RDAArchive(rda_path) as rda:
+            paths = rda.extract_all(dest_root)
+        assert {p.name for p in paths} == {"alpha.bin", "beta.bin", "gamma.bin"}
+        assert (dest_root / "alpha.bin").read_bytes() == b"AAA"
+        assert (dest_root / "beta.bin").read_bytes() == b"BBBB"
+        assert (dest_root / "gamma.bin").read_bytes() == b"CCCCC"
+
+    def test_extract_all_creates_subdirectories_from_embedded_paths(
+        self, tmp_path: Path
+    ) -> None:
+        """エントリ名にスラッシュが含まれる場合にサブディレクトリを作ることを確認．"""
+        rda_path = tmp_path / "nested.rda"
+        # ``\`` を含む名前も含め，正規化 (lstrip("/") / ``\\`` → ``/``) 経路を踏む
+        rda_path.write_bytes(
+            _build_single_block_rda(
+                [
+                    ("/leading-slash.bin", b"L"),
+                    ("gfx\\sub\\foo.bin", b"F"),
+                ]
+            )
+        )
+        dest_root = tmp_path / "nested_out"
+        with RDAArchive(rda_path) as rda:
+            paths = rda.extract_all(dest_root)
+        # 正規化後のパスを確認
+        rels = sorted(str(p.relative_to(dest_root)) for p in paths)
+        assert rels == sorted(["leading-slash.bin", "gfx/sub/foo.bin"])
+        assert (dest_root / "gfx" / "sub" / "foo.bin").read_bytes() == b"F"
+        assert (dest_root / "leading-slash.bin").read_bytes() == b"L"
+
     def test_read_encrypted_entry_rejected(self, tmp_path: Path) -> None:
         """
         直接 RDAEntry を encrypted flag 付きで構築して ``_read_entry_data`` を叩く．
