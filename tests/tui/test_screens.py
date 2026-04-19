@@ -201,6 +201,91 @@ class TestStatisticsScreen:
             # skip されるので active のみ
             assert routes_table.row_count == len(tui_state.route_summaries)
 
+    async def test_partners_pane_updates_on_item_row_highlight(self, tui_state) -> None:
+        """items-table の row highlight で Partners pane が選択物資の相手集計に切り替わる．"""
+        from textual.widgets import Static
+
+        app = TradeApp(tui_state)
+        async with app.run_test() as pilot:
+            await pilot.pause()
+            await pilot.press("ctrl+t")
+            await pilot.pause()
+            screen = pilot.app.screen
+            items_table = screen.query_one("#items-table")
+            items_table.focus()
+            await pilot.pause()
+            # 先頭行 highlight は DataTable が prop 的に入るはず．
+            # 明示的に keypress で currentChange を発火．
+            await pilot.press("down")
+            await pilot.pause()
+            pane = screen.query_one("#partners-pane", Static)
+            rendered = str(pane.render())
+            # placeholder から切り替わる (partners.placeholder は "(per-good partner list arrives..."
+            assert "arrives in Week" not in rendered and "Week 3 で実装" not in rendered
+
+    async def test_partners_pane_shows_empty_message_for_item_without_events(
+        self, tui_state
+    ) -> None:
+        """fixture に登場しない guid を直接 pane に渡すと empty メッセージ．"""
+        from textual.widgets import Static
+
+        app = TradeApp(tui_state)
+        async with app.run_test() as pilot:
+            await pilot.pause()
+            await pilot.press("ctrl+t")
+            await pilot.pause()
+            screen = pilot.app.screen
+            screen._update_partners_pane(999_999)
+            pane = screen.query_one("#partners-pane", Static)
+            rendered = str(pane.render())
+            # en fallback 名が表示される
+            assert "Good_999999" in rendered
+
+    async def test_row_highlight_early_returns(self, tui_state) -> None:
+        """items-table 以外 / row_key が数値でない / None → pane 無更新 (early return)．"""
+        from textual.widgets import DataTable, Static
+
+        app = TradeApp(tui_state)
+        async with app.run_test() as pilot:
+            await pilot.pause()
+            await pilot.press("ctrl+t")
+            await pilot.pause()
+            screen = pilot.app.screen
+
+            class _FakeRowKey:
+                def __init__(self, value):
+                    self.value = value
+
+            class _FakeEvent:
+                def __init__(self, table, key_value):
+                    self.data_table = table
+                    self.row_key = _FakeRowKey(key_value) if key_value is not None else None
+
+            items_table = screen.query_one("#items-table", DataTable)
+            routes_table = screen.query_one("#routes-table", DataTable)
+            pane = screen.query_one("#partners-pane", Static)
+            before = str(pane.render())
+
+            # (1) routes-table from event → early return (line 178)
+            screen.on_data_table_row_highlighted(_FakeEvent(routes_table, "0"))
+            await pilot.pause()
+            assert str(pane.render()) == before
+
+            # (2) row_key None → early return (line 181)
+            screen.on_data_table_row_highlighted(_FakeEvent(items_table, None))
+            await pilot.pause()
+            assert str(pane.render()) == before
+
+            # (3) row_key empty string → early return (line 181)
+            screen.on_data_table_row_highlighted(_FakeEvent(items_table, ""))
+            await pilot.pause()
+            assert str(pane.render()) == before
+
+            # (4) row_key not int → ValueError → silently skip (lines 184-185)
+            screen.on_data_table_row_highlighted(_FakeEvent(items_table, "not_a_guid"))
+            await pilot.pause()
+            assert str(pane.render()) == before
+
     async def test_statistics_japanese_labels_after_locale_switch(self, tui_state) -> None:
         # locale=ja で初期化
         from anno_save_analyzer.tui.state import TuiState

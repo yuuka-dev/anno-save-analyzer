@@ -4,7 +4,14 @@
 から re-export する．
 """
 
-from .aggregate import ItemSummary, RouteSummary, by_item, by_route
+from .aggregate import (
+    ItemSummary,
+    PartnerSummary,
+    RouteSummary,
+    by_item,
+    by_route,
+    partners_for_item,
+)
 from .extract import extract
 from .items import ItemDictionary
 from .models import (
@@ -25,6 +32,7 @@ __all__ = [
     "ItemSummary",
     "Locale",
     "PartnerKind",
+    "PartnerSummary",
     "RouteSummary",
     "SourceMethod",
     "TradeEvent",
@@ -35,4 +43,5 @@ __all__ = [
     "by_route",
     "extract",
     "list_trade_routes",
+    "partners_for_item",
 ]

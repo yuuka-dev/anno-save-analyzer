@@ -15,7 +15,8 @@ from textual.widgets import (
     Tree,
 )
 
-from anno_save_analyzer.trade.aggregate import ItemSummary, RouteSummary
+from anno_save_analyzer.trade import partners_for_item
+from anno_save_analyzer.trade.aggregate import ItemSummary, PartnerSummary, RouteSummary
 
 from ..i18n import Localizer
 from ..state import TuiState
@@ -79,6 +80,7 @@ class TradeStatisticsScreen(Screen):
 
     def _render_items_table(self) -> DataTable:
         table = DataTable(id="items-table")
+        table.cursor_type = "row"
         t = self._localizer.t
         table.add_columns(
             t("statistics.col.good"),
@@ -88,8 +90,9 @@ class TradeStatisticsScreen(Screen):
             t("statistics.col.net_gold"),
             t("statistics.col.events"),
         )
+        # row_key に guid 文字列を付けて後で partner 検索できるようにする
         for s in self._state.item_summaries:
-            table.add_row(*self._format_item_row(s))
+            table.add_row(*self._format_item_row(s), key=str(s.item.guid))
         return table
 
     def _render_routes_table(self) -> DataTable:
@@ -139,9 +142,7 @@ class TradeStatisticsScreen(Screen):
             f"{s.event_count:,}",
         )
 
-    def _format_route_row(
-        self, s: RouteSummary, legs: int, *, active: bool
-    ) -> tuple[str, ...]:
+    def _format_route_row(self, s: RouteSummary, legs: int, *, active: bool) -> tuple[str, ...]:
         t = self._localizer.t
         route_id = s.route_id if s.route_id is not None else "—"
         status = t("statistics.status.active") if active else t("statistics.status.idle")
@@ -168,3 +169,46 @@ class TradeStatisticsScreen(Screen):
             "+0",
             "0",
         )
+
+    def on_data_table_row_highlighted(self, event: DataTable.RowHighlighted) -> None:
+        """items-table で行 highlight 時に partners pane を更新．"""
+        if event.data_table.id != "items-table":
+            return
+        row_key = event.row_key.value if event.row_key is not None else None
+        if not row_key:
+            return
+        try:
+            guid = int(row_key)
+        except ValueError:
+            return
+        self._update_partners_pane(guid)
+
+    def _update_partners_pane(self, item_guid: int) -> None:
+        rows = partners_for_item(self._state.events, item_guid)
+        self.query_one("#partners-pane", Static).update(self._format_partners_pane(rows, item_guid))
+
+    def _format_partners_pane(self, rows: list[PartnerSummary], item_guid: int) -> str:
+        t = self._localizer.t
+        if not rows:
+            item = self._state.items[item_guid]
+            return (
+                f"[b]{t('partners.heading')}[/b]\n\n"
+                f"[dim]{item.display_name(self._localizer.code)}[/dim]\n\n"
+                f"{t('partners.empty')}"
+            )
+        item = rows[0].item
+        locale = self._localizer.code
+        lines: list[str] = [
+            f"[b]{t('partners.heading')}[/b]",
+            f"[dim]{item.display_name(locale)}[/dim]",
+            "",
+        ]
+        for r in rows:
+            lines.append(
+                f"• {r.display_partner}  [dim]({r.partner_kind})[/dim]\n"
+                f"    {t('statistics.col.bought')}: {r.bought:,}  "
+                f"{t('statistics.col.sold')}: {r.sold:,}  "
+                f"{t('statistics.col.net_gold')}: {r.net_gold:+,}  "
+                f"{t('statistics.col.events')}: {r.event_count:,}"
+            )
+        return "\n".join(lines)
