@@ -77,6 +77,7 @@ def _walk_inner_session(inner: bytes, session_idx: int) -> Iterator[RawTradedGoo
 
     # TradedGoods 内部の集計用
     in_traded_goods = False
+    traded_goods_depth = 0
     current_triple: dict[str, int | None] = _empty_triple()
     pending_kind: PartnerKind = "unknown"
 
@@ -94,16 +95,20 @@ def _walk_inner_session(inner: bytes, session_idx: int) -> Iterator[RawTradedGoo
                     # 想定外 (ConstructionAI/EventBuffer 等) は skip
                     continue
                 in_traded_goods = True
+                traded_goods_depth = 0
                 pending_kind = kind
-                current_triple = _empty_triple()
+            elif in_traded_goods:
+                traded_goods_depth += 1
+                if traded_goods_depth == 1:
+                    current_triple = _empty_triple()
             continue
 
         if ev.kind is EventKind.ATTRIB:
             # invariant: ATTRIB は必ず enclosing TAG の中で来るため attrib_stack は非空．
             attrib_stack[-1][ev.name or f"<{ev.id_}>"] = ev.content
 
-            if in_traded_goods:
-                # TradedGoods 直下の <1> 配下に GoodGuid / GoodAmount / TotalPrice
+            if in_traded_goods and traded_goods_depth >= 1:
+                # TradedGoods 直下の child (<1>) 配下に GoodGuid / GoodAmount / TotalPrice
                 attr_name = ev.name
                 if attr_name == "GoodGuid":
                     current_triple["good_guid"] = _read_int32(ev.content)
@@ -119,17 +124,22 @@ def _walk_inner_session(inner: bytes, session_idx: int) -> Iterator[RawTradedGoo
         closing_name = tag_stack.pop()
         attrib_stack.pop()
 
+        if in_traded_goods and closing_name != _TRADED_GOODS_TAG:
+            if traded_goods_depth == 1:
+                triple = _build_triple_if_complete(
+                    current_triple,
+                    session_id=session_id,
+                    kind=pending_kind,
+                    ancestor_attribs=attrib_stack,
+                )
+                if triple is not None:
+                    yield triple
+            traded_goods_depth -= 1
+            continue
+
         if closing_name == _TRADED_GOODS_TAG and in_traded_goods:
-            # この時点で要件揃ってれば yield
             in_traded_goods = False
-            triple = _build_triple_if_complete(
-                current_triple,
-                session_id=session_id,
-                kind=pending_kind,
-                ancestor_attribs=attrib_stack,
-            )
-            if triple is not None:
-                yield triple
+            traded_goods_depth = 0
 
 
 def _empty_triple() -> dict[str, int | None]:

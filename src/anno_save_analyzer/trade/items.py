@@ -14,7 +14,7 @@ Loader は ``en`` ファイルをベースに他 locale を name のみマージ
 
 from __future__ import annotations
 
-from collections.abc import Iterable
+from collections.abc import Iterable, Mapping
 from importlib import resources
 from pathlib import Path
 from typing import cast
@@ -105,6 +105,20 @@ def _load_yaml(title: str, locale: Locale, data_dir: Path | None) -> dict[int, d
 
     if raw is None:
         return {}
-    parsed = yaml.safe_load(raw) or {}
-    # GUID キーを int に揃える（YAML の数値キーは int だが文字列で書かれる場合の互換）
-    return {int(k): (v or {}) for k, v in parsed.items()}
+    parsed = yaml.safe_load(raw)
+    if parsed is None:
+        return {}
+    if not isinstance(parsed, Mapping):
+        raise ValueError(f"{filename}: expected a mapping at YAML root")
+
+    normalized: dict[int, dict] = {}
+    for k, v in parsed.items():
+        if v is None:
+            entry: dict = {}
+        elif isinstance(v, Mapping):
+            entry = dict(v)
+        else:
+            raise ValueError(f"{filename}: expected mapping entry for GUID {k!r}")
+        # GUID キーを int に揃える（YAML の数値キーは int だが文字列で書かれる場合の互換）
+        normalized[int(k)] = entry
+    return normalized

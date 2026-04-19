@@ -348,3 +348,55 @@ class TestInterpreterIgnoresInvalidParents:
         section = parse_tag_section(outer, detect_version(outer))
         triples = list(Anno117Interpreter().find_traded_goods(outer, section))
         assert triples == []
+
+
+class TestMultipleRowsInSingleTradedGoods:
+    """TradedGoods 直下の child 要素ごとに triple を emit する．"""
+
+    def test_emits_each_child_row(self) -> None:
+        from tests.parser.filedb.conftest import minimal_v3
+
+        tags = {
+            2: "PassiveTrade",
+            3: "History",
+            4: "TradeRouteEntries",
+            5: "TradedGoods",
+        }
+        attribs = {
+            0x8001: "Trader",
+            0x8002: "GoodGuid",
+            0x8003: "GoodAmount",
+            0x8004: "TotalPrice",
+        }
+        events = [
+            ("T", 2),
+            ("T", 3),
+            ("T", 4),
+            ("T", 1),  # outer <1>
+            ("A", 0x8001, struct.pack("<i", 42)),
+            ("T", 1),  # inner <1>
+            ("T", 5),  # TradedGoods
+            ("T", 1),
+            ("A", 0x8002, struct.pack("<i", 2088)),
+            ("A", 0x8003, struct.pack("<i", 5)),
+            ("A", 0x8004, struct.pack("<i", 0)),
+            ("X",),  # close row #1
+            ("T", 1),
+            ("A", 0x8002, struct.pack("<i", 2073)),
+            ("A", 0x8003, struct.pack("<i", -2)),
+            ("A", 0x8004, struct.pack("<i", 0)),
+            ("X",),  # close row #2
+            ("X",),  # close TradedGoods
+            ("X",),  # close inner <1>
+            ("X",),  # close outer <1>
+            ("X",),  # close TradeRouteEntries
+            ("X",),  # close History
+            ("X",),  # close PassiveTrade
+        ]
+        inner = minimal_v3(tags=tags, attribs=attribs, events=events)
+        outer = wrap_as_outer([inner])
+        section = parse_tag_section(outer, detect_version(outer))
+        triples = list(Anno117Interpreter().find_traded_goods(outer, section))
+        assert len(triples) == 2
+        assert {(t.good_guid, t.amount) for t in triples} == {(2088, 5), (2073, -2)}
+        assert {t.context.route_id for t in triples} == {"42"}

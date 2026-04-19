@@ -4,6 +4,8 @@ from __future__ import annotations
 
 from pathlib import Path
 
+import pytest
+
 from anno_save_analyzer.trade import ItemDictionary
 
 
@@ -49,3 +51,17 @@ def test_non_en_locale_does_not_set_category(tmp_path: Path) -> None:
     d = ItemDictionary.load(title, locales=["en", "ja"], data_dir=tmp_path)
     assert d[1].category == "en-cat"
     assert d[1].display_name("ja") == "ja-name"
+
+
+def test_yaml_root_non_mapping_raises_value_error(tmp_path: Path) -> None:
+    title = "badroot"
+    (tmp_path / f"items_{title}.en.yaml").write_text("- not\n- a\n- mapping\n", encoding="utf-8")
+    with pytest.raises(ValueError, match=f"items_{title}.en.yaml: expected a mapping at YAML root"):
+        ItemDictionary.load(title, data_dir=tmp_path)
+
+
+def test_yaml_entry_non_mapping_raises_value_error(tmp_path: Path) -> None:
+    title = "badentry"
+    (tmp_path / f"items_{title}.en.yaml").write_text("1: broken-entry\n", encoding="utf-8")
+    with pytest.raises(ValueError, match="expected mapping entry for GUID"):
+        ItemDictionary.load(title, data_dir=tmp_path)

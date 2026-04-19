@@ -59,7 +59,7 @@ def _load_dictionary(title: GameTitle, locale: str) -> ItemDictionary:
 
 def _events(save: Path, title: GameTitle, locale: str) -> Iterable[TradeEvent]:
     items = _load_dictionary(title, locale)
-    return list(extract(save, title=title, items=items))
+    return extract(save, title=title, items=items)
 
 
 def _emit_json(payload: object) -> None:
@@ -80,7 +80,7 @@ def list_trades(
     """List every TradeEvent extracted from SAVE."""
     _ensure_format_supported(fmt)
     title_v = title.to_title()
-    events = _events(save, title_v, locale)
+    events = list(_events(save, title_v, locale))
     payload = [
         {
             "timestamp_tick": ev.timestamp_tick,
