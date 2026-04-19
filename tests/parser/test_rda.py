@@ -36,7 +36,6 @@ from anno_save_analyzer.parser.rda.header import (
     magic_bytes,
 )
 
-
 # --------- 実セーブ依存テスト ---------
 
 _DEFAULT_SAMPLE = Path(__file__).resolve().parents[2] / "sample.a7s"
@@ -82,9 +81,8 @@ class TestRealSample:
                 assert p.stat().st_size > 0
 
     def test_missing_entry_raises_key_error(self) -> None:
-        with RDAArchive(SAMPLE_PATH) as rda:
-            with pytest.raises(KeyError):
-                rda.read("does_not_exist.a7s")
+        with RDAArchive(SAMPLE_PATH) as rda, pytest.raises(KeyError):
+            rda.read("does_not_exist.a7s")
 
 
 # --------- 合成フィクスチャによる単体テスト ---------
@@ -145,8 +143,8 @@ def _build_minimal_rda(
         flags,
         len(files),
         len(directory_on_disk),  # directorySize
-        decompressed_size,        # decompressedSize (directory 展開後)
-        file_size,                # nextBlock = EOF でチェーン終端
+        decompressed_size,  # decompressedSize (directory 展開後)
+        file_size,  # nextBlock = EOF でチェーン終端
     )
     assert len(block_info) == block_info_size(version)
 
@@ -201,58 +199,47 @@ class TestErrorHandling:
     def test_bad_magic_raises(self, tmp_path: Path) -> None:
         bad = tmp_path / "bad.rda"
         bad.write_bytes(b"\x00\x01not an RDA at all")
-        with pytest.raises(UnsupportedVersionError):
-            with RDAArchive(bad):
-                pass
+        with pytest.raises(UnsupportedVersionError), RDAArchive(bad):
+            pass
 
     def test_empty_file_raises(self, tmp_path: Path) -> None:
         bad = tmp_path / "empty.rda"
         bad.write_bytes(b"")
-        with pytest.raises(RDAParseError):
-            with RDAArchive(bad):
-                pass
+        with pytest.raises(RDAParseError), RDAArchive(bad):
+            pass
 
     def test_missing_file_raises(self, tmp_path: Path) -> None:
-        with pytest.raises(FileNotFoundError):
-            with RDAArchive(tmp_path / "nothing.rda"):
-                pass
+        with pytest.raises(FileNotFoundError), RDAArchive(tmp_path / "nothing.rda"):
+            pass
 
     def test_unknown_entry_raises(self, tmp_path: Path) -> None:
         rda_path = tmp_path / "x.rda"
-        rda_path.write_bytes(
-            _build_minimal_rda([("only.txt", b"x")], compressed=False)
-        )
-        with RDAArchive(rda_path) as rda:
-            with pytest.raises(KeyError):
-                rda.get_entry("missing.txt")
+        rda_path.write_bytes(_build_minimal_rda([("only.txt", b"x")], compressed=False))
+        with RDAArchive(rda_path) as rda, pytest.raises(KeyError):
+            rda.get_entry("missing.txt")
 
     def test_encrypted_block_rejected(self, tmp_path: Path) -> None:
         """Encrypted flag を立てたブロックは明示的に例外を送出する．"""
         rda_path = tmp_path / "enc.rda"
-        raw = bytearray(
-            _build_minimal_rda([("a.txt", b"hi")], compressed=False)
-        )
+        raw = bytearray(_build_minimal_rda([("a.txt", b"hi")], compressed=False))
         # 末尾 BlockInfo の flags フィールドに FLAG_ENCRYPTED を立てる
         bi_size = block_info_size(RDAVersion.V2_2)
         block_start = len(raw) - bi_size
-        flags_old, = struct.unpack("<I", raw[block_start : block_start + 4])
+        (flags_old,) = struct.unpack("<I", raw[block_start : block_start + 4])
         flags_new = flags_old | FLAG_ENCRYPTED
         raw[block_start : block_start + 4] = struct.pack("<I", flags_new)
         rda_path.write_bytes(bytes(raw))
 
-        with pytest.raises(EncryptedBlockError):
-            with RDAArchive(rda_path):
-                pass
+        with pytest.raises(EncryptedBlockError), RDAArchive(rda_path):
+            pass
 
     def test_deleted_block_is_skipped(self, tmp_path: Path) -> None:
         """Deleted flag を立てたブロックはエントリ列挙から除外される．"""
         rda_path = tmp_path / "del.rda"
-        raw = bytearray(
-            _build_minimal_rda([("a.txt", b"hi")], compressed=False)
-        )
+        raw = bytearray(_build_minimal_rda([("a.txt", b"hi")], compressed=False))
         bi_size = block_info_size(RDAVersion.V2_2)
         block_start = len(raw) - bi_size
-        flags_old, = struct.unpack("<I", raw[block_start : block_start + 4])
+        (flags_old,) = struct.unpack("<I", raw[block_start : block_start + 4])
         flags_new = flags_old | FLAG_DELETED
         raw[block_start : block_start + 4] = struct.pack("<I", flags_new)
         rda_path.write_bytes(bytes(raw))
