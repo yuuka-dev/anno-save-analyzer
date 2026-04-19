@@ -139,9 +139,7 @@ def read_directory(
     MemoryResident ブロックは本関数では追加ヘッダ処理を行わず，directory 本体のみを読む．
     """
     if block.is_encrypted:
-        raise EncryptedBlockError(
-            "encrypted directory block is not supported in v0.1.0"
-        )
+        raise EncryptedBlockError("encrypted directory block is not supported in v0.1.0")
 
     dir_start = block_offset - block.directory_size
     if block.is_memory_resident:
@@ -166,12 +164,10 @@ def read_directory(
 
     entry_sz = dir_entry_size(version)
     expected = block.file_count * entry_sz
-    if block.is_compressed:
-        if len(raw) != block.decompressed_size:
-            raise RDAParseError(
-                f"decompressed directory size mismatch "
-                f"(got {len(raw)}, want {block.decompressed_size})"
-            )
+    if block.is_compressed and len(raw) != block.decompressed_size:
+        raise RDAParseError(
+            f"decompressed directory size mismatch (got {len(raw)}, want {block.decompressed_size})"
+        )
     # 非圧縮時は directory_size == decompressed_size である前提．
     if expected != block.decompressed_size:
         raise RDAParseError(

@@ -57,9 +57,7 @@ def read_uint(stream: BinaryIO, version: RDAVersion) -> int:
     size = uint_size(version)
     data = stream.read(size)
     if len(data) != size:
-        raise RDAParseError(
-            f"unexpected EOF while reading uint (got {len(data)}B, want {size}B)"
-        )
+        raise RDAParseError(f"unexpected EOF while reading uint (got {len(data)}B, want {size}B)")
     fmt = "<I" if size == 4 else "<Q"
     return struct.unpack(fmt, data)[0]
 
@@ -76,9 +74,7 @@ def detect_version(first_two_bytes: bytes) -> RDAVersion:
         return RDAVersion.V2_0
     if first_two_bytes[0:2] == b"Re":
         return RDAVersion.V2_2
-    raise UnsupportedVersionError(
-        f"unknown RDA magic prefix: {first_two_bytes[0:2]!r}"
-    )
+    raise UnsupportedVersionError(f"unknown RDA magic prefix: {first_two_bytes[0:2]!r}")
 
 
 @dataclass(frozen=True)
@@ -94,9 +90,7 @@ class FileHeader:
     def header_size(self) -> int:
         """magic + unknown + firstBlockOffset の合計バイト数．"""
         return (
-            len(magic_bytes(self.version))
-            + _UNKNOWN_SIZES[self.version]
-            + uint_size(self.version)
+            len(magic_bytes(self.version)) + _UNKNOWN_SIZES[self.version] + uint_size(self.version)
         )
 
 
@@ -118,9 +112,7 @@ def read_file_header(stream: BinaryIO) -> FileHeader:
         raise RDAParseError("file truncated in magic section")
     actual_magic = raw_magic.decode(encoding, errors="replace")
     if actual_magic != expected_magic:
-        raise RDAParseError(
-            f"magic mismatch: expected {expected_magic!r}, got {actual_magic!r}"
-        )
+        raise RDAParseError(f"magic mismatch: expected {expected_magic!r}, got {actual_magic!r}")
 
     unknown = stream.read(_UNKNOWN_SIZES[version])
     if len(unknown) != _UNKNOWN_SIZES[version]:
