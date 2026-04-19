@@ -58,6 +58,8 @@ output/
 *.a7s.extracted/
 *.a8s.extracted/
 *.xml.tmp
+# ゲームのスクリーンショット類は著作権 (Ubisoft/BlueByte) 配慮でローカル参照のみ
+_screenshots/
 
 # ---- 環境変数 ----
 .env
