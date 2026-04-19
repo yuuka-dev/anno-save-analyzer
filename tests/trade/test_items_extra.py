@@ -65,3 +65,16 @@ def test_yaml_entry_non_mapping_raises_value_error(tmp_path: Path) -> None:
     (tmp_path / f"items_{title}.en.yaml").write_text("1: broken-entry\n", encoding="utf-8")
     with pytest.raises(ValueError, match="expected mapping entry for GUID"):
         ItemDictionary.load(title, data_dir=tmp_path)
+
+
+def test_yaml_entry_with_null_value_treated_as_empty(tmp_path: Path) -> None:
+    """``1: null`` (or ``1:`` with no value) は空エントリとして扱う．"""
+    title = "nullentry"
+    (tmp_path / f"items_{title}.en.yaml").write_text(
+        "1:\n2:\n  name: Has Name\n",  # 1 has no body -> YAML parses as None
+        encoding="utf-8",
+    )
+    d = ItemDictionary.load(title, data_dir=tmp_path)
+    # 1 は name 無しのため fallback
+    assert d[1].display_name("en") == "Good_1"
+    assert d[2].display_name("en") == "Has Name"

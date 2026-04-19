@@ -273,6 +273,93 @@ class TestInTradedGoodsAttrFiltering:
         assert triples[0].total_price == 0
 
 
+class TestNestedTagsInsideTradedGoods:
+    """TradedGoods 内部に複数階層の wrapper があっても，1 階層目の close 時にだけ
+    build & yield が走る (depth tracking の網羅)．"""
+
+    def test_nested_wrapper_only_yields_at_depth_one(self) -> None:
+        from tests.parser.filedb.conftest import minimal_v3
+
+        tags = {
+            2: "PassiveTrade",
+            3: "History",
+            4: "TradeRouteEntries",
+            5: "TradedGoods",
+        }
+        attribs = {
+            0x8001: "Trader",
+            0x8002: "GoodGuid",
+            0x8003: "GoodAmount",
+        }
+        events = [
+            ("T", 2),  # PassiveTrade
+            ("T", 3),  # History
+            ("T", 4),  # TradeRouteEntries
+            ("T", 1),  # 外側 <1>
+            ("A", 0x8001, struct.pack("<i", 7)),  # Trader=7
+            ("T", 1),  # 内側 <1> (entry)
+            ("T", 5),  # TradedGoods
+            ("T", 1),  # depth=1 wrapper
+            ("T", 1),  # depth=2 nested wrapper (踏ませたい OPEN 102->104)
+            ("A", 0x8002, struct.pack("<i", 555)),  # GoodGuid (depth>=1 なので拾われる)
+            ("A", 0x8003, struct.pack("<i", 3)),  # GoodAmount
+            ("X",),  # close depth=2 wrapper (踏ませたい CLOSE 128->137)
+            ("X",),  # close depth=1 wrapper (build & yield)
+            ("X",),  # close TradedGoods
+            ("X",),  # close inner <1> (entry)
+            ("X",),  # close outer <1>
+            ("X",),  # close TradeRouteEntries
+            ("X",),  # close History
+            ("X",),  # close PassiveTrade
+        ]
+        inner = minimal_v3(tags=tags, attribs=attribs, events=events)
+        outer = wrap_as_outer([inner])
+        section = parse_tag_section(outer, detect_version(outer))
+        triples = list(Anno117Interpreter().find_traded_goods(outer, section))
+        assert len(triples) == 1
+        assert triples[0].good_guid == 555
+        assert triples[0].amount == 3
+        assert triples[0].context.route_id == "7"
+
+
+class TestInnerWrapperWithoutTripleYieldsNothing:
+    """TradedGoods 直下 <1> が空 (good_guid 未設定) → triple is None → yield されない
+    (135->137 の False 枝)．"""
+
+    def test_empty_inner_wrapper_skipped(self) -> None:
+        from tests.parser.filedb.conftest import minimal_v3
+
+        tags = {
+            2: "PassiveTrade",
+            3: "History",
+            4: "TradeRouteEntries",
+            5: "TradedGoods",
+        }
+        attribs: dict[int, str] = {0x8001: "Trader"}
+        events = [
+            ("T", 2),
+            ("T", 3),
+            ("T", 4),
+            ("T", 1),  # 外側 <1>
+            ("A", 0x8001, struct.pack("<i", 1)),
+            ("T", 1),  # 内側 <1>
+            ("T", 5),  # TradedGoods
+            ("T", 1),  # depth=1 wrapper (空)
+            ("X",),  # close depth=1 wrapper → build → None → yield スキップ (135->137)
+            ("X",),  # close TradedGoods
+            ("X",),  # close inner <1>
+            ("X",),  # close outer <1>
+            ("X",),  # close TradeRouteEntries
+            ("X",),  # close History
+            ("X",),  # close PassiveTrade
+        ]
+        inner = minimal_v3(tags=tags, attribs=attribs, events=events)
+        outer = wrap_as_outer([inner])
+        section = parse_tag_section(outer, detect_version(outer))
+        triples = list(Anno117Interpreter().find_traded_goods(outer, section))
+        assert triples == []
+
+
 class TestEmptyTradedGoodsYieldsNothing:
     """TradedGoods open → 中身 attrib 無し → close で triple 不完全のため yield されない．"""
 
