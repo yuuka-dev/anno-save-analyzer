@@ -217,7 +217,36 @@ Tag        id=2      MetaGameManager
 
 メモリ制約：**165MB を一気にメモリに載せず，DOM は streaming で流す** 設計が重要．lxml の SAX-like な `iterparse` 的 API を模倣する．
 
-## 9. 参考・謝辞
+## 9. Anno 117: Pax Romana サンプルでの追加検証（2026-04-19 追補）
+
+書記長所有の ``sample_anno117.a8s`` (881KB) でも同様に解析を実施．
+
+| 項目 | Anno 1800 (`sample.a7s`) | Anno 117 (`sample_anno117.a8s`) |
+|---|---|---|
+| 外殻 RDA magic | ``Resource File V2.2`` | **``Resource File V2.2``（完全同一）** |
+| RDA 内エントリ | 4 件（``meta/header/gamesetup/data.a7s``） | **4 件（同名）** |
+| ``data.a7s`` 展開後 | 173,321,048 B | 17,715,512 B（約 10%） |
+| FileDB magic | ``08 00 00 00 FD FF FF FF`` → V3 | **同一 → V3** |
+| Tag 辞書件数 | 465 | 575 |
+| Attrib 辞書件数 | 558 | 448 |
+| DOM 先頭バイトパターン | ``00 00 00 00 02 00 00 00 04 00 00 00 01 80 00 00`` | **同一パターン** |
+
+### 含意
+
+- **フォーマット層（RDA → zlib → FileDB V3）は Anno 1800 / Anno 117 で完全同一**．
+- 差分は **タグ / 属性の辞書（ゲーム固有の意味論）** のみ．
+- 既存の v0.1.0 RDA parser は **追加実装なしで Anno 117 もそのまま読める**ことをテストで確認済み．
+- v0.2 で FileDB parser を実装した時点で，**Anno 117 の DOM 走査と XML 化も自動的に可能**．interpreter 層（どのタグがどの型か）を両ゲーム分で持つだけで済む．
+
+### ロードマップへの影響
+
+元の roadmap では **Anno 117 対応は v1.x（バージョン未定の Future）** に置いていたが，実質的に：
+
+- v0.2 (FileDB parser) 完了時点で，Anno 117 の構造解析は**副産物として完了**．
+- 残作業は「Anno 117 固有のタグ解釈 + supply-chain の違い」程度．
+- したがって **v1.0 リリース時点で Anno 117 alpha 対応は現実的**（roadmap 検討事項）．
+
+## 10. 参考・謝辞
 
 - **FileDBReader** (GPL-v3) by [@anno-mods](https://github.com/anno-mods/FileDBReader) — 先駆的リバースエンジニアリング．
 - **First version of FileDB unpacking** by @VeraAtVersus．
