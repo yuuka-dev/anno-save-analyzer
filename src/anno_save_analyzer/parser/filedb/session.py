@@ -7,6 +7,9 @@ Anno 1800 セーブ内部の FileDB V3 DOM には ``<SessionData>`` タグが複
 本モジュールは外側 FileDB バイト列を受け取り，5 セッション分の内部 FileDB バイト列を
 抜き出して ``list[bytes]`` として返す．呼び出し側は各要素を再度 :mod:`parser.filedb`
 で parse することで，島 / 建物 / 人口などの階層データを取得できる．
+
+加えて，内側 Session の tag 辞書から島管理単位（``AreaManager_*``）の internal ID
+列を取り出すヘルパも提供する．
 """
 
 from __future__ import annotations
@@ -15,6 +18,8 @@ from .dictionary import TagSection, parse_tag_section
 from .dom import EventKind, iter_dom
 from .exceptions import FileDBParseError
 from .version import FileDBVersion, detect_version
+
+_AREA_MANAGER_PREFIX = "AreaManager_"
 
 _SESSION_TAG_NAME = "SessionData"
 _BINARY_ATTRIB_NAME = "BinaryData"
@@ -64,3 +69,24 @@ def extract_sessions(
         if ev.kind is EventKind.ATTRIB and ev.id_ == binary_attrib_id and depth_in_session > 0:
             sessions.append(ev.content)
     return sessions
+
+
+def list_inner_area_managers(inner_session: bytes) -> tuple[int, ...]:
+    """内側 Session FileDB の tag 辞書から ``AreaManager_<N>`` の N（int）を昇順で返す．
+
+    Anno のセーブでは各島が 1 つの ``AreaManager`` で管理される．辞書を見るだけで
+    DOM 走査は不要なため，書記長のセーブ規模でもほぼ瞬時．
+    """
+    if not inner_session:
+        return ()
+    version = detect_version(inner_session)
+    section = parse_tag_section(inner_session, version)
+    ids: list[int] = []
+    for name in section.tags.entries.values():
+        if not name.startswith(_AREA_MANAGER_PREFIX):
+            continue
+        suffix = name[len(_AREA_MANAGER_PREFIX) :]
+        if suffix.isdigit():
+            ids.append(int(suffix))
+    ids.sort()
+    return tuple(ids)

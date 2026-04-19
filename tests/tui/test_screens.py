@@ -65,6 +65,37 @@ class TestStatisticsScreen:
             routes_table = screen.query_one("#routes-table")
             assert routes_table is not None
 
+    async def test_statistics_tree_renders_island_leaves(self, tui_state, tmp_path) -> None:
+        """islands_by_session に値を入れて Tree に Island #N が出ることを確認．"""
+        from anno_save_analyzer.tui.state import TuiState
+
+        islands = dict.fromkeys(tui_state.session_ids, (1, 2, 3))
+        new_state = TuiState(
+            save_path=tui_state.save_path,
+            title=tui_state.title,
+            locale="en",
+            events=tui_state.events,
+            items=tui_state.items,
+            overview=tui_state.overview,
+            item_summaries=tui_state.item_summaries,
+            route_summaries=tui_state.route_summaries,
+            session_ids=tui_state.session_ids,
+            session_locale_keys=tui_state.session_locale_keys,
+            islands_by_session=islands,
+        )
+        app = TradeApp(new_state)
+        async with app.run_test() as pilot:
+            await pilot.pause()
+            await pilot.press("ctrl+t")
+            await pilot.pause()
+            tree = pilot.app.screen.query_one("#sessions-tree")
+            # root 直下に session ノード，その配下に島ノードが追加されてる
+            session_nodes = tree.root.children
+            assert len(session_nodes) == len(tui_state.session_ids)
+            # 各 session ノードに islands count 個の leaf
+            for node in session_nodes:
+                assert len(node.children) == 3
+
     async def test_statistics_japanese_labels_after_locale_switch(self, tui_state) -> None:
         # locale=ja で初期化
         from anno_save_analyzer.tui.state import TuiState

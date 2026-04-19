@@ -13,6 +13,7 @@ from anno_save_analyzer.parser.filedb import (
     FileDBVersion,
     detect_version,
     extract_sessions,
+    list_inner_area_managers,
     parse_tag_section,
 )
 
@@ -74,3 +75,31 @@ class TestExtractSessionsErrors:
         """外側が V1 だと tag section が parse 不可のため FileDBParseError が連鎖する．"""
         with pytest.raises(FileDBParseError):
             extract_sessions(b"\x00" * 32, version=FileDBVersion.V1)
+
+
+class TestListInnerAreaManagers:
+    def test_extracts_numeric_suffix_in_ascending_order(self) -> None:
+        inner = minimal_v3(
+            tags={
+                2: "AreaManager_257",
+                3: "AreaManager_1",
+                4: "AreaManager_64",
+                5: "OtherTag",
+                6: "AreaManager_NonNumeric",  # suffix not digit → ignored
+            },
+            attribs={},
+            events=[("T", 2), ("X",)],
+        )
+        ids = list_inner_area_managers(inner)
+        assert ids == (1, 64, 257)
+
+    def test_empty_session_returns_empty_tuple(self) -> None:
+        assert list_inner_area_managers(b"") == ()
+
+    def test_no_area_manager_tags_returns_empty(self) -> None:
+        inner = minimal_v3(
+            tags={2: "Other", 3: "AnotherTag"},
+            attribs={},
+            events=[("T", 2), ("X",)],
+        )
+        assert list_inner_area_managers(inner) == ()

@@ -16,6 +16,7 @@ statistics.heading: "貿易統計"
 statistics.tree_root: "全島まとめ"
 statistics.tree_session: "セッション #{index}"
 statistics.tree_session_named: "{name}"
+statistics.island_label: "島 #{id}"
 
 session.unknown: "セッション #{index}"
 session.anno117.latium: "ラティウム"

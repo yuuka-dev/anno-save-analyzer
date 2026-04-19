@@ -16,6 +16,7 @@ statistics.heading: "Trade Statistics"
 statistics.tree_root: "All islands"
 statistics.tree_session: "Session #{index}"
 statistics.tree_session_named: "{name}"
+statistics.island_label: "Island #{id}"
 
 session.unknown: "Session #{index}"
 session.anno117.latium: "Latium"

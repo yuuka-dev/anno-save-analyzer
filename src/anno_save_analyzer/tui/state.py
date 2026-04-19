@@ -6,10 +6,18 @@
 
 from __future__ import annotations
 
+import zlib
 from collections.abc import Iterable
 from dataclasses import dataclass, field
 from pathlib import Path
 
+from anno_save_analyzer.parser.filedb import (
+    detect_version,
+    extract_sessions,
+    list_inner_area_managers,
+    parse_tag_section,
+)
+from anno_save_analyzer.parser.pipeline import extract_inner_filedb
 from anno_save_analyzer.trade import (
     GameTitle,
     ItemDictionary,
@@ -51,6 +59,9 @@ class TuiState:
     # session_id (= "0" / "1" ...) → locale lookup key (例 "session.anno117.latium")
     # localizer 経由で「Latium / ラティウム」等にレンダリングする．
     session_locale_keys: tuple[str, ...] = field(default_factory=tuple)
+    # session_id → AreaManager_<N> の N 群．Statistics 画面の Tree で
+    # session > AreaManager の階層を組むのに使う．
+    islands_by_session: dict[str, tuple[int, ...]] = field(default_factory=dict)
 
 
 def build_overview(
@@ -108,6 +119,10 @@ def load_state(
         session_locale_key(title, int(sid)) if sid.isdigit() else "session.unknown"
         for sid in overview.session_ids
     )
+
+    # 内側 Session の AreaManager_* 列挙．Tree の島階層に使う．
+    islands_by_session = _collect_islands_by_session(save_path, overview.session_ids)
+
     return TuiState(
         save_path=save_path,
         title=title,
@@ -119,4 +134,30 @@ def load_state(
         route_summaries=tuple(route_rows),
         session_ids=overview.session_ids,
         session_locale_keys=locale_keys,
+        islands_by_session=islands_by_session,
     )
+
+
+def _collect_islands_by_session(
+    save_path: Path, session_ids: tuple[str, ...]
+) -> dict[str, tuple[int, ...]]:
+    """内側 Session ごとに ``AreaManager_<N>`` を列挙．
+
+    Anno のセーブでは 1 島 = 1 ``AreaManager``．tag 辞書を読むだけでよい．
+    """
+    if not session_ids:
+        return {}
+    suffix = save_path.suffix.lower()
+    if suffix in {".a7s", ".a8s"}:
+        outer = extract_inner_filedb(save_path)
+    else:
+        raw = save_path.read_bytes()
+        outer = zlib.decompress(raw) if raw[:2] in (b"\x78\x9c", b"\x78\xda", b"\x78\x01") else raw
+    version = detect_version(outer)
+    section = parse_tag_section(outer, version)
+    inner_payloads = extract_sessions(outer, version=version, tag_section=section)
+
+    by_session: dict[str, tuple[int, ...]] = {}
+    for sid, inner in zip(session_ids, inner_payloads, strict=False):
+        by_session[sid] = list_inner_area_managers(inner)
+    return by_session

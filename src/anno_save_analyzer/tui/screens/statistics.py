@@ -70,8 +70,11 @@ class TradeStatisticsScreen(Screen):
         keys = self._state.session_locale_keys or tuple(
             "session.unknown" for _ in self._state.session_ids
         )
+        islands_by_sid = self._state.islands_by_session
         for sid, key in zip(self._state.session_ids, keys, strict=False):
-            tree.root.add_leaf(t(key, index=sid))
+            session_node = tree.root.add(t(key, index=sid), expand=True)
+            for island_id in islands_by_sid.get(sid, ()):
+                session_node.add_leaf(t("statistics.island_label", id=island_id))
         return tree
 
     def _render_items_table(self) -> DataTable:
