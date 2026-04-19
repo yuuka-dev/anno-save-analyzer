@@ -296,7 +296,7 @@ class TestNestedTagsInsideTradedGoods:
             7: "AreaInfo",
         }
         attribs = {
-            0x8001: "Trader",
+            0x8001: "RouteID",
             0x8002: "GoodGuid",
             0x8003: "GoodAmount",
             0x8005: "CityName",
@@ -309,8 +309,8 @@ class TestNestedTagsInsideTradedGoods:
             ("T", 3),  # History
             ("T", 4),  # TradeRouteEntries
             ("T", 1),  # 外側 <1>
-            ("A", 0x8001, struct.pack("<i", 7)),  # Trader=7
             ("T", 1),  # 内側 <1> (entry)
+            ("A", 0x8001, struct.pack("<i", 7)),  # RouteID=7 (on inner entry)
             ("T", 5),  # TradedGoods
             ("T", 1),  # depth=1 wrapper
             ("T", 1),  # depth=2 nested wrapper
@@ -526,7 +526,7 @@ class TestMultipleRowsInSingleTradedGoods:
             6: "AreaInfo",
         }
         attribs = {
-            0x8001: "Trader",
+            0x8001: "RouteID",
             0x8002: "GoodGuid",
             0x8003: "GoodAmount",
             0x8004: "TotalPrice",
@@ -540,8 +540,8 @@ class TestMultipleRowsInSingleTradedGoods:
             ("T", 3),
             ("T", 4),
             ("T", 1),  # outer <1>
-            ("A", 0x8001, struct.pack("<i", 42)),
             ("T", 1),  # inner <1>
+            ("A", 0x8001, struct.pack("<i", 42)),  # RouteID=42 on inner entry
             ("T", 5),  # TradedGoods
             ("T", 1),
             ("A", 0x8002, struct.pack("<i", 2088)),

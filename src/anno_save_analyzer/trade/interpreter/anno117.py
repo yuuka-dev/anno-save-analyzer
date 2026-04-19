@@ -41,7 +41,11 @@ _CITY_NAME_ATTRIB = "CityName"
 # - TradeRouteEntries 配下 → route_id（プレイヤー所有 route の internal ID）
 # - PassiveTradeEntries 配下 → partner_id（NPC trader の GUID）
 _TRADER_ATTRIB = "Trader"
+_ROUTE_ID_ATTRIB = "RouteID"
 _TIMESTAMP_ATTRIB_CANDIDATES = (
+    # Anno 117 実測: 内側 <1> の ``ExecutionTime`` (i64 tick) が個別取引の時刻．
+    # 1,533 entries 全件に 8B で入ってる．他の候補は 1800 や別パッチ用の保険．
+    "ExecutionTime",
     "LastGoodTradeUpdate",
     "Timestamp",
     "TradeTime",
@@ -89,6 +93,13 @@ def _walk_inner_session(inner: bytes, session_idx: int) -> Iterator[RawTradedGoo
     area_entry_depth = -1  # 直下 <1> エントリの tag_stack 長
     in_player_island = False
 
+    # TradedGoods が置かれる「inner <1> エントリ」の深さ．ここに Trader /
+    # ExecutionTime / RouteID 等の attribs が載る．ただし順序的に TradedGoods
+    # より **後** に出てくるので，triple yield は entry close まで遅延させる．
+    entry_depth = -1
+    pending_triples: list[dict[str, int | None]] = []
+    pending_kinds: list[PartnerKind] = []
+
     session_id = str(session_idx)
 
     for ev in iter_dom(inner, inner_version, tag_section=inner_section):
@@ -117,6 +128,8 @@ def _walk_inner_session(inner: bytes, session_idx: int) -> Iterator[RawTradedGoo
                 in_traded_goods = True
                 traded_goods_depth = 0
                 pending_kind = kind
+                # TradedGoods の親 = inner <1> エントリ．depth はその位置．
+                entry_depth = len(tag_stack) - 1
             elif in_traded_goods:
                 traded_goods_depth += 1
                 if traded_goods_depth == 1:
@@ -153,7 +166,26 @@ def _walk_inner_session(inner: bytes, session_idx: int) -> Iterator[RawTradedGoo
         if not tag_stack:
             continue
         closing_depth = len(tag_stack)
-        closing_name = tag_stack.pop()
+        closing_name = tag_stack[-1]
+
+        # inner entry close は pop **前** に処理する．attrib_stack に entry dict
+        # (ExecutionTime / Trader / RouteID 等) が残ってる状態で triple を yield．
+        if entry_depth >= 0 and closing_depth == entry_depth:
+            for pending, kind in zip(pending_triples, pending_kinds, strict=False):
+                triple = _build_triple_if_complete(
+                    pending,
+                    session_id=session_id,
+                    kind=kind,
+                    ancestor_attribs=attrib_stack,
+                )
+                if triple is not None:
+                    yield triple
+            pending_triples.clear()
+            pending_kinds.clear()
+            entry_depth = -1
+
+        # ここで pop
+        tag_stack.pop()
         attrib_stack.pop()
 
         # AreaInfo entry / AreaInfo 自身の close 検出
@@ -165,14 +197,12 @@ def _walk_inner_session(inner: bytes, session_idx: int) -> Iterator[RawTradedGoo
 
         if in_traded_goods and closing_name != _TRADED_GOODS_TAG:
             if traded_goods_depth == 1:
-                triple = _build_triple_if_complete(
-                    current_triple,
-                    session_id=session_id,
-                    kind=pending_kind,
-                    ancestor_attribs=attrib_stack,
-                )
-                if triple is not None:
-                    yield triple
+                # inner <1> エントリの attribs (ExecutionTime 等) はこの時点で
+                # まだ未収集なので，triple candidate を buffer．entry close で
+                # まとめて yield する．filter (GoodGuid / GoodAmount 欠落)
+                # は _build_triple_if_complete が行う．
+                pending_triples.append(dict(current_triple))
+                pending_kinds.append(pending_kind)
             traded_goods_depth -= 1
             continue
 
@@ -215,18 +245,22 @@ def _build_triple_if_complete(
         return None
     total_price = triple["total_price"] or 0
 
-    # ``Trader`` attrib を親階層から拾う．文脈で意味が変わる（前述コメント）．
-    trader_value = _first_int32_attrib(ancestor_attribs, (_TRADER_ATTRIB,))
+    # kind ごとに異なる attrib を使う．実測では:
+    # - TradeRouteEntries 配下 → inner <1> の ``RouteID`` (4B) が route definition の ID
+    #   (``Trader`` は OwnerProfile=プレイヤー ID で全取引で同一 = 識別に使えない)
+    # - PassiveTradeEntries 配下 → inner <1> の ``Trader`` (4B) が取引相手 ID
     timestamp_tick = _first_int_attrib(ancestor_attribs, _TIMESTAMP_ATTRIB_CANDIDATES)
 
     route_id: str | None = None
     partner_id: str | None = None
-    if trader_value is not None:
-        as_str = str(trader_value)
-        if kind == "route":
-            route_id = as_str
-        elif kind == "passive":
-            partner_id = as_str
+    if kind == "route":
+        route_value = _first_int32_attrib(ancestor_attribs, (_ROUTE_ID_ATTRIB,))
+        if route_value is not None:
+            route_id = str(route_value)
+    elif kind == "passive":
+        partner_value = _first_int32_attrib(ancestor_attribs, (_TRADER_ATTRIB,))
+        if partner_value is not None:
+            partner_id = str(partner_value)
 
     return RawTradedGoodTriple(
         good_guid=int(triple["good_guid"]),

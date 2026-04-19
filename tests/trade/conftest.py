@@ -57,6 +57,7 @@ def make_inner_filedb(
         0x8003: "GoodAmount",
         0x8004: "TotalPrice",
         0x8005: "CityName",
+        0x8006: "RouteID",
     }
 
     def _trade_subtree() -> list[Event]:
@@ -74,7 +75,10 @@ def make_inner_filedb(
                 sub.append(("T", 1))  # 外側 <1>
                 for trader_, good, amount, price in group:
                     sub.append(("T", 1))  # 内側 <1>
-                    sub.append(("A", 0x8001, struct.pack("<i", trader_)))
+                    # route は RouteID (0x8006) / passive は Trader (0x8001) を使う．
+                    # 実セーブの inner entry 構造に合わせる (interpreter の文脈分岐で必要)．
+                    ident_attrib = 0x8006 if kind == "route" else 0x8001
+                    sub.append(("A", ident_attrib, struct.pack("<i", trader_)))
                     sub.append(("T", 6))  # TradedGoods
                     sub.append(("T", 1))  # depth=1 wrapper
                     sub.append(("A", 0x8002, struct.pack("<i", good)))

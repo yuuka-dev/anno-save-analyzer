@@ -1,9 +1,9 @@
-"""Trade Statistics 画面．3 カラム: Tree / DataTable / Partners pane．"""
+"""Trade Statistics 画面．3 カラム: Tree / DataTable / (Partners + Chart)．"""
 
 from __future__ import annotations
 
 from textual.app import ComposeResult
-from textual.containers import Horizontal
+from textual.containers import Horizontal, Vertical
 from textual.screen import Screen
 from textual.widgets import (
     DataTable,
@@ -14,6 +14,7 @@ from textual.widgets import (
     TabPane,
     Tree,
 )
+from textual_plotext import PlotextPlot
 
 from anno_save_analyzer.trade import partners_for_item
 from anno_save_analyzer.trade.aggregate import ItemSummary, PartnerSummary, RouteSummary
@@ -23,7 +24,7 @@ from ..state import TuiState
 
 
 class TradeStatisticsScreen(Screen):
-    """3 カラム統計画面．"""
+    """3 カラム統計画面．右端は Partners pane (上) + 時系列 Chart (下) を縦分割．"""
 
     DEFAULT_CSS = """
     TradeStatisticsScreen Horizontal {
@@ -37,8 +38,15 @@ class TradeStatisticsScreen(Screen):
         width: 1fr;
         border: solid $secondary;
     }
+    TradeStatisticsScreen #right-column {
+        width: 42;
+    }
     TradeStatisticsScreen #partners-pane {
-        width: 36;
+        height: 40%;
+        border: solid $secondary;
+    }
+    TradeStatisticsScreen #chart-pane {
+        height: 60%;
         border: solid $secondary;
     }
     """
@@ -58,10 +66,12 @@ class TradeStatisticsScreen(Screen):
                     yield self._render_items_table()
                 with TabPane(t("statistics.tab.routes"), id="routes-tab"):
                     yield self._render_routes_table()
-            yield Static(
-                f"[b]{t('partners.heading')}[/b]\n\n{t('partners.placeholder')}",
-                id="partners-pane",
-            )
+            with Vertical(id="right-column"):
+                yield Static(
+                    f"[b]{t('partners.heading')}[/b]\n\n{t('partners.placeholder')}",
+                    id="partners-pane",
+                )
+                yield PlotextPlot(id="chart-pane")
         yield Footer()
 
     def _render_tree(self) -> Tree:
@@ -186,6 +196,39 @@ class TradeStatisticsScreen(Screen):
     def _update_partners_pane(self, item_guid: int) -> None:
         rows = partners_for_item(self._state.events, item_guid)
         self.query_one("#partners-pane", Static).update(self._format_partners_pane(rows, item_guid))
+        self._update_chart_pane(item_guid)
+
+    def _update_chart_pane(self, item_guid: int) -> None:
+        """選択物資の取引を (timestamp_tick, 累積数量) の折れ線で描画．"""
+        chart = self.query_one("#chart-pane", PlotextPlot)
+        chart.plt.clear_data()
+        chart.plt.clear_figure()
+        events = sorted(
+            (
+                e
+                for e in self._state.events
+                if e.item.guid == item_guid and e.timestamp_tick is not None
+            ),
+            key=lambda e: e.timestamp_tick or 0,
+        )
+        item = self._state.items[item_guid]
+        title = item.display_name(self._localizer.code)
+        if not events:
+            chart.plt.title(f"{title} — no timed events")
+            chart.refresh()
+            return
+        # x 軸: tick / 1000 で桁を減らす (plotext 表示で見やすく)
+        x_scaled = [(e.timestamp_tick or 0) / 1000 for e in events]
+        y_cumulative: list[int] = []
+        running = 0
+        for e in events:
+            running += e.amount
+            y_cumulative.append(running)
+        chart.plt.plot(x_scaled, y_cumulative, marker="hd")
+        chart.plt.title(title)
+        chart.plt.xlabel("tick / 1000")
+        chart.plt.ylabel("cumulative qty")
+        chart.refresh()
 
     def _format_partners_pane(self, rows: list[PartnerSummary], item_guid: int) -> str:
         t = self._localizer.t

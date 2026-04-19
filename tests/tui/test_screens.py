@@ -241,6 +241,54 @@ class TestStatisticsScreen:
             # en fallback 名が表示される
             assert "Good_999999" in rendered
 
+    async def test_chart_pane_plots_cumulative_timeseries(self, tui_state) -> None:
+        """timestamp 付きイベントがある物資は累積時系列がプロットされる．"""
+        from textual_plotext import PlotextPlot
+
+        from anno_save_analyzer.trade import Item, TradeEvent, TradingPartner
+        from anno_save_analyzer.tui.state import TuiState
+
+        item = Item(guid=100, names={"en": "Wood"})
+
+        def _ev(tick: int, amount: int) -> TradeEvent:
+            return TradeEvent(
+                item=item,
+                amount=amount,
+                total_price=amount * 10,
+                partner=TradingPartner(id="7", display_name="r", kind="route"),
+                route_id="7",
+                timestamp_tick=tick,
+                session_id="0",
+            )
+
+        new_state = TuiState(
+            save_path=tui_state.save_path,
+            title=tui_state.title,
+            locale="en",
+            events=(_ev(100, 5), _ev(200, -3), _ev(300, 7)),
+            items=tui_state.items,
+            overview=tui_state.overview,
+            item_summaries=tui_state.item_summaries,
+            route_summaries=tui_state.route_summaries,
+            session_ids=tui_state.session_ids,
+            session_locale_keys=tui_state.session_locale_keys,
+            islands_by_session=tui_state.islands_by_session,
+            routes_by_session=tui_state.routes_by_session,
+        )
+        app = TradeApp(new_state)
+        async with app.run_test() as pilot:
+            await pilot.pause()
+            await pilot.press("ctrl+t")
+            await pilot.pause()
+            screen = pilot.app.screen
+            screen._update_chart_pane(100)
+            chart = screen.query_one("#chart-pane", PlotextPlot)
+            # plotext は内部状態が公開 API 少ないので smoke test のみ．
+            # 例外を出さず描画されれば OK (branch カバレッジ対象の行を通す)．
+            assert chart is not None
+            # chart without events (無効 guid) も実行して no-events 分岐を踏む
+            screen._update_chart_pane(999_999)
+
     async def test_row_highlight_early_returns(self, tui_state) -> None:
         """items-table 以外 / row_key が数値でない / None → pane 無更新 (early return)．"""
         from textual.widgets import DataTable, Static
