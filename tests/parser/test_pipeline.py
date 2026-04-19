@@ -1,7 +1,8 @@
 """parser.pipeline の pytest．
 
-合成フィクスチャ（中に zlib 二重圧縮された data.a7s を埋めた擬似 RDA）を作り，
-extract_inner_filedb が想定通りに 2 段階解凍して FileDB 相当のバイトを返すことを確認する．
+合成フィクスチャ（zlib 圧縮された ``data.a7s`` を埋めた擬似 RDA）を作り，
+extract_inner_filedb が想定通りにそれを取り出して zlib 解凍し，
+FileDB 相当のバイトを返すことを確認する．
 """
 
 from __future__ import annotations
