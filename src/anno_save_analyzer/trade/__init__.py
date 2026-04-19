@@ -16,6 +16,7 @@ from .models import (
     TradeEvent,
     TradingPartner,
 )
+from .routes import TradeRouteDef, TransportTask, list_trade_routes
 
 __all__ = [
     "GameTitle",
@@ -27,8 +28,11 @@ __all__ = [
     "RouteSummary",
     "SourceMethod",
     "TradeEvent",
+    "TradeRouteDef",
     "TradingPartner",
+    "TransportTask",
     "by_item",
     "by_route",
     "extract",
+    "list_trade_routes",
 ]
