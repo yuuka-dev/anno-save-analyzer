@@ -4,7 +4,7 @@
 > 自力で再構成した RDA アーカイブフォーマット仕様書．clean-room 実装の根拠資料．
 >
 > 対象: Anno 1404 / 2070 / 2205 / 1800 が採用する `.rda` コンテナ（`.a7s` セーブも同形式）．
-> 本プロジェクト（anno-save-analyzer）の v0.1.5 では **V2.2 の読取のみ**を実装する．
+> 本プロジェクト（anno-save-analyzer）の v0.1.0 では **V2.2 の読取のみ**を実装する．
 
 ## 1. 全体構造
 
@@ -183,7 +183,7 @@ def read_rda(path):
             if block.flags & 0x08:       # Deleted
                 block_offset = block.nextBlock
                 continue
-            if block.flags & 0x02:       # Encrypted (v0.1.5 では未対応)
+            if block.flags & 0x02:       # Encrypted (v0.1.0 では未対応)
                 raise NotImplementedError
 
             # directory 読取
@@ -252,8 +252,8 @@ MemoryResident の場合，base は packed data の先頭 offset，`rda_file.off
 3. **BlockInfo は自分の offset の直前 directoryBytes 分が directory 本体**（トリッキー）．
 4. **uint サイズはバージョン依存**．V2.0 は uint32，V2.2 は uint64．
 5. **Deleted ブロックも nextBlock は有効**．skip しつつ chain を継続．
-6. **MemoryResident は v0.1.5 では最小限対応**．セーブデータ（`.a7s`）では通常不要だが，万一遭遇したらエラー出す．
-7. **暗号化ブロックは v0.1.5 では未対応**．遭遇したら明示的に NotImplementedError．
+6. **MemoryResident は v0.1.0 では最小限対応**．セーブデータ（`.a7s`）では通常不要だが，万一遭遇したらエラー出す．
+7. **暗号化ブロックは v0.1.0 では未対応**．遭遇したら明示的に NotImplementedError．
 8. **Streaming**: セーブは数百 MB になりうるため，`mmap` もしくは個別 seek で読み，全部を bytes に載せない．
 9. **directorySize == 0** の空ブロック（fileCount=0）は，C# 側は空ディレクトリとして普通に処理する．同じ扱いで良い．
 
