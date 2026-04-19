@@ -241,6 +241,112 @@ class TestStatisticsScreen:
             # en fallback 名が表示される
             assert "Good_999999" in rendered
 
+    async def test_route_detail_plots_cumulative_gold_for_active_route(self, tui_state) -> None:
+        """履歴のある route_id を routes-table で選ぶと chart に累積 gold が描画される．"""
+        from anno_save_analyzer.trade import Item, TradeEvent, TradingPartner
+        from anno_save_analyzer.tui.state import TuiState
+
+        item = Item(guid=100, names={"en": "Wood"})
+        partner = TradingPartner(id="route:42", display_name="r42", kind="route")
+
+        def _ev(tick: int, price: int) -> TradeEvent:
+            return TradeEvent(
+                item=item,
+                amount=1,
+                total_price=price,
+                partner=partner,
+                route_id="42",
+                timestamp_tick=tick,
+                session_id="0",
+            )
+
+        new_state = TuiState(
+            save_path=tui_state.save_path,
+            title=tui_state.title,
+            locale="en",
+            events=(_ev(100, 50), _ev(200, -20), _ev(300, 100)),
+            items=tui_state.items,
+            overview=tui_state.overview,
+            item_summaries=tui_state.item_summaries,
+            route_summaries=tui_state.route_summaries,
+            session_ids=tui_state.session_ids,
+            session_locale_keys=tui_state.session_locale_keys,
+            islands_by_session=tui_state.islands_by_session,
+            routes_by_session=tui_state.routes_by_session,
+        )
+        app = TradeApp(new_state)
+        async with app.run_test() as pilot:
+            await pilot.pause()
+            await pilot.press("ctrl+t")
+            await pilot.pause()
+            screen = pilot.app.screen
+            screen._update_route_detail("42")
+            # 描画が例外を出さず title が更新されてる
+            # (plotext の検証手段が少ないので smoke test)
+
+    async def test_route_detail_idle_route_shows_leg_count(self, tui_state) -> None:
+        """history 無しだが routes_by_session に定義がある idle route の chart は empty + leg count title．"""
+        from anno_save_analyzer.trade import TradeRouteDef, TransportTask
+        from anno_save_analyzer.tui.state import TuiState
+
+        idle_def = TradeRouteDef(
+            ship_id=999,
+            route_hash=1,
+            round_travel=0,
+            establish_time=0,
+            tasks=(TransportTask(from_key=1, to_key=2, product_guid=100, balance_raw=0),),
+        )
+        first_sid = tui_state.session_ids[0]
+        new_state = TuiState(
+            save_path=tui_state.save_path,
+            title=tui_state.title,
+            locale="en",
+            events=tui_state.events,
+            items=tui_state.items,
+            overview=tui_state.overview,
+            item_summaries=tui_state.item_summaries,
+            route_summaries=tui_state.route_summaries,
+            session_ids=tui_state.session_ids,
+            session_locale_keys=tui_state.session_locale_keys,
+            islands_by_session=tui_state.islands_by_session,
+            routes_by_session={first_sid: (idle_def,)},
+        )
+        app = TradeApp(new_state)
+        async with app.run_test() as pilot:
+            await pilot.pause()
+            await pilot.press("ctrl+t")
+            await pilot.pause()
+            screen = pilot.app.screen
+            screen._update_route_detail("999")
+            # idle route branch (tasks found) を踏む
+            # 存在しない route_id で tasks=() branch も踏む
+            screen._update_route_detail("nonexistent")
+
+    async def test_route_row_highlight_routes_to_detail(self, tui_state) -> None:
+        """routes-table の highlight が _update_route_detail を呼ぶ経路を確認．"""
+        from textual.widgets import DataTable
+
+        app = TradeApp(tui_state)
+        async with app.run_test() as pilot:
+            await pilot.pause()
+            await pilot.press("ctrl+t")
+            await pilot.pause()
+            screen = pilot.app.screen
+
+            class _Key:
+                def __init__(self, v):
+                    self.value = v
+
+            class _Evt:
+                def __init__(self, t, k):
+                    self.data_table = t
+                    self.row_key = _Key(k)
+
+            routes_table = screen.query_one("#routes-table", DataTable)
+            # routes-table に行があれば任意 row_key で dispatch を踏む
+            if routes_table.row_count:
+                screen.on_data_table_row_highlighted(_Evt(routes_table, "7"))
+
     async def test_chart_pane_plots_cumulative_timeseries(self, tui_state) -> None:
         """timestamp 付きイベントがある物資は累積時系列がプロットされる．"""
         from textual_plotext import PlotextPlot
@@ -331,6 +437,14 @@ class TestStatisticsScreen:
 
             # (4) row_key not int → ValueError → silently skip (lines 184-185)
             screen.on_data_table_row_highlighted(_FakeEvent(items_table, "not_a_guid"))
+            await pilot.pause()
+            assert str(pane.render()) == before
+
+            # (5) 未知 table id (items でも routes でもない) → 両 branch 素通り
+            class _FakeTable:
+                id = "some-other-table"
+
+            screen.on_data_table_row_highlighted(_FakeEvent(_FakeTable(), "0"))
             await pilot.pause()
             assert str(pane.render()) == before
 

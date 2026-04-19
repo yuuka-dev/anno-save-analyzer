@@ -153,9 +153,11 @@ class TradeStatisticsScreen(Screen):
                     legs_by_ship[str(rd.ship_id)] = len(rd.tasks)
 
         # active routes (履歴あり) を先に，次に idle (定義あり / 履歴無し)
+        # row_key = route_id (str) で後段の highlight event から参照できるようにする．
         for s in self._state.route_summaries:
             legs = legs_by_ship.get(s.route_id or "", 0) if s.route_id else 0
-            table.add_row(*self._format_route_row(s, legs, active=True))
+            row_key = s.route_id if s.route_id is not None else None
+            table.add_row(*self._format_route_row(s, legs, active=True), key=row_key)
         for routes in self._state.routes_by_session.values():
             for rd in routes:
                 if rd.ship_id is None:
@@ -163,7 +165,7 @@ class TradeStatisticsScreen(Screen):
                 rid = str(rd.ship_id)
                 if rid in active_ids:
                     continue
-                table.add_row(*self._format_idle_route_row(rd))
+                table.add_row(*self._format_idle_route_row(rd), key=rid)
                 active_ids.add(rid)  # 同一 ship_id が他 session に出ても 2 重計上しない
         return table
 
@@ -206,17 +208,19 @@ class TradeStatisticsScreen(Screen):
         )
 
     def on_data_table_row_highlighted(self, event: DataTable.RowHighlighted) -> None:
-        """items-table で行 highlight 時に partners pane を更新．"""
-        if event.data_table.id != "items-table":
-            return
+        """items / routes テーブル双方の行 highlight で右 pane を更新．"""
+        table_id = event.data_table.id
         row_key = event.row_key.value if event.row_key is not None else None
         if not row_key:
             return
-        try:
-            guid = int(row_key)
-        except ValueError:
-            return
-        self._update_partners_pane(guid)
+        if table_id == "items-table":
+            try:
+                guid = int(row_key)
+            except ValueError:
+                return
+            self._update_partners_pane(guid)
+        elif table_id == "routes-table":
+            self._update_route_detail(row_key)
 
     def _update_partners_pane(self, item_guid: int) -> None:
         rows = partners_for_item(self._state.events, item_guid)
@@ -225,9 +229,6 @@ class TradeStatisticsScreen(Screen):
 
     def _update_chart_pane(self, item_guid: int) -> None:
         """選択物資の取引を (timestamp_tick, 累積数量) の折れ線で描画．"""
-        chart = self.query_one("#chart-pane", PlotextPlot)
-        chart.plt.clear_data()
-        chart.plt.clear_figure()
         events = sorted(
             (
                 e
@@ -239,20 +240,66 @@ class TradeStatisticsScreen(Screen):
         item = self._state.items[item_guid]
         title = item.display_name(self._localizer.code)
         if not events:
-            chart.plt.title(f"{title} — no timed events")
-            chart.refresh()
+            self._render_empty_chart(f"{title} — no timed events")
             return
-        # x 軸: tick / 1000 で桁を減らす (plotext 表示で見やすく)
+        x_scaled, y_values = self._cumulative_series(events, by="amount")
+        self._plot_line(title, x_scaled, y_values, ylabel="cumulative qty")
+
+    def _update_route_detail(self, route_id: str) -> None:
+        """選択ルートの累積 net gold 時系列を chart pane に描画．"""
+        events = sorted(
+            (
+                e
+                for e in self._state.events
+                if e.route_id == route_id and e.timestamp_tick is not None
+            ),
+            key=lambda e: e.timestamp_tick or 0,
+        )
+        t = self._localizer.t
+        title = f"{t('statistics.col.route')} #{route_id}"
+        if not events:
+            # idle route: 履歴なし．定義 leg を簡潔に表示．
+            idle_tasks = self._find_idle_route_tasks(route_id)
+            if idle_tasks:
+                title = f"{title} ({t('statistics.status.idle')}, {len(idle_tasks)} legs)"
+            self._render_empty_chart(f"{title} — no timed events")
+            return
+        x_scaled, y_values = self._cumulative_series(events, by="total_price")
+        self._plot_line(title, x_scaled, y_values, ylabel="cumulative gold")
+
+    def _find_idle_route_tasks(self, route_id: str) -> tuple:
+        """routes_by_session から ship_id 一致の TradeRouteDef を探し tasks を返す．"""
+        for routes in self._state.routes_by_session.values():
+            for rd in routes:
+                if rd.ship_id is not None and str(rd.ship_id) == route_id:
+                    return rd.tasks
+        return ()
+
+    def _cumulative_series(self, events, *, by: str) -> tuple[list[float], list[int]]:
+        """events を時刻昇順で累積．by='amount' or 'total_price' を選ぶ．"""
         x_scaled = [(e.timestamp_tick or 0) / 1000 for e in events]
-        y_cumulative: list[int] = []
+        y_values: list[int] = []
         running = 0
         for e in events:
-            running += e.amount
-            y_cumulative.append(running)
-        chart.plt.plot(x_scaled, y_cumulative, marker="hd")
+            running += e.amount if by == "amount" else e.total_price
+            y_values.append(running)
+        return x_scaled, y_values
+
+    def _plot_line(self, title: str, x: list[float], y: list[int], *, ylabel: str) -> None:
+        chart = self.query_one("#chart-pane", PlotextPlot)
+        chart.plt.clear_data()
+        chart.plt.clear_figure()
+        chart.plt.plot(x, y, marker="hd")
         chart.plt.title(title)
         chart.plt.xlabel("tick / 1000")
-        chart.plt.ylabel("cumulative qty")
+        chart.plt.ylabel(ylabel)
+        chart.refresh()
+
+    def _render_empty_chart(self, title: str) -> None:
+        chart = self.query_one("#chart-pane", PlotextPlot)
+        chart.plt.clear_data()
+        chart.plt.clear_figure()
+        chart.plt.title(title)
         chart.refresh()
 
     def _format_partners_pane(self, rows: list[PartnerSummary], item_guid: int) -> str:
