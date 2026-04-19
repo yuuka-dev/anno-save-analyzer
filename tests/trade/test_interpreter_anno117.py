@@ -360,6 +360,41 @@ class TestInnerWrapperWithoutTripleYieldsNothing:
         assert triples == []
 
 
+class TestRootLevelAttribsAndTerminators:
+    """外側 FileDB の root レベルに attrib / 余分 terminator がある DOM を扱える．"""
+
+    def test_root_attrib_is_silently_absorbed(self) -> None:
+        """tag_stack 空状態で attrib が来ても crash しない（109->112 False 枝）．"""
+        from tests.parser.filedb.conftest import minimal_v3
+
+        # root 直下に attrib + 通常 tag．`SessionFileVersion` 風の構造．
+        inner = minimal_v3(
+            tags={2: "OtherTag"},
+            attribs={0x8001: "RootAttrib"},
+            events=[
+                ("A", 0x8001, struct.pack("<i", 1)),  # tag 開く前 → attrib_stack 空
+                ("T", 2),
+                ("X",),
+            ],
+        )
+        outer = wrap_as_outer([inner])
+        section = parse_tag_section(outer, detect_version(outer))
+        triples = list(Anno117Interpreter().find_traded_goods(outer, section))
+        assert triples == []
+
+    def test_redundant_root_terminator_skipped(self) -> None:
+        """iter_dom が DOM 終端で余分 terminator を 1 つだけ吐くケース．
+        tag_stack 空で Terminator が来ても落ちず ``continue`` する．"""
+        from tests.parser.filedb.conftest import minimal_v3
+
+        # 1 個 terminator (root より上) — iter_dom の depth=-1 までは許容．
+        inner = minimal_v3(tags={}, attribs={}, events=[("X",)])
+        outer = wrap_as_outer([inner])
+        section = parse_tag_section(outer, detect_version(outer))
+        triples = list(Anno117Interpreter().find_traded_goods(outer, section))
+        assert triples == []
+
+
 class TestEmptyTradedGoodsYieldsNothing:
     """TradedGoods open → 中身 attrib 無し → close で triple 不完全のため yield されない．"""
 

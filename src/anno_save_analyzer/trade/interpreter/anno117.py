@@ -104,8 +104,10 @@ def _walk_inner_session(inner: bytes, session_idx: int) -> Iterator[RawTradedGoo
             continue
 
         if ev.kind is EventKind.ATTRIB:
-            # invariant: ATTRIB は必ず enclosing TAG の中で来るため attrib_stack は非空．
-            attrib_stack[-1][ev.name or f"<{ev.id_}>"] = ev.content
+            # FileDB DOM は root レベルにも attrib を持ちうる（例: SessionFileVersion）．
+            # その場合 attrib_stack は空のためガードする．
+            if attrib_stack:
+                attrib_stack[-1][ev.name or f"<{ev.id_}>"] = ev.content
 
             if in_traded_goods and traded_goods_depth >= 1:
                 # TradedGoods 直下の child (<1>) 配下に GoodGuid / GoodAmount / TotalPrice
@@ -118,9 +120,10 @@ def _walk_inner_session(inner: bytes, session_idx: int) -> Iterator[RawTradedGoo
                     current_triple["total_price"] = _read_int32(ev.content)
             continue
 
-        # Terminator. invariant: 直前 TAG OPEN で必ず両 stack に push されているため
-        # 安全に pop できる．DOM の終端で stack が空になりうる余分な terminator は
-        # `iter_dom` 側で正規化されている．
+        # Terminator．DOM の終端で root より先に出る余分な terminator は
+        # `iter_dom` 側で正規化されているはずだが，安全のためガード付きで pop．
+        if not tag_stack:
+            continue
         closing_name = tag_stack.pop()
         attrib_stack.pop()
 
