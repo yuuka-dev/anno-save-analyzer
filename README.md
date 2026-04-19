@@ -16,7 +16,7 @@ Anno 1800 saves are matryoshka-style containers:
 
 This project aims to peel every layer natively in Python (with a possible Rust re-port later) and expose the data in ways that let players actually use it: supply-chain balance tables, route-efficiency reports, and quest dashboards.
 
-## Current features (v0.1.5)
+## Current features (v0.1.0)
 
 - RDA V2.2 container parser, fully native Python
   - Magic / header / block chain / directory entry / per-file zlib decompression
@@ -29,7 +29,7 @@ This project aims to peel every layer natively in Python (with a possible Rust r
 
 | Version | Scope | Status |
 |---|---|---|
-| v0.1.5 | RDA V2.2 native parser | done |
+| v0.1.0 | RDA V2.2 native parser | done |
 | v0.2 | FileDB V1/V2/V3 parser, route data models | next |
 | v0.3 | `SessionData` / `BinaryData` decoder (the hard part) | planned |
 | v0.4 | Per-island supply-chain balance sheet | planned |

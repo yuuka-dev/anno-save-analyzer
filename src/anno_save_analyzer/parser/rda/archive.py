@@ -212,7 +212,7 @@ class RDAArchive:
 
         if entry.is_encrypted:
             raise EncryptedBlockError(
-                "encrypted file data is not supported in v0.1.5"
+                "encrypted file data is not supported in v0.1.0"
             )
 
         self._stream.seek(entry.offset)

@@ -135,12 +135,12 @@ def read_directory(
 ) -> list[DirEntry]:
     """block の直前領域から directory を読み出し，DirEntry のリストを返す．
 
-    Encrypted ブロックは v0.1.5 では未対応で例外を送出する．
+    Encrypted ブロックは v0.1.0 では未対応で例外を送出する．
     MemoryResident ブロックは本関数では追加ヘッダ処理を行わず，directory 本体のみを読む．
     """
     if block.is_encrypted:
         raise EncryptedBlockError(
-            "encrypted directory block is not supported in v0.1.5"
+            "encrypted directory block is not supported in v0.1.0"
         )
 
     dir_start = block_offset - block.directory_size

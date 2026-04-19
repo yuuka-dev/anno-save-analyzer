@@ -1,6 +1,6 @@
 """セーブデータ解析の薄い pipeline API．
 
-v0.1.5 時点では RDA → inner zlib 解凍までを提供する．
+v0.1.0 時点では RDA → inner zlib 解凍までを提供する．
 FileDB 解析 / XML 化 / SessionData 解読は後続のマイルストーンで追加．
 """
 

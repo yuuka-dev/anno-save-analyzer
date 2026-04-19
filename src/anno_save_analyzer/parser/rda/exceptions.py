@@ -12,4 +12,4 @@ class UnsupportedVersionError(RDAParseError):
 
 
 class EncryptedBlockError(RDAParseError):
-    """Encrypted flag の付いたブロックに遭遇した場合に送出．v0.1.5 では未対応．"""
+    """Encrypted flag の付いたブロックに遭遇した場合に送出．v0.1.0 では未対応．"""
