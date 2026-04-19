@@ -39,7 +39,7 @@ All PRs must:
 
 1. **Request GitHub Copilot code review.** Add `Copilot` as a reviewer when opening the PR, or use the repo-level ruleset (configured by the maintainer). A Copilot review is a required check before merging.
 2. **Pass CI.** Every push triggers `pytest` with coverage on Python 3.12 and 3.13. See `.github/workflows/ci.yml`.
-3. **Keep or improve coverage.** Current target for the `anno_save_analyzer.parser` package is 80%+. Coverage drops below threshold block the merge.
+3. **Keep coverage at 100%.** Line and branch coverage for the `anno_save_analyzer` package must stay at 100%. CI enforces this via `pytest --cov-fail-under=100`. New code without tests that cover every branch blocks the merge; defensive checks that are unreachable through normal flow must be exercised via `monkeypatch`, mocked streams, or direct unit tests on the helper function — not excluded with `pragma: no cover`.
 4. **Describe the change clearly** using the PR template (`Summary` / `Test plan`). Link any issue with `Closes #N`.
 5. **Keep scope tight.** If a change bundles unrelated refactors, split it. The maintainer may request a split before review.
 

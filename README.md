@@ -30,7 +30,7 @@ This project peels every layer natively in Python and exposes the data in ways t
   - `entries` / `read(name)` / `extract(...)` / `extract_all(...)`
   - Clean-room reimplementation of [@lysannschlegel/RDAExplorer](https://github.com/lysannschlegel/RDAExplorer) based on format spec only
 - `parser.pipeline.extract_inner_filedb` — one call `a7s` to inner FileDB bytes
-- Test suite: 16 tests, ~87% line/branch coverage. Synthetic fixtures run in CI; real-save tests auto-skip when `sample.a7s` is missing
+- Test suite: 43 tests, **100% line + branch coverage** enforced in CI via `--cov-fail-under=100`. Synthetic fixtures run in CI; real-save tests auto-skip when `sample.a7s` is missing
 
 ## Roadmap
 
