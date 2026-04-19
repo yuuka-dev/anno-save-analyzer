@@ -97,14 +97,36 @@ class TradeStatisticsScreen(Screen):
         t = self._localizer.t
         table.add_columns(
             t("statistics.col.route"),
+            t("statistics.col.status"),
             t("statistics.col.kind"),
+            t("statistics.col.legs"),
             t("statistics.col.bought"),
             t("statistics.col.sold"),
             t("statistics.col.net_gold"),
             t("statistics.col.events"),
         )
+        active_ids: set[str] = {
+            s.route_id for s in self._state.route_summaries if s.route_id is not None
+        }
+        legs_by_ship: dict[str, int] = {}
+        for routes in self._state.routes_by_session.values():
+            for rd in routes:
+                if rd.ship_id is not None:
+                    legs_by_ship[str(rd.ship_id)] = len(rd.tasks)
+
+        # active routes (履歴あり) を先に，次に idle (定義あり / 履歴無し)
         for s in self._state.route_summaries:
-            table.add_row(*self._format_route_row(s))
+            legs = legs_by_ship.get(s.route_id or "", 0) if s.route_id else 0
+            table.add_row(*self._format_route_row(s, legs, active=True))
+        for routes in self._state.routes_by_session.values():
+            for rd in routes:
+                if rd.ship_id is None:
+                    continue
+                rid = str(rd.ship_id)
+                if rid in active_ids:
+                    continue
+                table.add_row(*self._format_idle_route_row(rd))
+                active_ids.add(rid)  # 同一 ship_id が他 session に出ても 2 重計上しない
         return table
 
     def _format_item_row(self, s: ItemSummary) -> tuple[str, ...]:
@@ -117,13 +139,32 @@ class TradeStatisticsScreen(Screen):
             f"{s.event_count:,}",
         )
 
-    def _format_route_row(self, s: RouteSummary) -> tuple[str, ...]:
+    def _format_route_row(
+        self, s: RouteSummary, legs: int, *, active: bool
+    ) -> tuple[str, ...]:
+        t = self._localizer.t
         route_id = s.route_id if s.route_id is not None else "—"
+        status = t("statistics.status.active") if active else t("statistics.status.idle")
         return (
             route_id,
+            status,
             s.partner_kind,
+            f"{legs:,}",
             f"{s.bought:,}",
             f"{s.sold:,}",
             f"{s.net_gold:+,}",
             f"{s.event_count:,}",
+        )
+
+    def _format_idle_route_row(self, rd) -> tuple[str, ...]:
+        t = self._localizer.t
+        return (
+            str(rd.ship_id),
+            t("statistics.status.idle"),
+            "route",
+            f"{len(rd.tasks):,}",
+            "0",
+            "0",
+            "+0",
+            "0",
         )

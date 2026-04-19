@@ -102,6 +102,105 @@ class TestStatisticsScreen:
             for node in session_nodes:
                 assert len(node.children) == 3
 
+    async def test_statistics_routes_table_shows_idle_and_active(self, tui_state) -> None:
+        """routes_by_session に history 未登場の ship_id を仕込むと idle 行が増える．"""
+        from anno_save_analyzer.trade import TradeRouteDef, TransportTask
+        from anno_save_analyzer.tui.state import TuiState
+
+        # history に出てる route_id (= ship_id) を集める．fixture は "7", "8"．
+        active_ids = {s.route_id for s in tui_state.route_summaries if s.route_id}
+        idle_def = TradeRouteDef(
+            ship_id=999,  # history に無い → idle
+            route_hash=42,
+            round_travel=1000,
+            establish_time=0,
+            tasks=(
+                TransportTask(from_key=1, to_key=2, product_guid=100, balance_raw=0),
+                TransportTask(from_key=2, to_key=1, product_guid=200, balance_raw=0),
+            ),
+        )
+        # 加えて active route (ship_id=7) の legs も populate してみる
+        active_def = TradeRouteDef(
+            ship_id=7,
+            route_hash=7,
+            round_travel=500,
+            establish_time=0,
+            tasks=(TransportTask(from_key=10, to_key=20, product_guid=100, balance_raw=0),),
+        )
+        first_sid = tui_state.session_ids[0]
+        routes_map = {first_sid: (active_def, idle_def)}
+
+        new_state = TuiState(
+            save_path=tui_state.save_path,
+            title=tui_state.title,
+            locale="en",
+            events=tui_state.events,
+            items=tui_state.items,
+            overview=tui_state.overview,
+            item_summaries=tui_state.item_summaries,
+            route_summaries=tui_state.route_summaries,
+            session_ids=tui_state.session_ids,
+            session_locale_keys=tui_state.session_locale_keys,
+            islands_by_session=tui_state.islands_by_session,
+            routes_by_session=routes_map,
+        )
+        app = TradeApp(new_state)
+        async with app.run_test() as pilot:
+            await pilot.pause()
+            await pilot.press("ctrl+t")
+            await pilot.pause()
+            screen = pilot.app.screen
+            routes_table = screen.query_one("#routes-table")
+            # row count: active (route_summaries の長さ) + 1 (idle ship=999)
+            assert routes_table.row_count == len(tui_state.route_summaries) + 1
+            # 行ごとに (Route, Status, Kind, Legs, ...) の順で確認
+            all_rows = [
+                tuple(str(v) for v in routes_table.get_row_at(i))
+                for i in range(routes_table.row_count)
+            ]
+            statuses = [row[1] for row in all_rows]
+            route_ids = [row[0] for row in all_rows]
+            assert "idle" in statuses
+            assert "active" in statuses
+            assert "999" in route_ids
+            # active row (ship=7) の legs は active_def.tasks=1 に反映されてる
+            row_7 = next(row for row in all_rows if row[0] == "7")
+            assert row_7[3] == "1"  # Legs
+            _ = active_ids
+
+    async def test_statistics_idle_routes_skip_none_ship_id(self, tui_state) -> None:
+        """ship_id=None の idle 候補は行に出さない．"""
+        from anno_save_analyzer.trade import TradeRouteDef
+        from anno_save_analyzer.tui.state import TuiState
+
+        skip_def = TradeRouteDef(
+            ship_id=None, route_hash=None, round_travel=None, establish_time=None, tasks=()
+        )
+        first_sid = tui_state.session_ids[0]
+        routes_map = {first_sid: (skip_def,)}
+        new_state = TuiState(
+            save_path=tui_state.save_path,
+            title=tui_state.title,
+            locale="en",
+            events=tui_state.events,
+            items=tui_state.items,
+            overview=tui_state.overview,
+            item_summaries=tui_state.item_summaries,
+            route_summaries=tui_state.route_summaries,
+            session_ids=tui_state.session_ids,
+            session_locale_keys=tui_state.session_locale_keys,
+            islands_by_session=tui_state.islands_by_session,
+            routes_by_session=routes_map,
+        )
+        app = TradeApp(new_state)
+        async with app.run_test() as pilot:
+            await pilot.pause()
+            await pilot.press("ctrl+t")
+            await pilot.pause()
+            routes_table = pilot.app.screen.query_one("#routes-table")
+            # skip されるので active のみ
+            assert routes_table.row_count == len(tui_state.route_summaries)
+
     async def test_statistics_japanese_labels_after_locale_switch(self, tui_state) -> None:
         # locale=ja で初期化
         from anno_save_analyzer.tui.state import TuiState

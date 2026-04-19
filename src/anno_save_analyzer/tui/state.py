@@ -22,9 +22,11 @@ from anno_save_analyzer.parser.pipeline import extract_inner_filedb
 from anno_save_analyzer.trade import (
     GameTitle,
     ItemDictionary,
+    TradeRouteDef,
     by_item,
     by_route,
     extract,
+    list_trade_routes,
 )
 from anno_save_analyzer.trade.aggregate import ItemSummary, RouteSummary
 from anno_save_analyzer.trade.models import TradeEvent
@@ -63,6 +65,10 @@ class TuiState:
     # session_id → プレイヤー保有島 (CityName 持ち) のリスト．
     # Statistics 画面の Tree で session > island の階層に使う．
     islands_by_session: dict[str, tuple[PlayerIsland, ...]] = field(default_factory=dict)
+    # session_id → 定義済 TradeRoute のリスト．
+    # 履歴に現れない idle route も含まれる．Statistics 画面で active/idle 両方
+    # を列挙するために使う．
+    routes_by_session: dict[str, tuple[TradeRouteDef, ...]] = field(default_factory=dict)
 
 
 def build_overview(
@@ -123,6 +129,7 @@ def load_state(
 
     # 内側 Session の AreaManager_* 列挙．Tree の島階層に使う．
     islands_by_session = _collect_islands_by_session(save_path, overview.session_ids)
+    routes_by_session = _collect_routes_by_session(save_path, overview.session_ids)
 
     return TuiState(
         save_path=save_path,
@@ -136,7 +143,21 @@ def load_state(
         session_ids=overview.session_ids,
         session_locale_keys=locale_keys,
         islands_by_session=islands_by_session,
+        routes_by_session=routes_by_session,
     )
+
+
+def _load_inner_sessions(save_path: Path) -> list[bytes]:
+    """save から内側 Session FileDB の bytes 列を取り出す．"""
+    suffix = save_path.suffix.lower()
+    if suffix in {".a7s", ".a8s"}:
+        outer = extract_inner_filedb(save_path)
+    else:
+        raw = save_path.read_bytes()
+        outer = zlib.decompress(raw) if raw[:2] in (b"\x78\x9c", b"\x78\xda", b"\x78\x01") else raw
+    version = detect_version(outer)
+    section = parse_tag_section(outer, version)
+    return extract_sessions(outer, version=version, tag_section=section)
 
 
 def _collect_islands_by_session(
@@ -148,17 +169,25 @@ def _collect_islands_by_session(
     """
     if not session_ids:
         return {}
-    suffix = save_path.suffix.lower()
-    if suffix in {".a7s", ".a8s"}:
-        outer = extract_inner_filedb(save_path)
-    else:
-        raw = save_path.read_bytes()
-        outer = zlib.decompress(raw) if raw[:2] in (b"\x78\x9c", b"\x78\xda", b"\x78\x01") else raw
-    version = detect_version(outer)
-    section = parse_tag_section(outer, version)
-    inner_payloads = extract_sessions(outer, version=version, tag_section=section)
+    inner_payloads = _load_inner_sessions(save_path)
+    return {
+        sid: list_player_islands(inner)
+        for sid, inner in zip(session_ids, inner_payloads, strict=False)
+    }
 
-    by_session: dict[str, tuple[PlayerIsland, ...]] = {}
-    for sid, inner in zip(session_ids, inner_payloads, strict=False):
-        by_session[sid] = list_player_islands(inner)
-    return by_session
+
+def _collect_routes_by_session(
+    save_path: Path, session_ids: tuple[str, ...]
+) -> dict[str, tuple[TradeRouteDef, ...]]:
+    """内側 Session ごとに定義済 TradeRoute を列挙．
+
+    履歴に現れない idle route も含む．active/idle の区別は呼び出し側が
+    履歴の ship_id セットと突き合わせて行う．
+    """
+    if not session_ids:
+        return {}
+    inner_payloads = _load_inner_sessions(save_path)
+    return {
+        sid: list_trade_routes(inner)
+        for sid, inner in zip(session_ids, inner_payloads, strict=False)
+    }

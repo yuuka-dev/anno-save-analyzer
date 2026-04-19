@@ -7,7 +7,11 @@ from pathlib import Path
 from anno_save_analyzer.trade import GameTitle, Item, TradingPartner
 from anno_save_analyzer.trade.aggregate import ItemSummary, RouteSummary
 from anno_save_analyzer.trade.models import TradeEvent
-from anno_save_analyzer.tui.state import _collect_islands_by_session, build_overview
+from anno_save_analyzer.tui.state import (
+    _collect_islands_by_session,
+    _collect_routes_by_session,
+    build_overview,
+)
 
 
 def _ev(guid: int, amount: int, price: int, *, sid: str | None = "0") -> TradeEvent:
@@ -103,3 +107,15 @@ class TestCollectIslandsBySession:
         # session ごとに何かしら（空 tuple でも良い）入ってる
         assert "0" in result
         assert called["n"] == 1
+
+
+class TestCollectRoutesBySession:
+    def test_empty_session_ids_returns_empty_dict(self, tmp_path: Path) -> None:
+        assert _collect_routes_by_session(tmp_path / "anything.bin", ()) == {}
+
+    def test_returns_tuple_per_session(self, tui_state) -> None:
+        """合成 fixture は ConstructionAI を持たないため空 tuple が返る．"""
+        result = _collect_routes_by_session(tui_state.save_path, tui_state.session_ids)
+        assert set(result) == set(tui_state.session_ids)
+        for sid in tui_state.session_ids:
+            assert result[sid] == ()
