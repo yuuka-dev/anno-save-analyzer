@@ -19,6 +19,7 @@ from anno_save_analyzer.trade import (
 )
 from anno_save_analyzer.trade.aggregate import ItemSummary, RouteSummary
 from anno_save_analyzer.trade.models import TradeEvent
+from anno_save_analyzer.trade.sessions import session_locale_key
 
 
 @dataclass(frozen=True)
@@ -47,6 +48,9 @@ class TuiState:
     item_summaries: tuple[ItemSummary, ...]
     route_summaries: tuple[RouteSummary, ...]
     session_ids: tuple[str, ...] = field(default_factory=tuple)
+    # session_id (= "0" / "1" ...) → locale lookup key (例 "session.anno117.latium")
+    # localizer 経由で「Latium / ラティウム」等にレンダリングする．
+    session_locale_keys: tuple[str, ...] = field(default_factory=tuple)
 
 
 def build_overview(
@@ -100,6 +104,10 @@ def load_state(
     item_rows = by_item(events)
     route_rows = by_route(events)
     overview = build_overview(save_path, title, events, item_rows, route_rows)
+    locale_keys = tuple(
+        session_locale_key(title, int(sid)) if sid.isdigit() else "session.unknown"
+        for sid in overview.session_ids
+    )
     return TuiState(
         save_path=save_path,
         title=title,
@@ -110,4 +118,5 @@ def load_state(
         item_summaries=tuple(item_rows),
         route_summaries=tuple(route_rows),
         session_ids=overview.session_ids,
+        session_locale_keys=locale_keys,
     )

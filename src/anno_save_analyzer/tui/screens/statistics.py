@@ -67,8 +67,11 @@ class TradeStatisticsScreen(Screen):
         t = self._localizer.t
         tree = Tree(t("statistics.tree_root"), id="sessions-tree")
         tree.root.expand()
-        for sid in self._state.session_ids:
-            tree.root.add_leaf(t("statistics.tree_session", index=sid))
+        keys = self._state.session_locale_keys or tuple(
+            "session.unknown" for _ in self._state.session_ids
+        )
+        for sid, key in zip(self._state.session_ids, keys, strict=False):
+            tree.root.add_leaf(t(key, index=sid))
         return tree
 
     def _render_items_table(self) -> DataTable:

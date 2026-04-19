@@ -27,8 +27,11 @@ class OverviewScreen(Screen):
     def _render_body(self) -> Static:
         t = self._localizer.t
         ov = self._state.overview
+        keys = self._state.session_locale_keys or tuple("session.unknown" for _ in ov.session_ids)
         sessions_block = (
-            "\n".join(f"  - {t('statistics.tree_session', index=sid)}" for sid in ov.session_ids)
+            "\n".join(
+                f"  - {t(key, index=sid)}" for sid, key in zip(ov.session_ids, keys, strict=False)
+            )
             or f"  - ({t('overview.empty')})"
         )
         body = (
