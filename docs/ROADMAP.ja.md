@@ -26,16 +26,25 @@
 
 依存: `lxml`（宣言済），streaming byte reader ヘルパ．
 
-### v0.3 — `SessionData` / `BinaryData` 解読（本丸）
+### v0.3 — 貿易履歴ビューア（Anno 117 ドッグフーディング）
 
-目標: 島ごとの建物・在庫・人口を格納している再埋め込みバイナリを解読．
+> **2026-04 にスコープ変更**: 元の SessionData/BinaryData 解読は v0.2 でほぼ
+> 副産物として完了（再帰 FileDB 仮説確定）し，より差し迫った dogfooding
+> ニーズに優先順位を譲った — Anno 117 はゲーム内貿易履歴 UI が無く，
+> 書記長が困っとる．
 
-- ヘッダマジック (`04000000018000001D0000…`) の逆解析
-- 5 セッション（旧世界 / 新世界 / エンベサ / 北極 / Cape）の識別
-- GUID / timestamp / UTF-16LE 文字列のデコード
-- 島単位のデータモデル
+目標: `.a8s` (Anno 117) と `.a7s` (Anno 1800) のセーブから貿易活動を抽出し，物資別 / ルート別の集計を CLI と Textual TUI で見せる．
 
-調査量が大きいため，部分進捗を v0.3.x として段階リリースしてよい．
+- タイトル横断の抽象データモデル (`TradeEvent`, `Item`, `Route` など)
+- Method A: セーブ内の履歴フィールドから抽出 (`<TradedGoods>` 等)
+- Method B: 履歴が薄いタイトル向けの snapshot 差分推定
+- Anno 1800 統計画面準拠の 3 カラム Textual TUI
+- `textual-plotext` でインライン折れ線グラフ
+- 英日併記 (`name_en` + `name_ja`) の GUID 辞書 YAML
+
+詳細仕様: [`v0.3-trade-history-design.ja.md`](./v0.3-trade-history-design.ja.md)（英語正本: [`v0.3-trade-history-design.md`](./v0.3-trade-history-design.md)）．
+
+元 v0.3 の SessionData ドメインモデル化（島 / 建物 / 人口の完全スキーマ）は **v0.6** に移管．
 
 ### v0.4 — サプライチェーン balance 表
 
@@ -53,14 +62,19 @@
 - 船の積載量，移動時間，現行割り当てを制約に
 - `optimizer` extra: `pip install anno-save-analyzer[optimizer]`
 
-### v0.6 — Textual TUI ダッシュボード
+### v0.6 — 島 / 建物 / 人口スキーマ深掘り
 
-目標: 追加インストール無しでターミナル上からセーブを探索できる UI．
+> **2026-04 にスコープ変更**: 元の「Textual TUI ダッシュボード」は v0.3 の
+> 貿易履歴ビューアに前倒しで取り込み済．v0.6 の枠は v0.4 サプライチェーン
+> 計算と v0.5 ルート最適化が必要とするドメインスキーマの整備に再利用．
 
-- [Textual](https://github.com/Textualize/Textual)（Pure Python TUI）ベース
-- 画面: Overview / Islands / Routes / Quests / Balance
-- Python が動く環境ならどこでも起動．Electron / Tauri / ブラウザ不要
-- キーボード操作前提
+目標: SessionData 内側 FileDB の「島」「建物」「人口」レイヤを Pydantic モデル化．バイト抽出は v0.2 / v0.3 で済んでるので，v0.6 では typed domain object に昇格させる．
+
+- `Island*` / `AreaManager_*` / `AreaPopulationManager` のスキーマ
+- 建物カタログ（建物種別ごとの生産・消費）
+- 人口階層別の breakdown（Anno 117 ならローマ人 / イタリック人 等）
+- 匿名 attrib (`id=0x8000`) のコンテキスト依存型解釈
+- Anno 1800 ↔ Anno 117 のスキーマ差分ドキュメント
 
 ### v1.0 — 公開安定版
 

@@ -26,16 +26,28 @@ Goal: expose the structured XML tree that sits inside `data.a7s`.
 
 Dependencies: `lxml` (already declared), streaming byte-reader helpers.
 
-### v0.3 — `SessionData` / `BinaryData` decoder (hard part)
+### v0.3 — Trade History Viewer (Anno 117 dogfooding)
 
-Goal: crack the re-embedded binary that holds island details (buildings, stockpiles, population).
+> **Scope changed in 2026-04**: the original SessionData / BinaryData decoder
+> work was largely subsumed by v0.2 (recursive FileDB hypothesis confirmed) and
+> displaced by a more pressing dogfooding need — Anno 117 ships without an
+> in-game trade-history UI, and the maintainer wants one.
 
-- Reverse-engineer the header magic (`04000000018000001D0000…`)
-- Identify the five session blocks (Old World / New World / Enbesa / Arctic / Cape)
-- Decode GUID references, timestamps, UTF-16LE strings
-- Produce island-level data models
+Goal: a CLI + Textual TUI that exposes per-good and per-route trade activity
+extracted from `.a8s` (Anno 117) and `.a7s` (Anno 1800) saves.
 
-This is expected to take significant research. Acceptable to ship partial progress as v0.3.x increments.
+- Cross-title abstract data model (`TradeEvent`, `Item`, `Route`, ...)
+- Method A: extract from in-save history fields (`<TradedGoods>` etc.)
+- Method B: snapshot diff for titles where history is sparse
+- 3-column Textual TUI modelled after the Anno 1800 statistics view
+- Inline charts via `textual-plotext`
+- Bilingual (`name_en` + `name_ja`) GUID dictionary YAMLs
+
+Detailed specification: [`v0.3-trade-history-design.md`](./v0.3-trade-history-design.md)
+(Japanese sibling: [`v0.3-trade-history-design.ja.md`](./v0.3-trade-history-design.ja.md)).
+
+The deeper SessionData / BinaryData domain modelling (full island /
+building / population schema) is preserved as **v0.6** below.
 
 ### v0.4 — Supply-chain balance sheet
 
@@ -53,14 +65,22 @@ Goal: suggest route reassignments that reduce idle ships or unfilled demand.
 - Respect ship capacity, travel time, and current assignments
 - `optimizer` extras group: `pip install anno-save-analyzer[optimizer]`
 
-### v0.6 — Textual TUI dashboard
+### v0.6 — Island / Building / Population schema deep-dive
 
-Goal: zero-install, terminal-based UI for exploring a save file.
+> **Scope changed in 2026-04**: the original "Textual TUI dashboard" was
+> pulled forward into v0.3 (the trade-history viewer ships its own TUI). The
+> v0.6 slot is now used for the deeper schema work that the supply-chain
+> balance (v0.4) and route optimizer (v0.5) will consume.
 
-- Built on [Textual](https://github.com/Textualize/Textual) (pure Python TUI)
-- Screens: overview / islands / routes / quests / balance sheet
-- Runs anywhere Python runs; no Electron, no Tauri, no browser
-- Keyboard-first navigation
+Goal: complete Pydantic models for islands, buildings, and population layers
+inside the SessionData inner FileDB. v0.2 / v0.3 already extract the bytes;
+v0.6 turns them into typed domain objects.
+
+- Schema for `Island*` / `AreaManager_*` / `AreaPopulationManager`
+- Building catalogue (production / consumption per building type)
+- Population tier breakdowns (Roman / Italic / etc. for Anno 117)
+- Anonymous attrib (`id=0x8000`) context-dependent type resolution
+- Anno 1800 ↔ Anno 117 schema diff documentation
 
 ### v1.0 — Public stable release
 

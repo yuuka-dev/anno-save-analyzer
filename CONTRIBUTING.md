@@ -22,14 +22,24 @@ Japanese contributors: feel free to file issues and PR descriptions in 日本語
 ## Commit message format
 
 ```
-<type>(<scope>): <short title>
+<type>(<scope>): English subject (50 chars or less is ideal)
 
-<optional body>
+English body explaining the why and the what.
+Wrap at 72 chars where reasonable.
+
+---
+
+日本語の本文 (任意，書記長 / 日本語話者向け)
 ```
 
 Types: `feat`, `fix`, `update`, `docs`, `style`, `refactor`, `perf`, `test`, `chore`, `ci`.
 
-Japanese commit messages are the default in this repo. English is fine for widely-relevant refactors.
+**Language policy**:
+
+- **English is required** in the subject line and body. This repo is OSS-facing.
+- **Japanese is encouraged** as a second body block separated by a `---` line, particularly for design / architecture commits where local context matters.
+- **Japanese-only commit messages are not accepted** — they break the OSS contributor experience for non-Japanese readers.
+- English-only is acceptable for trivial / mechanical commits.
 
 Do **not** append `Co-Authored-By: Claude ...` or `Cursor ...` trailers.
 
