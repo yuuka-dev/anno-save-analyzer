@@ -229,21 +229,27 @@ class TestInTradedGoodsAttrFiltering:
     def test_unknown_attribute_inside_traded_goods_ignored(self) -> None:
         from tests.parser.filedb.conftest import minimal_v3
 
-        # PassiveTrade > History > PassiveTradeEntries > <1> > <1> > TradedGoods >
-        #   <1> with attribs: ExtraJunk + GoodGuid + GoodAmount
+        # AreaInfo > <1> (CityName 持ち = プレイヤー島) > PassiveTrade > History
+        # > PassiveTradeEntries > <1> > <1> > TradedGoods > <1> with
+        # ExtraJunk + GoodGuid + GoodAmount
         tags = {
             2: "PassiveTrade",
             3: "History",
             4: "PassiveTradeEntries",
             5: "TradedGoods",
+            7: "AreaInfo",
         }
         attribs = {
             0x8001: "GoodGuid",
             0x8002: "GoodAmount",
             0x8003: "ExtraJunk",  # 関係ない attrib．無視されるはず
             0x8004: "TotalPrice",
+            0x8005: "CityName",
         }
         events = [
+            ("T", 7),  # AreaInfo
+            ("T", 1),  # AreaInfo > <1> (player island)
+            ("A", 0x8005, "島".encode("utf-16-le")),
             ("T", 2),  # PassiveTrade
             ("T", 3),  # History
             ("T", 4),  # PassiveTradeEntries
@@ -261,6 +267,8 @@ class TestInTradedGoodsAttrFiltering:
             ("X",),  # close PassiveTradeEntries
             ("X",),  # close History
             ("X",),  # close PassiveTrade
+            ("X",),  # close AreaInfo > <1>
+            ("X",),  # close AreaInfo
         ]
         inner = minimal_v3(tags=tags, attribs=attribs, events=events)
         outer = wrap_as_outer([inner])
@@ -285,13 +293,18 @@ class TestNestedTagsInsideTradedGoods:
             3: "History",
             4: "TradeRouteEntries",
             5: "TradedGoods",
+            7: "AreaInfo",
         }
         attribs = {
             0x8001: "Trader",
             0x8002: "GoodGuid",
             0x8003: "GoodAmount",
+            0x8005: "CityName",
         }
         events = [
+            ("T", 7),  # AreaInfo
+            ("T", 1),  # AreaInfo > <1> (player)
+            ("A", 0x8005, "島".encode("utf-16-le")),
             ("T", 2),  # PassiveTrade
             ("T", 3),  # History
             ("T", 4),  # TradeRouteEntries
@@ -300,10 +313,10 @@ class TestNestedTagsInsideTradedGoods:
             ("T", 1),  # 内側 <1> (entry)
             ("T", 5),  # TradedGoods
             ("T", 1),  # depth=1 wrapper
-            ("T", 1),  # depth=2 nested wrapper (踏ませたい OPEN 102->104)
-            ("A", 0x8002, struct.pack("<i", 555)),  # GoodGuid (depth>=1 なので拾われる)
+            ("T", 1),  # depth=2 nested wrapper
+            ("A", 0x8002, struct.pack("<i", 555)),  # GoodGuid
             ("A", 0x8003, struct.pack("<i", 3)),  # GoodAmount
-            ("X",),  # close depth=2 wrapper (踏ませたい CLOSE 128->137)
+            ("X",),  # close depth=2 wrapper
             ("X",),  # close depth=1 wrapper (build & yield)
             ("X",),  # close TradedGoods
             ("X",),  # close inner <1> (entry)
@@ -311,6 +324,8 @@ class TestNestedTagsInsideTradedGoods:
             ("X",),  # close TradeRouteEntries
             ("X",),  # close History
             ("X",),  # close PassiveTrade
+            ("X",),  # close AreaInfo > <1>
+            ("X",),  # close AreaInfo
         ]
         inner = minimal_v3(tags=tags, attribs=attribs, events=events)
         outer = wrap_as_outer([inner])
@@ -334,9 +349,13 @@ class TestInnerWrapperWithoutTripleYieldsNothing:
             3: "History",
             4: "TradeRouteEntries",
             5: "TradedGoods",
+            6: "AreaInfo",
         }
-        attribs: dict[int, str] = {0x8001: "Trader"}
+        attribs: dict[int, str] = {0x8001: "Trader", 0x8002: "CityName"}
         events = [
+            ("T", 6),  # AreaInfo
+            ("T", 1),  # AreaInfo > <1> (player island)
+            ("A", 0x8002, "プレイヤー島".encode("utf-16-le")),
             ("T", 2),
             ("T", 3),
             ("T", 4),
@@ -345,19 +364,40 @@ class TestInnerWrapperWithoutTripleYieldsNothing:
             ("T", 1),  # 内側 <1>
             ("T", 5),  # TradedGoods
             ("T", 1),  # depth=1 wrapper (空)
-            ("X",),  # close depth=1 wrapper → build → None → yield スキップ (135->137)
+            ("X",),  # close depth=1 wrapper → build → None → yield スキップ (174->176)
             ("X",),  # close TradedGoods
             ("X",),  # close inner <1>
             ("X",),  # close outer <1>
             ("X",),  # close TradeRouteEntries
             ("X",),  # close History
             ("X",),  # close PassiveTrade
+            ("X",),  # close AreaInfo > <1>
+            ("X",),  # close AreaInfo
         ]
         inner = minimal_v3(tags=tags, attribs=attribs, events=events)
         outer = wrap_as_outer([inner])
         section = parse_tag_section(outer, detect_version(outer))
         triples = list(Anno117Interpreter().find_traded_goods(outer, section))
         assert triples == []
+
+
+class TestNpcIslandFiltering:
+    """CityName 持たない AreaInfo > <1>（NPC 島）の TradedGoods は yield されない．"""
+
+    def test_npc_island_trades_are_excluded(self) -> None:
+        from .conftest import make_inner_filedb, wrap_as_outer
+
+        # プレイヤー島 1 件 + NPC 島 1 件．それぞれ同じ trade 構造を持つ．
+        # interpreter はプレイヤー島の取引のみ拾うべき．
+        inner = make_inner_filedb(
+            {"route": [(7, 100, 5, 0), (7, 200, -3, 0)]},
+            include_npc_island=True,
+        )
+        outer = wrap_as_outer([inner])
+        section = parse_tag_section(outer, detect_version(outer))
+        triples = list(Anno117Interpreter().find_traded_goods(outer, section))
+        # プレイヤー島の 2 取引のみ．NPC 島の同じ 2 取引は skip．
+        assert len(triples) == 2
 
 
 class TestRootLevelAttribsAndTerminators:
@@ -483,14 +523,19 @@ class TestMultipleRowsInSingleTradedGoods:
             3: "History",
             4: "TradeRouteEntries",
             5: "TradedGoods",
+            6: "AreaInfo",
         }
         attribs = {
             0x8001: "Trader",
             0x8002: "GoodGuid",
             0x8003: "GoodAmount",
             0x8004: "TotalPrice",
+            0x8005: "CityName",
         }
         events = [
+            ("T", 6),  # AreaInfo
+            ("T", 1),  # AreaInfo > <1> (player island)
+            ("A", 0x8005, "プレイヤー島".encode("utf-16-le")),
             ("T", 2),
             ("T", 3),
             ("T", 4),
@@ -514,6 +559,8 @@ class TestMultipleRowsInSingleTradedGoods:
             ("X",),  # close TradeRouteEntries
             ("X",),  # close History
             ("X",),  # close PassiveTrade
+            ("X",),  # close AreaInfo > <1>
+            ("X",),  # close AreaInfo
         ]
         inner = minimal_v3(tags=tags, attribs=attribs, events=events)
         outer = wrap_as_outer([inner])

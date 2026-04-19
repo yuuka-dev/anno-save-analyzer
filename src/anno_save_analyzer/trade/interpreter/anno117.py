@@ -33,6 +33,8 @@ _PASSIVE_TRADE_ROOT_TAG = "PassiveTrade"
 _TRADE_ROUTE_ENTRIES = "TradeRouteEntries"
 _PASSIVE_TRADE_ENTRIES = "PassiveTradeEntries"
 _TRADED_GOODS_TAG = "TradedGoods"
+_AREA_INFO_TAG = "AreaInfo"
+_CITY_NAME_ATTRIB = "CityName"
 
 # 親階層の attrib name 候補．実測（rev 5 W-1 spike + 続報）に基づく．
 # Anno 117 では `Trader` という同名 attrib が文脈によって意味を変える：
@@ -81,6 +83,12 @@ def _walk_inner_session(inner: bytes, session_idx: int) -> Iterator[RawTradedGoo
     current_triple: dict[str, int | None] = _empty_triple()
     pending_kind: PartnerKind = "unknown"
 
+    # AreaInfo > <1> 単位で「プレイヤー保有島か」を track．CityName attrib を持つ
+    # entry 配下の TradedGoods だけ yield することで NPC 同士の取引を除外する．
+    in_area_info_depth = -1  # AreaInfo タグに入った時点の tag_stack 長
+    area_entry_depth = -1  # 直下 <1> エントリの tag_stack 長
+    in_player_island = False
+
     session_id = str(session_idx)
 
     for ev in iter_dom(inner, inner_version, tag_section=inner_section):
@@ -89,10 +97,22 @@ def _walk_inner_session(inner: bytes, session_idx: int) -> Iterator[RawTradedGoo
             tag_stack.append(name)
             attrib_stack.append({})
 
+            # AreaInfo の追跡
+            if name == _AREA_INFO_TAG and in_area_info_depth < 0:
+                in_area_info_depth = len(tag_stack)
+            elif (
+                in_area_info_depth >= 0
+                and area_entry_depth < 0
+                and len(tag_stack) == in_area_info_depth + 1
+            ):
+                # 新しい AreaInfo > <1> エントリ開始
+                area_entry_depth = len(tag_stack)
+                in_player_island = False
+
             if name == _TRADED_GOODS_TAG:
                 kind = _classify_parent(tag_stack)
-                if kind is None:
-                    # 想定外 (ConstructionAI/EventBuffer 等) は skip
+                if kind is None or not in_player_island:
+                    # ConstructionAI/EventBuffer や，NPC 島の取引は skip
                     continue
                 in_traded_goods = True
                 traded_goods_depth = 0
@@ -109,6 +129,14 @@ def _walk_inner_session(inner: bytes, session_idx: int) -> Iterator[RawTradedGoo
             if attrib_stack:
                 attrib_stack[-1][ev.name or f"<{ev.id_}>"] = ev.content
 
+            # AreaInfo > <1> 直下に CityName があるならプレイヤー保有島と判定
+            if (
+                area_entry_depth >= 0
+                and len(tag_stack) == area_entry_depth
+                and ev.name == _CITY_NAME_ATTRIB
+            ):
+                in_player_island = True
+
             if in_traded_goods and traded_goods_depth >= 1:
                 # TradedGoods 直下の child (<1>) 配下に GoodGuid / GoodAmount / TotalPrice
                 attr_name = ev.name
@@ -124,8 +152,16 @@ def _walk_inner_session(inner: bytes, session_idx: int) -> Iterator[RawTradedGoo
         # `iter_dom` 側で正規化されているはずだが，安全のためガード付きで pop．
         if not tag_stack:
             continue
+        closing_depth = len(tag_stack)
         closing_name = tag_stack.pop()
         attrib_stack.pop()
+
+        # AreaInfo entry / AreaInfo 自身の close 検出
+        if area_entry_depth >= 0 and closing_depth == area_entry_depth:
+            area_entry_depth = -1
+            in_player_island = False
+        if in_area_info_depth >= 0 and closing_depth == in_area_info_depth:
+            in_area_info_depth = -1
 
         if in_traded_goods and closing_name != _TRADED_GOODS_TAG:
             if traded_goods_depth == 1:
