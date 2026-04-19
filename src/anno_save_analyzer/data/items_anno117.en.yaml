@@ -1,0 +1,65 @@
+# Anno 117: Pax Romana — canonical English item dictionary.
+# Sourced from in-game observation and modder community references.
+# Add new entries as they are discovered. Pure pre-population stubs only;
+# the parser falls back to "Good_<guid>" for unknown GUIDs.
+
+2088:
+  name: "Wood"
+  category: "raw"
+2073:
+  name: "Bricks"
+  category: "construction"
+2137:
+  name: "Wine"
+  category: "consumer"
+2138:
+  name: "Wool"
+  category: "raw"
+2142:
+  name: "Rum"
+  category: "consumer"
+2171:
+  name: "Sugar"
+  category: "raw"
+2172:
+  name: "Cotton"
+  category: "raw"
+2174:
+  name: "Iron Ore"
+  category: "raw"
+2175:
+  name: "Iron"
+  category: "intermediate"
+2176:
+  name: "Coal"
+  category: "raw"
+2177:
+  name: "Tools"
+  category: "intermediate"
+2178:
+  name: "Fish"
+  category: "consumer"
+2179:
+  name: "Bread"
+  category: "consumer"
+2180:
+  name: "Olives"
+  category: "raw"
+2181:
+  name: "Olive Oil"
+  category: "consumer"
+2182:
+  name: "Marble"
+  category: "raw"
+2183:
+  name: "Pottery"
+  category: "consumer"
+2184:
+  name: "Clothing"
+  category: "consumer"
+2185:
+  name: "Weapons"
+  category: "intermediate"
+2186:
+  name: "Spices"
+  category: "luxury"
