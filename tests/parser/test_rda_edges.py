@@ -229,9 +229,7 @@ class TestArchiveIO:
         assert (dest_root / "beta.bin").read_bytes() == b"BBBB"
         assert (dest_root / "gamma.bin").read_bytes() == b"CCCCC"
 
-    def test_extract_all_creates_subdirectories_from_embedded_paths(
-        self, tmp_path: Path
-    ) -> None:
+    def test_extract_all_creates_subdirectories_from_embedded_paths(self, tmp_path: Path) -> None:
         """エントリ名にスラッシュが含まれる場合にサブディレクトリを作ることを確認．"""
         rda_path = tmp_path / "nested.rda"
         # ``\`` を含む名前も含め，正規化 (lstrip("/") / ``\\`` → ``/``) 経路を踏む
