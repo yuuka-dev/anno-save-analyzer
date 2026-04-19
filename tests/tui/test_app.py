@@ -10,12 +10,17 @@ from anno_save_analyzer.tui.screens import OverviewScreen, TradeStatisticsScreen
 
 @pytest.mark.asyncio
 class TestTradeAppLifecycle:
+    @staticmethod
+    def _binding_description(app: TradeApp, key: str) -> str:
+        return next(binding.description for binding in app.BINDINGS if binding.key == key)
+
     async def test_app_boots_to_overview(self, tui_state) -> None:
         app = TradeApp(tui_state)
         async with app.run_test() as pilot:
             await pilot.pause()
             assert pilot.app.title == "anno-save-analyzer"
             assert isinstance(pilot.app.screen, OverviewScreen)
+            assert self._binding_description(pilot.app, "ctrl+l") == "Locale"
 
     async def test_overview_to_statistics_via_ctrl_t(self, tui_state) -> None:
         app = TradeApp(tui_state)
@@ -40,13 +45,16 @@ class TestTradeAppLifecycle:
         async with app.run_test() as pilot:
             await pilot.pause()
             assert pilot.app._localizer.code == "en"
+            assert self._binding_description(pilot.app, "ctrl+l") == "Locale"
             await pilot.press("ctrl+l")
             await pilot.pause()
             assert pilot.app._localizer.code == "ja"
+            assert self._binding_description(pilot.app, "ctrl+l") == "言語"
             # もう 1 度押すと en に戻る
             await pilot.press("ctrl+l")
             await pilot.pause()
             assert pilot.app._localizer.code == "en"
+            assert self._binding_description(pilot.app, "ctrl+l") == "Locale"
 
     async def test_locale_switch_from_statistics_screen(self, tui_state) -> None:
         app = TradeApp(tui_state)

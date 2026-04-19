@@ -4,6 +4,8 @@ from __future__ import annotations
 
 from pathlib import Path
 
+import pytest
+
 from anno_save_analyzer.tui.i18n import Localizer
 
 
@@ -53,3 +55,8 @@ class TestLocalizer:
         (tmp_path / "empty.yaml").write_text("", encoding="utf-8")
         loc = Localizer.load("empty", data_dir=tmp_path)
         assert loc.t("anything") == "anything"
+
+    def test_non_mapping_yaml_raises_value_error(self, tmp_path: Path) -> None:
+        (tmp_path / "bad.yaml").write_text("- not\n- a\n- mapping\n", encoding="utf-8")
+        with pytest.raises(ValueError, match="Locale YAML root must be a mapping"):
+            Localizer.load("bad", data_dir=tmp_path)

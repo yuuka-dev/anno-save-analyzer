@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import builtins
 from pathlib import Path
 from unittest.mock import patch
 
@@ -21,6 +22,20 @@ def _make_save(tmp_path: Path) -> Path:
 
 
 class TestTuiCommand:
+    def test_tui_shows_friendly_error_when_textual_missing(self, tmp_path: Path) -> None:
+        save = _make_save(tmp_path)
+        original_import = builtins.__import__
+
+        def raising_import(name, *args, **kwargs):
+            if name == "anno_save_analyzer.tui":
+                raise ImportError("No module named 'textual'")
+            return original_import(name, *args, **kwargs)
+
+        with patch("builtins.__import__", side_effect=raising_import):
+            result = runner.invoke(app, ["tui", str(save)])
+        assert result.exit_code == 1
+        assert "anno-save-analyzer[tui]" in result.output
+
     def test_tui_subcommand_invokes_app(self, tmp_path: Path) -> None:
         save = _make_save(tmp_path)
         # TradeApp.run() を mock して headless で実行終了

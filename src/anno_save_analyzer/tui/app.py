@@ -38,6 +38,7 @@ class TradeApp(App[None]):
         super().__init__()
         self._state = state
         self._localizer = localizer or Localizer.load(state.locale)
+        self._apply_localized_bindings()
         self.title = self._localizer.t("app.title")
 
     @classmethod
@@ -72,6 +73,7 @@ class TradeApp(App[None]):
         active stack 中はエラーになるため避ける．
         """
         self._localizer = self._localizer.with_locale(code)
+        self._apply_localized_bindings()
         self.title = self._localizer.t("app.title")
         for screen in (self.get_screen("overview"), self.get_screen("statistics")):
             screen._localizer = self._localizer
@@ -79,3 +81,16 @@ class TradeApp(App[None]):
 
     def action_show_help(self) -> None:  # pragma: no cover - manual interaction only
         self.notify(self._localizer.t("binding.help"))
+
+    def _apply_localized_bindings(self) -> None:
+        self.BINDINGS = [
+            Binding("ctrl+x", "quit", self._localizer.t("binding.exit"), priority=True),
+            Binding("ctrl+g", "show_help", self._localizer.t("binding.help")),
+            Binding(
+                "ctrl+t",
+                "switch_main_screen",
+                f"{self._localizer.t('binding.overview')}/{self._localizer.t('binding.statistics')}",
+            ),
+            Binding("ctrl+l", "toggle_locale", self._localizer.t("binding.locale")),
+        ]
+        self.refresh_bindings()

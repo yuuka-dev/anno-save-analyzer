@@ -27,7 +27,17 @@ def _launch(
     locale: Annotated[str, typer.Option("--locale", help="UI locale (en / ja).")] = "en",
 ) -> None:
     """Open the Textual trade-history viewer on SAVE."""
-    from anno_save_analyzer.tui import TradeApp
+    try:
+        from anno_save_analyzer.tui import TradeApp
+    except ImportError as exc:
+        typer.secho(
+            "The TUI dependencies are not installed. Install "
+            "'anno-save-analyzer[tui]' (or the equivalent optional extras) "
+            "and try again.",
+            err=True,
+            fg=typer.colors.RED,
+        )
+        raise typer.Exit(code=1) from exc
 
     app = TradeApp.from_save(save, title=title.to_title(), locale=locale)
     app.run()

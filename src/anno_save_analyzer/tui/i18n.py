@@ -5,6 +5,7 @@
 
 from __future__ import annotations
 
+from collections.abc import Mapping
 from importlib import resources
 from pathlib import Path
 
@@ -62,4 +63,6 @@ def _load_yaml(code: str, data_dir: Path | None) -> dict[str, str]:
         # Fallback: empty dict．Localizer.t がキー名そのまま返すから致命的じゃない
         return {}
     parsed = yaml.safe_load(raw) or {}
+    if not isinstance(parsed, Mapping):
+        raise ValueError(f"Locale YAML root must be a mapping: {filename}")
     return {str(k): str(v) for k, v in parsed.items()}
