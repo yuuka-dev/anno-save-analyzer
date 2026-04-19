@@ -1,0 +1,43 @@
+# Anno 117: Pax Romana — Japanese item names (translation).
+# Names only; category and other metadata are inherited from the .en.yaml.
+
+2088:
+  name: "木材"
+2073:
+  name: "煉瓦"
+2137:
+  name: "葡萄酒"
+2138:
+  name: "羊毛"
+2142:
+  name: "ラム酒"
+2171:
+  name: "砂糖"
+2172:
+  name: "綿花"
+2174:
+  name: "鉄鉱石"
+2175:
+  name: "鉄"
+2176:
+  name: "石炭"
+2177:
+  name: "工具"
+2178:
+  name: "魚"
+2179:
+  name: "パン"
+2180:
+  name: "オリーブ"
+2181:
+  name: "オリーブ油"
+2182:
+  name: "大理石"
+2183:
+  name: "陶器"
+2184:
+  name: "衣料"
+2185:
+  name: "武器"
+2186:
+  name: "香辛料"
