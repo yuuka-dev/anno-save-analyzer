@@ -13,6 +13,7 @@
 from .dictionary import TagDictionary, TagSection, parse_tag_section
 from .dom import Attrib, DomEvent, EventKind, Tag, Terminator, iter_dom
 from .exceptions import FileDBParseError, UnsupportedFileDBVersion
+from .session import extract_sessions
 from .version import FileDBVersion, detect_version
 from .xml import build_xml
 
@@ -29,6 +30,7 @@ __all__ = [
     "Attrib",
     "Terminator",
     "build_xml",
+    "extract_sessions",
     "FileDBParseError",
     "UnsupportedFileDBVersion",
 ]
