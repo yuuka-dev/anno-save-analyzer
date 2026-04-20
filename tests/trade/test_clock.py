@@ -57,3 +57,43 @@ class TestPickTimeUnit:
         unit, div = pick_time_unit([-500.0, 0.0])
         assert unit == "hours_ago"
         assert div == pytest.approx(1.0 / 60.0)
+
+
+class TestInventorySampleMinutes:
+    def test_latest_sample_at_zero(self) -> None:
+        from anno_save_analyzer.trade.clock import inventory_sample_minutes
+
+        out = inventory_sample_minutes(5)
+        assert out[-1] == 0.0
+        # 最古サンプルは -(5-1)*1 = -4 分 (step=600 tick = 1 min default)
+        assert out[0] == -4.0
+        # 昇順
+        assert out == sorted(out)
+
+    def test_single_sample_is_zero(self) -> None:
+        from anno_save_analyzer.trade.clock import inventory_sample_minutes
+
+        assert inventory_sample_minutes(1) == [0.0]
+
+    def test_empty_returns_empty(self) -> None:
+        from anno_save_analyzer.trade.clock import inventory_sample_minutes
+
+        assert inventory_sample_minutes(0) == []
+
+    def test_120_samples_span_two_hours(self) -> None:
+        """書記長の dogfood 仮定: capacity=120 で 2 時間分の履歴 (step=600 ticks=1 分)．"""
+        from anno_save_analyzer.trade.clock import inventory_sample_minutes
+
+        out = inventory_sample_minutes(120)
+        assert out[-1] == 0.0
+        assert out[0] == -119.0
+        # 最古から最新までの spread = 119 分 (≈ 2 時間)
+        assert out[-1] - out[0] == 119.0
+
+    def test_custom_step_ticks(self) -> None:
+        """step を ticks_per_minute=600 / 10 = 60 (= 0.1 分) にすると細かくなる．"""
+        from anno_save_analyzer.trade.clock import inventory_sample_minutes
+
+        out = inventory_sample_minutes(5, step_ticks=60)
+        # 60 tick = 0.1 分
+        assert out == pytest.approx([-0.4, -0.3, -0.2, -0.1, 0.0])

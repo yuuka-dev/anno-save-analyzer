@@ -15,6 +15,14 @@ from collections.abc import Iterable
 # 差分分布から検証した値．Anno 1800 も同等と仮定 (要検証)．
 TICKS_PER_MINUTE = 600
 
+# ``StorageTrends > Points`` の 1 サンプル = 何 tick か．暫定値 = 1 分 (600)．
+# 公式ドキュメントは無く，Anno 内部の「在庫推移グラフ」の UI 観察とサンプル数
+# (capacity=120 固定) から「約 2 時間分の観測点」と仮置きしている．なお 1 分刻み
+# なら 120 サンプルの最古-最新の端点間スパンは 119 分．書記長の dogfood で
+# 違和感があれば調整する．clock モジュールに隔離して ad-hoc 値をコード上からも
+# 見分けやすくする．
+SAMPLE_INTERVAL_TICKS = TICKS_PER_MINUTE  # 1 sample = 1 minute 仮定
+
 
 def minutes_relative_to(tick: int, *, now_tick: int) -> float:
     """``tick`` を ``now_tick`` からの相対分数 (負=過去) として返す．
@@ -32,6 +40,18 @@ def latest_tick(ticks: Iterable[int]) -> int | None:
 
 # spread がこの分数を超えたら時間単位に切り替える閾値．
 _HOURS_UNIT_THRESHOLD_MIN = 120.0
+
+
+def inventory_sample_minutes(
+    n_samples: int, step_ticks: int = SAMPLE_INTERVAL_TICKS
+) -> list[float]:
+    """StorageTrends の N サンプルを「何分前」相対値に展開．
+
+    最新サンプル (``samples[-1]``) を 0，最古を
+    ``-(n_samples - 1) * step_ticks / TICKS_PER_MINUTE`` として左に並べる．
+    chart の x 軸は昇順なので最古が左端．
+    """
+    return [(i - (n_samples - 1)) * step_ticks / TICKS_PER_MINUTE for i in range(n_samples)]
 
 
 def pick_time_unit(values_minutes: Iterable[float]) -> tuple[str, float]:

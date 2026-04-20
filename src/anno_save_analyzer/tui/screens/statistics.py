@@ -534,19 +534,27 @@ class TradeStatisticsScreen(Screen):
         )
         if trend is None:
             return
+        from anno_save_analyzer.trade.clock import (
+            inventory_sample_minutes,
+            pick_time_unit,
+        )
+
         item = self._state.items[guid]
         title = f"{island} · {item.display_name(self._localizer.code)}"
         samples = list(trend.points.samples)
         if not samples:
             self._render_empty_chart(t("statistics.chart.no_inventory_samples", title=title))
             return
-        x_values = list(range(len(samples)))
+        # 最新 = 0，最古 = -(n-1) * step．chart は昇順なので左端が最古．
+        minutes = inventory_sample_minutes(len(samples))
+        unit_key, divisor = pick_time_unit(minutes)
+        x_values = [m * divisor for m in minutes]
         chart = self.query_one("#chart-pane", PlotextPlot)
         chart.plt.clear_data()
         chart.plt.clear_figure()
         chart.plt.plot(x_values, samples, marker="hd")
         chart.plt.title(title)
-        chart.plt.xlabel(t("statistics.chart.sample_index"))
+        chart.plt.xlabel(t(f"statistics.chart.xlabel.{unit_key}"))
         chart.plt.ylabel(t("statistics.col.latest"))
         chart.refresh()
 
