@@ -89,8 +89,7 @@ def list_trades(
     """List every TradeEvent extracted from SAVE."""
     _ensure_format_supported(fmt)
     title_v = title.to_title()
-    events = list(_events(save, title_v, locale))
-    events = filter_events(events, session=session, island=island)
+    events = filter_events(_events(save, title_v, locale), session=session, island=island)
     payload = [
         {
             "timestamp_tick": ev.timestamp_tick,
