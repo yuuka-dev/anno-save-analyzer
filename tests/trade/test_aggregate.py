@@ -22,6 +22,7 @@ def _ev(
     partner: TradingPartner | None | object = ...,
     session_id: str | None = None,
     island_name: str | None = None,
+    route_name: str | None = None,
 ) -> TradeEvent:
     item = Item(guid=guid, names={"en": f"Good_{guid}"})
     # partner = sentinel (...) なら kind と route_id から自動生成．
@@ -37,6 +38,7 @@ def _ev(
         timestamp_tick=timestamp,
         session_id=session_id,
         island_name=island_name,
+        route_name=route_name,
     )
 
 
@@ -138,6 +140,43 @@ class TestByRoute:
         assert rows[0].route_id == "r2"
         assert rows[1].route_id == "r1"
 
+    def test_route_name_aggregates_with_latest_tick_winning(self) -> None:
+        """同一 route_id 内で途中 rename された場合，tick が進むタイミングで上書き．"""
+        events = [
+            _ev(1, 1, 1, route_id="7", kind="route", timestamp=100, route_name="旧ルート"),
+            _ev(1, 1, 1, route_id="7", kind="route", timestamp=200, route_name="新ルート"),
+        ]
+        rows = by_route(events)
+        assert rows[0].route_name == "新ルート"
+        assert rows[0].display_route == "新ルート"
+
+    def test_route_name_latest_tick_wins_even_if_events_are_out_of_order(self) -> None:
+        events = [
+            _ev(1, 1, 1, route_id="7", kind="route", timestamp=200, route_name="新ルート"),
+            _ev(1, 1, 1, route_id="7", kind="route", timestamp=100, route_name="旧ルート"),
+        ]
+        rows = by_route(events)
+        assert rows[0].route_name == "新ルート"
+
+    def test_route_name_with_no_tick_does_not_override_ticked_name(self) -> None:
+        events = [
+            _ev(1, 1, 1, route_id="7", kind="route", timestamp=200, route_name="新ルート"),
+            _ev(1, 1, 1, route_id="7", kind="route", timestamp=None, route_name="旧ルート"),
+        ]
+        rows = by_route(events)
+        assert rows[0].route_name == "新ルート"
+
+    def test_display_route_fallback_chain(self) -> None:
+        """route_name > ``#{route_id}`` > ``—``."""
+        events = [
+            _ev(1, 1, 1, route_id="42", kind="route"),
+            _ev(2, 1, 1, route_id=None, kind="unknown", partner=None),
+        ]
+        rows = by_route(events)
+        labels = {r.display_route for r in rows}
+        assert "#42" in labels
+        assert "—" in labels
+
 
 class TestPartnersForItem:
     def test_groups_by_route_and_partner_kind(self) -> None:
@@ -197,6 +236,13 @@ class TestPartnersForItem:
         assert "route #42" in labels
         assert "partner #99" in labels
         assert "—" in labels
+
+    def test_display_partner_uses_route_name_when_present(self) -> None:
+        """route_name があれば ``route <name>`` を優先．"""
+        events = [_ev(100, 1, 10, route_id="42", kind="route", route_name="商会ルート")]
+        rows = partners_for_item(events, 100)
+        assert rows[0].route_name == "商会ルート"
+        assert rows[0].display_partner == "route 商会ルート"
 
     def test_display_name_helper(self) -> None:
         events = [_ev(100, 1, 10, route_id="r")]

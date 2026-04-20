@@ -75,6 +75,11 @@ class TradeEvent(BaseModel):
     interpreter 側で除外済みのためここに載るのは全てプレイヤー所有．
     TUI 側の Tree filter (島単位 / セッション単位) の key．
     """
+    route_name: str | None = None
+    """書記長がゲーム内で命名したトレードルート名．``partner_kind='route'`` の
+    ときのみ意味を持つ．表示では ``route_name`` 優先，無ければ ``route_id`` を
+    fallback．
+    """
     source_method: SourceMethod = "history"
 
     model_config = {"frozen": True}
