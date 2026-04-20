@@ -268,7 +268,8 @@ class TestFilteredRenderingAndExport:
 
         routes_csv = next(tmp_path.glob("fake_routes_session-*_*.csv"))
         rows = routes_csv.read_text(encoding="utf-8").splitlines()
-        assert any(row.startswith("999,idle,route,") for row in rows)
+        # columns: route_id, route_name, status, partner_kind, ...
+        assert any(row.startswith("999,,idle,route,") for row in rows)
 
     async def test_export_filename_suffix_is_sanitized(
         self, tui_state, tmp_path, monkeypatch
@@ -630,12 +631,12 @@ class TestStatisticsScreen:
                 for i in range(routes_table.row_count)
             ]
             statuses = [row[1] for row in all_rows]
-            route_ids = [row[0] for row in all_rows]
+            route_labels = [row[0] for row in all_rows]
             assert "idle" in statuses
             assert "active" in statuses
-            assert "999" in route_ids
+            assert "#999" in route_labels
             # active row (ship=7) の legs は active_def.tasks=1 に反映されてる
-            row_7 = next(row for row in all_rows if row[0] == "7")
+            row_7 = next(row for row in all_rows if row[0] == "#7")
             assert row_7[3] == "1"  # Legs
             _ = active_ids
 

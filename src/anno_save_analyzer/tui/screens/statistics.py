@@ -394,10 +394,9 @@ class TradeStatisticsScreen(Screen):
 
     def _format_route_row(self, s: RouteSummary, legs: int, *, active: bool) -> tuple[str, ...]:
         t = self._localizer.t
-        route_id = s.route_id if s.route_id is not None else "—"
         status = t("statistics.status.active") if active else t("statistics.status.idle")
         return (
-            route_id,
+            s.display_route,  # route_name 優先．無ければ #<route_id> or "—"
             status,
             s.partner_kind,
             f"{legs:,}",
@@ -410,7 +409,7 @@ class TradeStatisticsScreen(Screen):
     def _format_idle_route_row(self, rd) -> tuple[str, ...]:
         t = self._localizer.t
         return (
-            str(rd.ship_id),
+            f"#{rd.ship_id}",
             t("statistics.status.idle"),
             "route",
             f"{len(rd.tasks):,}",

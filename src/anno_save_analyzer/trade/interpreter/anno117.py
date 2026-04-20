@@ -42,6 +42,7 @@ _CITY_NAME_ATTRIB = "CityName"
 # - PassiveTradeEntries 配下 → partner_id（NPC trader の GUID）
 _TRADER_ATTRIB = "Trader"
 _ROUTE_ID_ATTRIB = "RouteID"
+_ROUTE_NAME_ATTRIB = "RouteName"
 _TIMESTAMP_ATTRIB_CANDIDATES = (
     # Anno 117 実測: 内側 <1> の ``ExecutionTime`` (i64 tick) が個別取引の時刻．
     # 1,533 entries 全件に 8B で入ってる．他の候補は 1800 や別パッチ用の保険．
@@ -266,11 +267,13 @@ def _build_triple_if_complete(
     timestamp_tick = _first_int_attrib(ancestor_attribs, _TIMESTAMP_ATTRIB_CANDIDATES)
 
     route_id: str | None = None
+    route_name: str | None = None
     partner_id: str | None = None
     if kind == "route":
         route_value = _first_int32_attrib(ancestor_attribs, (_ROUTE_ID_ATTRIB,))
         if route_value is not None:
             route_id = str(route_value)
+        route_name = _first_utf16_attrib(ancestor_attribs, (_ROUTE_NAME_ATTRIB,))
     elif kind == "passive":
         partner_value = _first_int32_attrib(ancestor_attribs, (_TRADER_ATTRIB,))
         if partner_value is not None:
@@ -287,6 +290,7 @@ def _build_triple_if_complete(
             partner_kind=kind,
             timestamp_tick=timestamp_tick,
             island_name=island_name,
+            route_name=route_name,
         ),
     )
 
@@ -314,6 +318,28 @@ def _first_int_attrib(
                     return _read_int64(value)
                 if len(value) == 4:
                     return _read_int32(value)
+    return None
+
+
+def _first_utf16_attrib(
+    attrib_stack: list[dict[str, bytes]], candidates: tuple[str, ...]
+) -> str | None:
+    """ancestor から UTF-16-LE attrib を拾って文字列に復号．
+
+    空文字や U+200B のみは ``None`` 扱い．``CityName`` で観測した ZWSP の混入と
+    同じ処理をして表示に耐える形にする．``RouteName`` 等で使う．
+    """
+    for attribs in reversed(attrib_stack):
+        for candidate in candidates:
+            if candidate in attribs:
+                raw = attribs[candidate]
+                decoded = (
+                    raw.decode("utf-16-le", errors="replace")
+                    .rstrip("\x00")
+                    .replace("\u200b", "")
+                    .strip()
+                )
+                return decoded or None
     return None
 
 

@@ -28,6 +28,7 @@ def make_inner_filedb(
     triples_by_kind: dict[Literal["route", "passive"], list[tuple[int, int, int, int]]],
     *,
     include_npc_island: bool = False,
+    route_names: dict[int, str] | None = None,
 ) -> bytes:
     """内側 FileDB V3 を組み立てる．
 
@@ -58,7 +59,9 @@ def make_inner_filedb(
         0x8004: "TotalPrice",
         0x8005: "CityName",
         0x8006: "RouteID",
+        0x8007: "RouteName",
     }
+    route_names = route_names or {}
 
     def _trade_subtree() -> list[Event]:
         sub: list[Event] = []
@@ -79,6 +82,9 @@ def make_inner_filedb(
                     # 実セーブの inner entry 構造に合わせる (interpreter の文脈分岐で必要)．
                     ident_attrib = 0x8006 if kind == "route" else 0x8001
                     sub.append(("A", ident_attrib, struct.pack("<i", trader_)))
+                    # route に限り RouteName (UTF-16-LE) も添付可能．書記長命名ルート．
+                    if kind == "route" and trader_ in route_names:
+                        sub.append(("A", 0x8007, route_names[trader_].encode("utf-16-le")))
                     sub.append(("T", 6))  # TradedGoods
                     sub.append(("T", 1))  # depth=1 wrapper
                     sub.append(("A", 0x8002, struct.pack("<i", good)))

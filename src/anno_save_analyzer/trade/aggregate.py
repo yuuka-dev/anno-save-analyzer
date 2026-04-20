@@ -58,8 +58,21 @@ class RouteSummary(BaseModel):
     net_gold: int = 0
     event_count: int = 0
     last_seen_tick: int | None = None
+    route_name: str | None = None
+    """書記長命名のルート名．``partner_kind='route'`` のみ．表示では
+    ``route_name`` 優先，無ければ ``route_id`` を fallback．
+    """
 
     model_config = {"frozen": True}
+
+    @property
+    def display_route(self) -> str:
+        """routes-table 向け表示ラベル．route_name > ``#{route_id}`` > ``—``．"""
+        if self.route_name:
+            return self.route_name
+        if self.route_id is not None:
+            return f"#{self.route_id}"
+        return "—"
 
 
 class PartnerSummary(BaseModel):
@@ -73,6 +86,7 @@ class PartnerSummary(BaseModel):
     sold: int = 0
     net_gold: int = 0
     event_count: int = 0
+    route_name: str | None = None
 
     model_config = {"frozen": True}
 
@@ -81,7 +95,9 @@ class PartnerSummary(BaseModel):
 
     @property
     def display_partner(self) -> str:
-        """partner pane で表示する相手ラベル．route 優先，無ければ partner_id．"""
+        """partner pane で表示する相手ラベル．route_name > route_id > partner_id．"""
+        if self.route_name:
+            return f"route {self.route_name}"
         if self.route_id is not None:
             return f"route #{self.route_id}"
         if self.partner_id is not None:
@@ -153,6 +169,7 @@ def by_route(
             "net_gold": 0,
             "event_count": 0,
             "last_seen_tick": None,
+            "route_name": None,
         }
     )
     for ev in events:
@@ -169,6 +186,10 @@ def by_route(
             current = bucket["last_seen_tick"]
             if current is None or ev.timestamp_tick > current:
                 bucket["last_seen_tick"] = ev.timestamp_tick
+        # route_name は同一 route_id 内で変わる可能性 (書記長が途中で rename)．
+        # last_seen_tick が進むタイミングで上書き．tick 不明なら first-seen 優先．
+        if ev.route_name and (bucket["route_name"] is None or ev.timestamp_tick is not None):
+            bucket["route_name"] = ev.route_name
 
     summaries = [
         RouteSummary(route_id=route_id, partner_kind=kind, **bucket)
@@ -199,6 +220,7 @@ def partners_for_item(
             "sold": 0,
             "net_gold": 0,
             "event_count": 0,
+            "route_name": None,
         }
     )
     item: Item | None = None
@@ -216,6 +238,8 @@ def partners_for_item(
             bucket["sold"] += -ev.amount
         bucket["net_gold"] += ev.total_price
         bucket["event_count"] += 1
+        if ev.route_name and bucket["route_name"] is None:
+            bucket["route_name"] = ev.route_name
 
     if item is None:
         return []

@@ -95,6 +95,47 @@ class TestAnno117ExtractionFromSyntheticDOM:
         triples = list(Anno117Interpreter().find_traded_goods(outer, section))
         assert len(triples) == 1
 
+    def test_route_name_extracted_from_inner_entry(self) -> None:
+        """RouteName attrib が inner <1> に付いていれば ExtractionContext に流れる．"""
+        inner = make_inner_filedb(
+            {"route": [(41, 2088, 5, 0)]},
+            route_names={41: "商会ルート"},
+        )
+        outer = wrap_as_outer([inner])
+        section = parse_tag_section(outer, detect_version(outer))
+        triples = list(Anno117Interpreter().find_traded_goods(outer, section))
+        assert len(triples) == 1
+        assert triples[0].context.route_name == "商会ルート"
+
+    def test_route_name_zwsp_stripped(self) -> None:
+        """U+200B 混入は strip (CityName 同様の実測挙動)．"""
+        inner = make_inner_filedb(
+            {"route": [(42, 2088, 1, 0)]},
+            route_names={42: "\u200b商会ルート\u200b"},
+        )
+        outer = wrap_as_outer([inner])
+        section = parse_tag_section(outer, detect_version(outer))
+        triples = list(Anno117Interpreter().find_traded_goods(outer, section))
+        assert triples[0].context.route_name == "商会ルート"
+
+    def test_route_name_absent_leaves_none(self) -> None:
+        """RouteName が無い route の場合 ``route_name`` は ``None``．"""
+        inner = make_inner_filedb({"route": [(41, 2088, 1, 0)]})
+        outer = wrap_as_outer([inner])
+        section = parse_tag_section(outer, detect_version(outer))
+        triples = list(Anno117Interpreter().find_traded_goods(outer, section))
+        assert triples[0].context.route_name is None
+
+    def test_route_name_not_extracted_for_passive_kind(self) -> None:
+        """RouteName は ``kind='route'`` のときのみ拾う．passive では無視．"""
+        inner = make_inner_filedb(
+            {"passive": [(32777, 2142, -3, 156)]},
+        )
+        outer = wrap_as_outer([inner])
+        section = parse_tag_section(outer, detect_version(outer))
+        triples = list(Anno117Interpreter().find_traded_goods(outer, section))
+        assert triples[0].context.route_name is None
+
 
 class TestClassifyParentDirect:
     def test_too_short_stack_returns_none(self) -> None:
@@ -167,6 +208,24 @@ class TestFirstAttribHelpers:
         from anno_save_analyzer.trade.interpreter.anno117 import _first_int_attrib
 
         assert _first_int_attrib([{"X": b"\x00\x00\x00\x00"}], ("Tick",)) is None
+
+    def test_first_utf16_attrib_decodes_and_strips(self) -> None:
+        from anno_save_analyzer.trade.interpreter.anno117 import _first_utf16_attrib
+
+        stack = [{"RouteName": "\u200b商会ルート\u200b\x00\x00".encode("utf-16-le")}]
+        assert _first_utf16_attrib(stack, ("RouteName",)) == "商会ルート"
+
+    def test_first_utf16_attrib_returns_none_when_only_zwsp(self) -> None:
+        from anno_save_analyzer.trade.interpreter.anno117 import _first_utf16_attrib
+
+        stack = [{"RouteName": "\u200b\u200b".encode("utf-16-le")}]
+        assert _first_utf16_attrib(stack, ("RouteName",)) is None
+
+    def test_first_utf16_attrib_no_candidate_returns_none(self) -> None:
+        from anno_save_analyzer.trade.interpreter.anno117 import _first_utf16_attrib
+
+        stack = [{"Other": "x".encode("utf-16-le")}]
+        assert _first_utf16_attrib(stack, ("RouteName",)) is None
 
 
 class TestBuildTripleEdgeCases:
