@@ -310,20 +310,24 @@ class TestEventsForItem:
         assert events_for_item(events, 999) == []
 
     def test_max_age_minutes_cuts_old_events(self) -> None:
-        """``max_age_minutes`` 指定時，最新 tick から指定分を超えた event は落ちる．"""
-        # tick=1000 = 最新．1 分 = 600 tick．
+        """``max_age_minutes`` 指定時，最新 tick から指定分を超えた event は落ちる．
+
+        TPM 依存を数値で書かず式で表現．
+        """
+        from anno_save_analyzer.trade.clock import TICKS_PER_MINUTE
+
+        now = 10 * TICKS_PER_MINUTE
         events = [
-            _ev(100, 1, 10, timestamp=1000),  # 0 min ago
-            _ev(100, 1, 10, timestamp=400),  # 1 min ago (600 tick 差)
-            _ev(100, 1, 10, timestamp=100),  # 1.5 min ago (900 tick 差)
+            _ev(100, 1, 10, timestamp=now),  # 0 min ago
+            _ev(100, 1, 10, timestamp=now - TICKS_PER_MINUTE),  # 1 min ago (境界)
+            _ev(100, 1, 10, timestamp=now - int(1.5 * TICKS_PER_MINUTE)),  # 1.5 min ago → drop
             _ev(100, 1, 10, timestamp=None),  # 時刻不明 → 常に残す
         ]
         out = events_for_item(events, 100, max_age_minutes=1.0)
-        # 0 min, 1 min (ちょうど境界), tick=None が残る．1.5 min は落ちる
         ticks = [e.timestamp_tick for e in out]
-        assert 1000 in ticks
-        assert 400 in ticks
-        assert 100 not in ticks
+        assert now in ticks
+        assert (now - TICKS_PER_MINUTE) in ticks
+        assert (now - int(1.5 * TICKS_PER_MINUTE)) not in ticks
         assert None in ticks
 
     def test_max_age_minutes_with_no_timed_events_is_noop(self) -> None:
