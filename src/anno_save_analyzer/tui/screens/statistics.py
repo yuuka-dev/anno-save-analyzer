@@ -243,9 +243,13 @@ class TradeStatisticsScreen(Screen):
         if not events:
             self._render_empty_chart(t("statistics.chart.no_timed_events", title=title))
             return
-        x_scaled, y_values = self._cumulative_series(events, by="amount")
+        x_values, y_values, unit_key = self._cumulative_series(events, by="amount")
         self._plot_line(
-            title, x_scaled, y_values, ylabel=t("statistics.chart.ylabel.cumulative_qty")
+            title,
+            x_values,
+            y_values,
+            ylabel=t("statistics.chart.ylabel.cumulative_qty"),
+            unit_key=unit_key,
         )
 
     def _update_route_detail(self, route_id: str) -> None:
@@ -270,9 +274,13 @@ class TradeStatisticsScreen(Screen):
                 )
             self._render_empty_chart(t("statistics.chart.no_timed_events", title=title))
             return
-        x_scaled, y_values = self._cumulative_series(events, by="total_price")
+        x_values, y_values, unit_key = self._cumulative_series(events, by="total_price")
         self._plot_line(
-            title, x_scaled, y_values, ylabel=t("statistics.chart.ylabel.cumulative_gold")
+            title,
+            x_values,
+            y_values,
+            ylabel=t("statistics.chart.ylabel.cumulative_gold"),
+            unit_key=unit_key,
         )
 
     def _find_idle_route_tasks(self, route_id: str) -> tuple:
@@ -283,24 +291,40 @@ class TradeStatisticsScreen(Screen):
                     return rd.tasks
         return ()
 
-    def _cumulative_series(self, events, *, by: str) -> tuple[list[float], list[int]]:
-        """events を時刻昇順で累積．by='amount' or 'total_price' を選ぶ．"""
-        x_scaled = [(e.timestamp_tick or 0) / 1000 for e in events]
+    def _cumulative_series(self, events, *, by: str) -> tuple[list[float], list[int], str]:
+        """events を時刻昇順で累積．x 軸は「最新 event を 0 とした相対時間 (負)」．
+
+        spread に応じて分 / 時間を auto 切替する．返り値の 3 つ目は xlabel の
+        locale key suffix ("minutes_ago" / "hours_ago")．
+        """
+        from anno_save_analyzer.trade.clock import (
+            latest_tick,
+            minutes_relative_to,
+            pick_time_unit,
+        )
+
+        ticks = [e.timestamp_tick for e in events if e.timestamp_tick is not None]
+        now = latest_tick(ticks) or 0
+        minutes = [minutes_relative_to(e.timestamp_tick or 0, now_tick=now) for e in events]
+        unit_key, divisor = pick_time_unit(minutes)
+        x_values = [m * divisor for m in minutes]
         y_values: list[int] = []
         running = 0
         for e in events:
             running += e.amount if by == "amount" else e.total_price
             y_values.append(running)
-        return x_scaled, y_values
+        return x_values, y_values, unit_key
 
-    def _plot_line(self, title: str, x: list[float], y: list[int], *, ylabel: str) -> None:
+    def _plot_line(
+        self, title: str, x: list[float], y: list[int], *, ylabel: str, unit_key: str
+    ) -> None:
         chart = self.query_one("#chart-pane", PlotextPlot)
         t = self._localizer.t
         chart.plt.clear_data()
         chart.plt.clear_figure()
         chart.plt.plot(x, y, marker="hd")
         chart.plt.title(title)
-        chart.plt.xlabel(t("statistics.chart.xlabel.tick_scaled"))
+        chart.plt.xlabel(t(f"statistics.chart.xlabel.{unit_key}"))
         chart.plt.ylabel(ylabel)
         chart.refresh()
 
