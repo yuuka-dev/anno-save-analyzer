@@ -92,6 +92,7 @@ def _walk_inner_session(inner: bytes, session_idx: int) -> Iterator[RawTradedGoo
     in_area_info_depth = -1  # AreaInfo タグに入った時点の tag_stack 長
     area_entry_depth = -1  # 直下 <1> エントリの tag_stack 長
     in_player_island = False
+    current_island_name: str | None = None  # 現在の AreaInfo entry の CityName
 
     # TradedGoods が置かれる「inner <1> エントリ」の深さ．ここに Trader /
     # ExecutionTime / RouteID 等の attribs が載る．ただし順序的に TradedGoods
@@ -119,6 +120,7 @@ def _walk_inner_session(inner: bytes, session_idx: int) -> Iterator[RawTradedGoo
                 # 新しい AreaInfo > <1> エントリ開始
                 area_entry_depth = len(tag_stack)
                 in_player_island = False
+                current_island_name = None
 
             if name == _TRADED_GOODS_TAG:
                 kind = _classify_parent(tag_stack)
@@ -142,13 +144,22 @@ def _walk_inner_session(inner: bytes, session_idx: int) -> Iterator[RawTradedGoo
             if attrib_stack:
                 attrib_stack[-1][ev.name or f"<{ev.id_}>"] = ev.content
 
-            # AreaInfo > <1> 直下に CityName があるならプレイヤー保有島と判定
+            # AreaInfo > <1> 直下に CityName があるならプレイヤー保有島と判定．
+            # UTF-16-LE で末尾 null を剥いて島名として保持．書記長の save では
+            # "​スターリングラード" のように先頭に U+200B (zero-width space) が混ざる
+            # ケースが実測されたため strip 対象に含める．
             if (
                 area_entry_depth >= 0
                 and len(tag_stack) == area_entry_depth
                 and ev.name == _CITY_NAME_ATTRIB
             ):
                 in_player_island = True
+                current_island_name = (
+                    ev.content.decode("utf-16-le", errors="replace")
+                    .rstrip("\x00")
+                    .replace("\u200b", "")
+                    .strip()
+                )
 
             if in_traded_goods and traded_goods_depth >= 1:
                 # TradedGoods 直下の child (<1>) 配下に GoodGuid / GoodAmount / TotalPrice
@@ -177,6 +188,7 @@ def _walk_inner_session(inner: bytes, session_idx: int) -> Iterator[RawTradedGoo
                     session_id=session_id,
                     kind=kind,
                     ancestor_attribs=attrib_stack,
+                    island_name=current_island_name,
                 )
                 if triple is not None:
                     yield triple
@@ -192,6 +204,7 @@ def _walk_inner_session(inner: bytes, session_idx: int) -> Iterator[RawTradedGoo
         if area_entry_depth >= 0 and closing_depth == area_entry_depth:
             area_entry_depth = -1
             in_player_island = False
+            current_island_name = None
         if in_area_info_depth >= 0 and closing_depth == in_area_info_depth:
             in_area_info_depth = -1
 
@@ -240,6 +253,7 @@ def _build_triple_if_complete(
     session_id: str,
     kind: PartnerKind,
     ancestor_attribs: list[dict[str, bytes]],
+    island_name: str | None = None,
 ) -> RawTradedGoodTriple | None:
     if triple["good_guid"] is None or triple["amount"] is None:
         return None
@@ -272,6 +286,7 @@ def _build_triple_if_complete(
             partner_id=partner_id,
             partner_kind=kind,
             timestamp_tick=timestamp_tick,
+            island_name=island_name,
         ),
     )
 

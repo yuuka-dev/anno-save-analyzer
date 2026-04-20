@@ -194,11 +194,13 @@ class TestEventsToCsvAndJson:
         ]
         out = events_to_csv(events)
         rows = list(csv.reader(io.StringIO(out)))
-        # column order: timestamp_tick, session_id, route_id, partner_id,
-        #               partner_kind, item_guid, item_name, amount, total_price
+        # column order: timestamp_tick, session_id, island_name, route_id,
+        #               partner_id, partner_kind, item_guid, item_name,
+        #               amount, total_price
         assert rows[0] == [
             "timestamp_tick",
             "session_id",
+            "island_name",
             "route_id",
             "partner_id",
             "partner_kind",
@@ -208,10 +210,10 @@ class TestEventsToCsvAndJson:
             "total_price",
         ]
         assert rows[1][0] == "100"  # timestamp
-        assert rows[1][5] == "100"  # item_guid
+        assert rows[1][6] == "100"  # item_guid
         # 2 行目 partner=None
-        assert rows[2][3] == ""
-        assert rows[2][4] == ""
+        assert rows[2][4] == ""  # partner_id
+        assert rows[2][5] == ""  # partner_kind
         # timestamp 無し
         assert rows[2][0] == ""
 
@@ -236,3 +238,17 @@ class TestEventsToCsvAndJson:
         events = [self._ev(guid=100)]
         out = events_to_json(events, locale="ja")
         assert "品100" in out  # ensure_ascii=False なので生の日本語が出る
+
+    def test_events_csv_includes_island_name(self) -> None:
+        events = [
+            self._ev(route_id="7", session_id="0", timestamp_tick=100, island_name="大阪民国")
+        ]
+        out = events_to_csv(events)
+        rows = list(csv.reader(io.StringIO(out)))
+        # island_name 列は index 2
+        assert rows[1][2] == "大阪民国"
+
+    def test_events_json_includes_island_name(self) -> None:
+        events = [self._ev(island_name="Osaka")]
+        parsed = json.loads(events_to_json(events))
+        assert parsed[0]["island_name"] == "Osaka"

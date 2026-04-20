@@ -10,6 +10,27 @@ from pydantic import BaseModel
 from .models import Item, Locale, TradeEvent
 
 
+def filter_events(
+    events: Iterable[TradeEvent],
+    *,
+    session: str | None = None,
+    island: str | None = None,
+) -> list[TradeEvent]:
+    """session / island 粒度で TradeEvent stream を絞る．
+
+    両方 ``None`` なら全量 (listify のみ)．両方指定時は AND．TUI の Tree
+    選択や CLI ``--session`` / ``--island`` の共通入口．
+    """
+    out: list[TradeEvent] = []
+    for ev in events:
+        if session is not None and ev.session_id != session:
+            continue
+        if island is not None and ev.island_name != island:
+            continue
+        out.append(ev)
+    return out
+
+
 class ItemSummary(BaseModel):
     """物資別集計．"""
 
@@ -68,8 +89,18 @@ class PartnerSummary(BaseModel):
         return "—"
 
 
-def by_item(events: Iterable[TradeEvent]) -> list[ItemSummary]:
-    """物資別に集計する．event_count 降順 → guid 昇順で安定ソート．"""
+def by_item(
+    events: Iterable[TradeEvent],
+    *,
+    session: str | None = None,
+    island: str | None = None,
+) -> list[ItemSummary]:
+    """物資別に集計する．event_count 降順 → guid 昇順で安定ソート．
+
+    ``session`` / ``island`` が指定されていればその粒度で pre-filter する．
+    """
+    if session is not None or island is not None:
+        events = filter_events(events, session=session, island=island)
     buckets: dict[int, dict] = {}
     item_lookup: dict[int, Item] = {}
     for ev in events:
@@ -103,8 +134,18 @@ def by_item(events: Iterable[TradeEvent]) -> list[ItemSummary]:
     return summaries
 
 
-def by_route(events: Iterable[TradeEvent]) -> list[RouteSummary]:
-    """ルート / partner kind 別に集計．`(route_id, partner_kind)` キー．"""
+def by_route(
+    events: Iterable[TradeEvent],
+    *,
+    session: str | None = None,
+    island: str | None = None,
+) -> list[RouteSummary]:
+    """ルート / partner kind 別に集計．`(route_id, partner_kind)` キー．
+
+    ``session`` / ``island`` が指定されていればその粒度で pre-filter する．
+    """
+    if session is not None or island is not None:
+        events = filter_events(events, session=session, island=island)
     buckets: dict[tuple[str | None, str], dict] = defaultdict(
         lambda: {
             "bought": 0,
@@ -137,12 +178,21 @@ def by_route(events: Iterable[TradeEvent]) -> list[RouteSummary]:
     return summaries
 
 
-def partners_for_item(events: Iterable[TradeEvent], item_guid: int) -> list[PartnerSummary]:
+def partners_for_item(
+    events: Iterable[TradeEvent],
+    item_guid: int,
+    *,
+    session: str | None = None,
+    island: str | None = None,
+) -> list[PartnerSummary]:
     """指定 item GUID の取引を (route_id, partner_id, kind) 別に集計．
 
     物資を選んだときの Partners pane に出す "この物資を誰と取引したか" を
     event_count 降順 → abs(net_gold) 降順 → route_id 昇順で返す．
+    ``session`` / ``island`` 指定で絞り込み可能．
     """
+    if session is not None or island is not None:
+        events = filter_events(events, session=session, island=island)
     buckets: dict[tuple[str | None, str | None, str], dict] = defaultdict(
         lambda: {
             "bought": 0,

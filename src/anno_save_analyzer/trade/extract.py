@@ -50,6 +50,7 @@ def normalise(
         partner=partner,
         route_id=raw.context.route_id,
         session_id=raw.context.session_id,
+        island_name=raw.context.island_name,
         source_method="history",
     )
 

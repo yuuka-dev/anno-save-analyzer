@@ -2,7 +2,12 @@
 
 from __future__ import annotations
 
-from anno_save_analyzer.trade.aggregate import by_item, by_route, partners_for_item
+from anno_save_analyzer.trade.aggregate import (
+    by_item,
+    by_route,
+    filter_events,
+    partners_for_item,
+)
 from anno_save_analyzer.trade.models import Item, TradeEvent, TradingPartner
 
 
@@ -15,6 +20,8 @@ def _ev(
     kind: str = "unknown",
     timestamp: int | None = None,
     partner: TradingPartner | None | object = ...,
+    session_id: str | None = None,
+    island_name: str | None = None,
 ) -> TradeEvent:
     item = Item(guid=guid, names={"en": f"Good_{guid}"})
     # partner = sentinel (...) なら kind と route_id から自動生成．
@@ -28,6 +35,8 @@ def _ev(
         partner=partner,
         route_id=route_id,
         timestamp_tick=timestamp,
+        session_id=session_id,
+        island_name=island_name,
     )
 
 
@@ -193,3 +202,67 @@ class TestPartnersForItem:
         events = [_ev(100, 1, 10, route_id="r")]
         rows = partners_for_item(events, 100)
         assert rows[0].display_name("en") == "Good_100"
+
+
+class TestFilterEvents:
+    def test_no_filter_returns_all(self) -> None:
+        events = [_ev(1, 1, 1, session_id="0", island_name="A"), _ev(2, 1, 1, session_id="1")]
+        assert len(filter_events(events)) == 2
+
+    def test_filter_by_session(self) -> None:
+        events = [
+            _ev(1, 1, 1, session_id="0"),
+            _ev(2, 1, 1, session_id="1"),
+            _ev(3, 1, 1, session_id="0"),
+        ]
+        out = filter_events(events, session="0")
+        assert len(out) == 2
+        assert all(e.session_id == "0" for e in out)
+
+    def test_filter_by_island(self) -> None:
+        events = [
+            _ev(1, 1, 1, island_name="大阪民国"),
+            _ev(2, 1, 1, island_name="ジョウト地方"),
+        ]
+        out = filter_events(events, island="大阪民国")
+        assert len(out) == 1
+        assert out[0].island_name == "大阪民国"
+
+    def test_filter_session_and_island_are_anded(self) -> None:
+        events = [
+            _ev(1, 1, 1, session_id="0", island_name="A"),
+            _ev(2, 1, 1, session_id="0", island_name="B"),
+            _ev(3, 1, 1, session_id="1", island_name="A"),
+        ]
+        out = filter_events(events, session="0", island="A")
+        assert len(out) == 1
+        assert out[0].item.guid == 1
+
+
+class TestAggregateFilterArgs:
+    def test_by_item_with_island_filter(self) -> None:
+        events = [
+            _ev(100, 5, 50, island_name="Osaka"),
+            _ev(100, 3, 30, island_name="Gunma"),
+        ]
+        rows = by_item(events, island="Osaka")
+        assert len(rows) == 1
+        assert rows[0].bought == 5
+
+    def test_by_route_with_session_filter(self) -> None:
+        events = [
+            _ev(1, 1, 10, route_id="A", kind="route", session_id="0"),
+            _ev(1, 1, 10, route_id="A", kind="route", session_id="1"),
+        ]
+        rows = by_route(events, session="0")
+        assert len(rows) == 1
+        assert rows[0].event_count == 1
+
+    def test_partners_for_item_with_island_filter(self) -> None:
+        events = [
+            _ev(100, 1, 10, route_id="A", island_name="X"),
+            _ev(100, 1, 10, route_id="B", island_name="Y"),
+        ]
+        rows = partners_for_item(events, 100, island="X")
+        assert len(rows) == 1
+        assert rows[0].route_id == "A"
