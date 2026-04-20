@@ -19,6 +19,7 @@ from anno_save_analyzer.trade import (
     diff_by_route,
     extract,
 )
+from anno_save_analyzer.trade.aggregate import filter_events
 from anno_save_analyzer.trade.models import TradeEvent
 
 trade_app = typer.Typer(help="Inspect trade activity inside a save file.")
@@ -75,6 +76,12 @@ def list_trades(
         GameTitleArg, typer.Option("--title", help="Game title.")
     ] = GameTitleArg.ANNO_117,
     locale: Annotated[str, typer.Option("--locale", help="Display locale.")] = "en",
+    session: Annotated[
+        str | None, typer.Option("--session", help="Filter by session id (e.g. '0' / '1').")
+    ] = None,
+    island: Annotated[
+        str | None, typer.Option("--island", help="Filter by island (CityName).")
+    ] = None,
     fmt: Annotated[
         OutputFormat, typer.Option("--format", help="Output format.")
     ] = OutputFormat.JSON,
@@ -82,7 +89,7 @@ def list_trades(
     """List every TradeEvent extracted from SAVE."""
     _ensure_format_supported(fmt)
     title_v = title.to_title()
-    events = list(_events(save, title_v, locale))
+    events = filter_events(_events(save, title_v, locale), session=session, island=island)
     payload = [
         {
             "timestamp_tick": ev.timestamp_tick,
@@ -104,6 +111,7 @@ def list_trades(
             ),
             "route_id": ev.route_id,
             "session_id": ev.session_id,
+            "island_name": ev.island_name,
             "source_method": ev.source_method,
         }
         for ev in events
@@ -119,6 +127,12 @@ def summary(
         GameTitleArg, typer.Option("--title", help="Game title.")
     ] = GameTitleArg.ANNO_117,
     locale: Annotated[str, typer.Option("--locale", help="Display locale.")] = "en",
+    session: Annotated[
+        str | None, typer.Option("--session", help="Filter by session id (e.g. '0' / '1').")
+    ] = None,
+    island: Annotated[
+        str | None, typer.Option("--island", help="Filter by island (CityName).")
+    ] = None,
     fmt: Annotated[
         OutputFormat, typer.Option("--format", help="Output format.")
     ] = OutputFormat.JSON,
@@ -128,7 +142,7 @@ def summary(
     title_v = title.to_title()
     events = _events(save, title_v, locale)
     if by is SummaryAxis.ITEM:
-        item_rows = by_item(events)
+        item_rows = by_item(events, session=session, island=island)
         _emit_json(
             [
                 {
@@ -146,7 +160,7 @@ def summary(
             ]
         )
         return
-    route_rows = by_route(events)
+    route_rows = by_route(events, session=session, island=island)
     _emit_json(
         [
             {
@@ -172,6 +186,12 @@ def diff(
         GameTitleArg, typer.Option("--title", help="Game title.")
     ] = GameTitleArg.ANNO_117,
     locale: Annotated[str, typer.Option("--locale", help="Display locale.")] = "en",
+    session: Annotated[
+        str | None, typer.Option("--session", help="Filter by session id (e.g. '0' / '1').")
+    ] = None,
+    island: Annotated[
+        str | None, typer.Option("--island", help="Filter by island (CityName).")
+    ] = None,
     fmt: Annotated[
         OutputFormat, typer.Option("--format", help="Output format.")
     ] = OutputFormat.JSON,
@@ -189,7 +209,7 @@ def diff(
     before_events = list(_events(before, title_v, locale))
     after_events = list(_events(after, title_v, locale))
     if by is SummaryAxis.ITEM:
-        rows = diff_by_item(before_events, after_events)
+        rows = diff_by_item(before_events, after_events, session=session, island=island)
         if not show_unchanged:
             rows = [r for r in rows if r.status != "unchanged"]
         _emit_json(
@@ -208,7 +228,7 @@ def diff(
             ]
         )
         return
-    route_rows = diff_by_route(before_events, after_events)
+    route_rows = diff_by_route(before_events, after_events, session=session, island=island)
     if not show_unchanged:
         route_rows = [r for r in route_rows if r.status != "unchanged"]
     _emit_json(

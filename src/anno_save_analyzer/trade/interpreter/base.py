@@ -26,6 +26,12 @@ class ExtractionContext:
     partner_id: str | None = None
     partner_kind: PartnerKind = "unknown"
     timestamp_tick: int | None = None
+    island_name: str | None = None
+    """プレイヤー保有島の ``CityName``．NPC 島は事前に filter されているので
+    ここに載るのは全てプレイヤー所有．interpreter が AreaInfo > <1> walk 時に
+    attach する．Anno 117 で実測．Anno 1800 でも同構造なら取れるはず (v0.3.1 は
+    117 のみ対象)．
+    """
 
 
 @dataclass(frozen=True)

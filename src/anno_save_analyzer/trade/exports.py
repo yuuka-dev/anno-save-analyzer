@@ -100,13 +100,14 @@ def routes_to_csv(
 def events_to_csv(events: Iterable[TradeEvent], *, locale: Locale = "en") -> str:
     """個別 TradeEvent を CSV にエクスポート (ledger 全量)．
 
-    列: timestamp_tick, session_id, route_id, partner_id, partner_kind,
-         item_guid, item_name, amount, total_price
+    列: timestamp_tick, session_id, island_name, route_id, partner_id,
+         partner_kind, item_guid, item_name, amount, total_price
     """
     rows: list[list[str]] = [
         [
             "timestamp_tick",
             "session_id",
+            "island_name",
             "route_id",
             "partner_id",
             "partner_kind",
@@ -123,6 +124,7 @@ def events_to_csv(events: Iterable[TradeEvent], *, locale: Locale = "en") -> str
             [
                 "" if ev.timestamp_tick is None else str(ev.timestamp_tick),
                 ev.session_id or "",
+                ev.island_name or "",
                 ev.route_id or "",
                 partner_id,
                 partner_kind,
@@ -143,6 +145,7 @@ def events_to_json(events: Iterable[TradeEvent], *, locale: Locale = "en") -> st
             {
                 "timestamp_tick": ev.timestamp_tick,
                 "session_id": ev.session_id,
+                "island_name": ev.island_name,
                 "route_id": ev.route_id,
                 "partner": ({"id": ev.partner.id, "kind": ev.partner.kind} if ev.partner else None),
                 "item": {

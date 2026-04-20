@@ -213,6 +213,119 @@ class TestTradeDiffCommand:
         assert isinstance(result.exception, NotImplementedError)
 
 
+class TestIslandAndSessionFilters:
+    """#29 Phase 1: ``--island`` / ``--session`` filter を受ける．"""
+
+    def _save_with_islands(self, tmp_path: Path) -> Path:
+        # conftest の make_inner_filedb は `プレイヤー島` 一律で付くので
+        # それを使って全イベントに island_name="プレイヤー島" が載る前提．
+        save = _make_save(tmp_path)
+        return save
+
+    def test_list_with_island_filter_returns_subset(self, tmp_path: Path) -> None:
+        save = self._save_with_islands(tmp_path)
+        # fixture は全件 "プレイヤー島" なので指定で全件残る
+        r = runner.invoke(
+            app, ["trade", "list", str(save), "--title", "anno117", "--island", "プレイヤー島"]
+        )
+        assert r.exit_code == 0, r.output
+        payload = json.loads(r.stdout)
+        assert len(payload) == 3
+        # 存在しない島を指定すると空
+        r2 = runner.invoke(
+            app, ["trade", "list", str(save), "--title", "anno117", "--island", "存在しない島"]
+        )
+        assert r2.exit_code == 0
+        assert json.loads(r2.stdout) == []
+
+    def test_list_exposes_island_name_in_json(self, tmp_path: Path) -> None:
+        save = self._save_with_islands(tmp_path)
+        r = runner.invoke(app, ["trade", "list", str(save), "--title", "anno117"])
+        assert r.exit_code == 0
+        payload = json.loads(r.stdout)
+        assert all(p["island_name"] == "プレイヤー島" for p in payload)
+
+    def test_summary_respects_island(self, tmp_path: Path) -> None:
+        save = self._save_with_islands(tmp_path)
+        r = runner.invoke(
+            app,
+            [
+                "trade",
+                "summary",
+                str(save),
+                "--title",
+                "anno117",
+                "--by",
+                "item",
+                "--island",
+                "存在しない島",
+            ],
+        )
+        assert r.exit_code == 0
+        # 指定島に該当なし → 空集計
+        assert json.loads(r.stdout) == []
+
+    def test_summary_by_route_with_session(self, tmp_path: Path) -> None:
+        save = self._save_with_islands(tmp_path)
+        # session_id 0 だけ指定．fixture は 1 session なので全件保持．
+        r = runner.invoke(
+            app,
+            [
+                "trade",
+                "summary",
+                str(save),
+                "--title",
+                "anno117",
+                "--by",
+                "route",
+                "--session",
+                "0",
+            ],
+        )
+        assert r.exit_code == 0
+        rows = json.loads(r.stdout)
+        assert len(rows) >= 1
+
+    def test_diff_respects_island_filter(self, tmp_path: Path) -> None:
+        (tmp_path / "b").mkdir(exist_ok=True)
+        before = self._save_with_islands(tmp_path / "b")
+        # 同じ save を 2 つ渡すと全 unchanged．island 一致なら行が出る (--show-unchanged)．
+        r = runner.invoke(
+            app,
+            [
+                "trade",
+                "diff",
+                str(before),
+                str(before),
+                "--title",
+                "anno117",
+                "--island",
+                "プレイヤー島",
+                "--show-unchanged",
+            ],
+        )
+        assert r.exit_code == 0
+        rows = json.loads(r.stdout)
+        assert len(rows) >= 1
+        # 違う島だと空
+        r2 = runner.invoke(
+            app,
+            [
+                "trade",
+                "diff",
+                str(before),
+                str(before),
+                "--title",
+                "anno117",
+                "--island",
+                "存在しない島",
+                "--show-unchanged",
+            ],
+        )
+        assert r2.exit_code == 0
+        assert json.loads(r2.stdout) == []
+
+
 class TestTopLevelHelp:
     def test_no_args_shows_help_and_exits_nonzero(self) -> None:
         result = runner.invoke(app, [])
