@@ -244,7 +244,9 @@ class TradeStatisticsScreen(Screen):
             self._render_empty_chart(t("statistics.chart.no_timed_events", title=title))
             return
         x_scaled, y_values = self._cumulative_series(events, by="amount")
-        self._plot_line(title, x_scaled, y_values, ylabel=t("statistics.chart.ylabel.cumulative_qty"))
+        self._plot_line(
+            title, x_scaled, y_values, ylabel=t("statistics.chart.ylabel.cumulative_qty")
+        )
 
     def _update_route_detail(self, route_id: str) -> None:
         """選択ルートの累積 net gold 時系列を chart pane に描画．"""
@@ -269,7 +271,9 @@ class TradeStatisticsScreen(Screen):
             self._render_empty_chart(t("statistics.chart.no_timed_events", title=title))
             return
         x_scaled, y_values = self._cumulative_series(events, by="total_price")
-        self._plot_line(title, x_scaled, y_values, ylabel=t("statistics.chart.ylabel.cumulative_gold"))
+        self._plot_line(
+            title, x_scaled, y_values, ylabel=t("statistics.chart.ylabel.cumulative_gold")
+        )
 
     def _find_idle_route_tasks(self, route_id: str) -> tuple:
         """routes_by_session から ship_id 一致の TradeRouteDef を探し tasks を返す．"""
