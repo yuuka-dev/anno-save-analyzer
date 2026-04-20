@@ -214,16 +214,30 @@ def events_for_item(
     session: str | None = None,
     island: str | None = None,
     limit: int = 50,
+    max_age_minutes: float | None = None,
 ) -> list[TradeEvent]:
     """指定 item の TradeEvent を ``timestamp_tick`` 降順で最大 ``limit`` 件返す．
 
     「この物資を最近いつ取引したか」を Partners pane 下に並べる用途．集計を行わず
     個別 event を素通しで渡す．``timestamp_tick=None`` の event は末尾に寄せる．
     ``session`` / ``island`` 指定で事前フィルタ．``limit`` に負値を渡すと上限なし．
+
+    ``max_age_minutes`` を指定すると全 event の最新 tick を基準にそれ以降しか
+    残さない (時刻付き event のみに適用)．``tick=None`` の event は
+    「時刻不明だが除外はしない」方針で常に末尾に残す．
     """
+    from .clock import TICKS_PER_MINUTE, latest_tick
+
     if session is not None or island is not None:
         events = filter_events(events, session=session, island=island)
     filtered = [ev for ev in events if ev.item.guid == item_guid]
+    if max_age_minutes is not None:
+        now_tick = latest_tick(e.timestamp_tick for e in filtered if e.timestamp_tick is not None)
+        if now_tick is not None:
+            cutoff = now_tick - max_age_minutes * TICKS_PER_MINUTE
+            filtered = [
+                ev for ev in filtered if ev.timestamp_tick is None or ev.timestamp_tick >= cutoff
+            ]
     # tick=None を末尾へ → (is_none, -tick) で降順．
     filtered.sort(key=lambda e: (e.timestamp_tick is None, -(e.timestamp_tick or 0)))
     if limit < 0:

@@ -47,6 +47,10 @@ class TradeApp(App[None]):
 
     CSS = theme_css("default")
 
+    # Textual デフォルトの command palette (``ctrl+p``) を無効化．nano 互換 UI
+    # では書記長独自のパレット (例: Statistics 画面の履歴窓 ``^P``) と衝突する．
+    ENABLE_COMMAND_PALETTE = False
+
     # App-level に置く事で画面横断的に効く．screen-level binding はキーが
     # 子 widget に吸われて届かないことがある．
     BINDINGS = [

@@ -309,6 +309,29 @@ class TestEventsForItem:
         events = [_ev(100, 1, 10, timestamp=1)]
         assert events_for_item(events, 999) == []
 
+    def test_max_age_minutes_cuts_old_events(self) -> None:
+        """``max_age_minutes`` 指定時，最新 tick から指定分を超えた event は落ちる．"""
+        # tick=1000 = 最新．1 分 = 600 tick．
+        events = [
+            _ev(100, 1, 10, timestamp=1000),  # 0 min ago
+            _ev(100, 1, 10, timestamp=400),  # 1 min ago (600 tick 差)
+            _ev(100, 1, 10, timestamp=100),  # 1.5 min ago (900 tick 差)
+            _ev(100, 1, 10, timestamp=None),  # 時刻不明 → 常に残す
+        ]
+        out = events_for_item(events, 100, max_age_minutes=1.0)
+        # 0 min, 1 min (ちょうど境界), tick=None が残る．1.5 min は落ちる
+        ticks = [e.timestamp_tick for e in out]
+        assert 1000 in ticks
+        assert 400 in ticks
+        assert 100 not in ticks
+        assert None in ticks
+
+    def test_max_age_minutes_with_no_timed_events_is_noop(self) -> None:
+        """時刻付き event が皆無なら ``max_age_minutes`` は効かず全件返る．"""
+        events = [_ev(100, 1, 10, timestamp=None), _ev(100, 1, 10, timestamp=None)]
+        out = events_for_item(events, 100, max_age_minutes=5.0)
+        assert len(out) == 2
+
 
 class TestFilterEvents:
     def test_no_filter_returns_all(self) -> None:
