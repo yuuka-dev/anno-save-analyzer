@@ -28,12 +28,14 @@ from anno_save_analyzer.trade import (
     events_for_item,
     partners_for_item,
 )
+from anno_save_analyzer.trade import chart_window as chart_window_mod
 from anno_save_analyzer.trade.aggregate import (
     ItemSummary,
     PartnerSummary,
     RouteSummary,
     filter_events,
 )
+from anno_save_analyzer.trade.chart_window import ChartTimeWindow
 from anno_save_analyzer.trade.clock import TICKS_PER_MINUTE, latest_tick
 from anno_save_analyzer.trade.models import TradeEvent
 
@@ -132,7 +134,10 @@ class RecentWindowPalette(ModalScreen[float | None]):
 class TradeStatisticsScreen(Screen):
     """3 カラム統計画面．右端は Partners pane (上) + 時系列 Chart (下) を縦分割．"""
 
-    BINDINGS = [Binding("ctrl+p", "recent_window", "History window")]
+    BINDINGS = [
+        Binding("ctrl+p", "recent_window", "History window"),
+        Binding("ctrl+r", "cycle_chart_window", "Range"),
+    ]
 
     DEFAULT_CSS = """
     TradeStatisticsScreen Horizontal {
@@ -192,6 +197,11 @@ class TradeStatisticsScreen(Screen):
         self._recent_window_minutes: float | None = None
         # 最後に選択していた item_guid (^P で設定変更時の再描画に使う)．
         self._last_selected_item_guid: int | None = None
+        # 最後に選んでいた route_id / inventory row key．^R cycle で再描画に使う．
+        self._last_selected_route_id: str | None = None
+        self._last_selected_inventory_key: tuple[str, int] | None = None
+        # チャート描画の時間窓．書記長希望のデフォルト 120 分．``^R`` で cycle．
+        self._chart_window: ChartTimeWindow = ChartTimeWindow.LAST_120_MIN
 
     def _classify_width(self, width: int) -> str:
         """terminal 幅から layout class を選ぶ (wide / mid / narrow)．"""
@@ -229,6 +239,7 @@ class TradeStatisticsScreen(Screen):
     def _apply_localized_bindings(self) -> None:
         self.BINDINGS = [
             Binding("ctrl+p", "recent_window", self._localizer.t("binding.recent_window")),
+            Binding("ctrl+r", "cycle_chart_window", self._localizer.t("binding.chart_window")),
         ]
         self.refresh_bindings()
 
@@ -260,6 +271,20 @@ class TradeStatisticsScreen(Screen):
             self.app.notify(t("partners.recent_window.notice.hours", value=value / 60.0))
         else:
             self.app.notify(t("partners.recent_window.notice.minutes", value=value))
+
+    def action_cycle_chart_window(self) -> None:
+        """``^R``: chart 時間窓を次の候補に cycle + 現在選択中のチャートを再描画．"""
+        self._chart_window = self._chart_window.next()
+        t = self._localizer.t
+        self.app.notify(t("chart.window.notice", label=t(self._chart_window.locale_key)))
+        # 現在描画中のチャートを新しい window で再描画．優先順位は
+        # inventory > route > item (route 選択中に item を重ね表示しない)．
+        if self._last_selected_inventory_key is not None:
+            self._update_inventory_chart(self._last_selected_inventory_key)
+        elif self._last_selected_route_id is not None:
+            self._update_route_detail(self._last_selected_route_id)
+        elif self._last_selected_item_guid is not None:
+            self._update_chart_pane(self._last_selected_item_guid)
 
     def compose(self) -> ComposeResult:
         # Trend 列 / 右カラム hide 等の layout 判定は compose の早い段階で固める．
@@ -591,16 +616,20 @@ class TradeStatisticsScreen(Screen):
         self.query_one("#partners-pane", Static).update(self._format_partners_pane(rows, item_guid))
         self._update_chart_pane(item_guid)
 
+    def _chart_title_with_window(self, title: str) -> str:
+        """chart タイトル末尾に現在の時間窓ラベルを ``·`` 区切りで追加．"""
+        t = self._localizer.t
+        return f"{title} · {t(self._chart_window.locale_key)}"
+
     def _update_chart_pane(self, item_guid: int) -> None:
         """選択物資の取引を (timestamp_tick, 累積数量) の折れ線で描画．"""
         t = self._localizer.t
         scoped = self._filtered_events() if not self._filter.is_all else self._state.events
-        events = sorted(
-            (e for e in scoped if e.item.guid == item_guid and e.timestamp_tick is not None),
-            key=lambda e: e.timestamp_tick or 0,
-        )
+        matching = [e for e in scoped if e.item.guid == item_guid and e.timestamp_tick is not None]
+        windowed = chart_window_mod.filter_events(matching, self._chart_window)
+        events = sorted(windowed, key=lambda e: e.timestamp_tick or 0)
         item = self._state.items[item_guid]
-        title = item.display_name(self._localizer.code)
+        title = self._chart_title_with_window(item.display_name(self._localizer.code))
         if not events:
             self._render_empty_chart(t("statistics.chart.no_timed_events", title=title))
             return
@@ -615,13 +644,13 @@ class TradeStatisticsScreen(Screen):
 
     def _update_route_detail(self, route_id: str) -> None:
         """選択ルートの累積 net gold 時系列を chart pane に描画．"""
+        self._last_selected_route_id = route_id
         scoped = self._filtered_events() if not self._filter.is_all else self._state.events
-        events = sorted(
-            (e for e in scoped if e.route_id == route_id and e.timestamp_tick is not None),
-            key=lambda e: e.timestamp_tick or 0,
-        )
+        matching = [e for e in scoped if e.route_id == route_id and e.timestamp_tick is not None]
+        windowed = chart_window_mod.filter_events(matching, self._chart_window)
+        events = sorted(windowed, key=lambda e: e.timestamp_tick or 0)
         t = self._localizer.t
-        title = f"{t('statistics.col.route')} #{route_id}"
+        title = self._chart_title_with_window(f"{t('statistics.col.route')} #{route_id}")
         if not events:
             # idle route: 履歴なし．定義 leg を簡潔に表示．
             idle_tasks = self._find_idle_route_tasks(route_id)
@@ -654,6 +683,7 @@ class TradeStatisticsScreen(Screen):
             and isinstance(row_key[1], int)
         ):
             return
+        self._last_selected_inventory_key = row_key
         island, guid = row_key
         trend = next(
             (tr for tr in self._state.storage_by_island.get(island, ()) if tr.product_guid == guid),
@@ -667,13 +697,23 @@ class TradeStatisticsScreen(Screen):
         )
 
         item = self._state.items[guid]
-        title = f"{island} · {item.display_name(self._localizer.code)}"
+        title = self._chart_title_with_window(
+            f"{island} · {item.display_name(self._localizer.code)}"
+        )
         samples = list(trend.points.samples)
         if not samples:
             self._render_empty_chart(t("statistics.chart.no_inventory_samples", title=title))
             return
         # 最新 = 0，最古 = -(n-1) * step．chart は昇順なので左端が最古．
         minutes = inventory_sample_minutes(len(samples))
+        # ``^R`` で選択中の window で区間を絞る．窓外の古い sample は描画しない．
+        keep_indices, minutes = chart_window_mod.filter_inventory_minutes(
+            minutes, self._chart_window
+        )
+        samples = [samples[i] for i in keep_indices]
+        if not samples:
+            self._render_empty_chart(t("statistics.chart.no_inventory_samples", title=title))
+            return
         unit_key, divisor = pick_time_unit(minutes)
         x_values = [m * divisor for m in minutes]
         chart = self.query_one("#chart-pane", PlotextPlot)

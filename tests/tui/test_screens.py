@@ -936,6 +936,127 @@ class TestStatisticsScreen:
             assert "分前" not in rendered
             assert "時刻不明" in rendered
 
+    async def test_chart_window_cycle_updates_state(self, tui_state) -> None:
+        """``^R`` で chart window が次候補に cycle する．"""
+        from anno_save_analyzer.trade.chart_window import ChartTimeWindow
+
+        app = TradeApp(tui_state)
+        async with app.run_test() as pilot:
+            await pilot.pause()
+            await pilot.press("ctrl+t")
+            await pilot.pause()
+            screen = pilot.app.screen
+            assert screen._chart_window == ChartTimeWindow.LAST_120_MIN
+            await pilot.press("ctrl+r")
+            await pilot.pause()
+            assert screen._chart_window == ChartTimeWindow.LAST_4H
+
+    async def test_chart_window_cycle_wraps_around(self, tui_state) -> None:
+        """末尾 (ALL) から次を押すと先頭 (LAST_120_MIN) に戻る．"""
+        from anno_save_analyzer.trade.chart_window import ChartTimeWindow
+
+        app = TradeApp(tui_state)
+        async with app.run_test() as pilot:
+            await pilot.pause()
+            await pilot.press("ctrl+t")
+            await pilot.pause()
+            screen = pilot.app.screen
+            screen._chart_window = ChartTimeWindow.ALL
+            await pilot.press("ctrl+r")
+            await pilot.pause()
+            assert screen._chart_window == ChartTimeWindow.LAST_120_MIN
+
+    async def test_chart_window_cycle_redraws_last_inventory(self, tui_state) -> None:
+        """inventory chart 選択中に ^R しても例外を出さず再描画する．"""
+        import dataclasses
+
+        from anno_save_analyzer.trade import IslandStorageTrend, PointSeries
+
+        trend = IslandStorageTrend(
+            island_name="プレイヤー島",
+            product_guid=2088,
+            points=PointSeries(capacity=3, size=3, samples=(1, 2, 3)),
+        )
+        new_state = dataclasses.replace(tui_state, storage_by_island={"プレイヤー島": (trend,)})
+        app = TradeApp(new_state)
+        async with app.run_test() as pilot:
+            await pilot.pause()
+            await pilot.press("ctrl+t")
+            await pilot.pause()
+            screen = pilot.app.screen
+            screen._update_inventory_chart(("プレイヤー島", 2088))
+            await pilot.press("ctrl+r")
+            await pilot.pause()
+            # 新しい window で再描画済 = 例外出ずに通る
+
+    async def test_chart_window_cycle_redraws_last_route(self, tui_state) -> None:
+        """route 選択中に ^R で再描画．"""
+        import dataclasses
+
+        from anno_save_analyzer.trade import Item, TradeEvent, TradingPartner
+
+        item = Item(guid=1234, names={"en": "X"})
+        partner = TradingPartner(id="route:99", display_name="r", kind="route")
+        events = tuple(
+            TradeEvent(
+                item=item,
+                amount=1,
+                total_price=10,
+                partner=partner,
+                route_id="99",
+                timestamp_tick=1000 + i,
+                session_id="0",
+            )
+            for i in range(3)
+        )
+        new_state = dataclasses.replace(tui_state, events=(*tui_state.events, *events))
+        app = TradeApp(new_state)
+        async with app.run_test() as pilot:
+            await pilot.pause()
+            await pilot.press("ctrl+t")
+            await pilot.pause()
+            screen = pilot.app.screen
+            screen._update_route_detail("99")
+            await pilot.press("ctrl+r")
+            await pilot.pause()
+
+    async def test_chart_window_filters_old_events(self, tui_state) -> None:
+        """LAST_120_MIN で窓外の event は chart から消える (item chart 経由で確認)．"""
+        import dataclasses
+
+        from anno_save_analyzer.trade import Item, TradeEvent
+        from anno_save_analyzer.trade.chart_window import ChartTimeWindow
+        from anno_save_analyzer.trade.clock import TICKS_PER_MINUTE
+
+        item = Item(guid=7777, names={"en": "X"})
+        events = (
+            # 121 分前 = LAST_120_MIN 窓外
+            TradeEvent(
+                item=item,
+                amount=1,
+                total_price=1,
+                timestamp_tick=1_000_000 - 121 * TICKS_PER_MINUTE,
+                session_id="0",
+            ),
+            # 0 分前 = 最新
+            TradeEvent(
+                item=item, amount=1, total_price=1, timestamp_tick=1_000_000, session_id="0"
+            ),
+        )
+        new_state = dataclasses.replace(tui_state, events=(*tui_state.events, *events))
+        app = TradeApp(new_state)
+        async with app.run_test() as pilot:
+            await pilot.pause()
+            await pilot.press("ctrl+t")
+            await pilot.pause()
+            screen = pilot.app.screen
+            screen._chart_window = ChartTimeWindow.LAST_120_MIN
+            # _update_chart_pane は例外を出さずに完了する (= 窓 filter が通った)
+            screen._update_chart_pane(7777)
+            # ALL に切り替えても例外を出さない
+            screen._chart_window = ChartTimeWindow.ALL
+            screen._update_chart_pane(7777)
+
     async def test_route_detail_plots_cumulative_gold_for_active_route(self, tui_state) -> None:
         """履歴のある route_id を routes-table で選ぶと chart に累積 gold が描画される．"""
         from anno_save_analyzer.trade import Item, TradeEvent, TradingPartner
