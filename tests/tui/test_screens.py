@@ -763,6 +763,107 @@ class TestStatisticsScreen:
             # chart without events (無効 guid) も実行して no-events 分岐を踏む
             screen._update_chart_pane(999_999)
 
+    async def test_inventory_row_key_tuple_handles_pipe_name_and_localized_xlabel(
+        self, tui_state
+    ) -> None:
+        from anno_save_analyzer.trade import IslandStorageTrend, PointSeries
+        from anno_save_analyzer.tui.state import TuiState
+
+        trend = IslandStorageTrend(
+            island_name="A|B",
+            product_guid=100,
+            points=PointSeries(capacity=3, size=3, samples=(10, 20, 30)),
+        )
+        new_state = TuiState(
+            save_path=tui_state.save_path,
+            title=tui_state.title,
+            locale="ja",
+            events=tui_state.events,
+            items=tui_state.items,
+            overview=tui_state.overview,
+            item_summaries=tui_state.item_summaries,
+            route_summaries=tui_state.route_summaries,
+            session_ids=tui_state.session_ids,
+            session_locale_keys=tui_state.session_locale_keys,
+            islands_by_session=tui_state.islands_by_session,
+            routes_by_session=tui_state.routes_by_session,
+            storage_by_island={"A|B": (trend,)},
+        )
+        app = TradeApp(new_state, localizer=Localizer.load("ja"))
+        async with app.run_test() as pilot:
+            await pilot.pause()
+            await pilot.press("ctrl+t")
+            await pilot.pause()
+            from textual.widgets import DataTable
+            from textual_plotext import PlotextPlot
+
+            screen = pilot.app.screen
+            chart = screen.query_one("#chart-pane", PlotextPlot)
+            xlabel_calls: list[str] = []
+            orig_xlabel = chart.plt.xlabel
+
+            def _spy_xlabel(label: str) -> None:
+                xlabel_calls.append(label)
+                orig_xlabel(label)
+
+            chart.plt.xlabel = _spy_xlabel
+
+            class _Key:
+                def __init__(self, value):
+                    self.value = value
+
+            class _Evt:
+                def __init__(self, table, key_value):
+                    self.data_table = table
+                    self.row_key = _Key(key_value)
+
+            inv_table = screen.query_one("#inventory-table", DataTable)
+            screen.on_data_table_row_highlighted(_Evt(inv_table, ("A|B", 100)))
+            await pilot.pause()
+            assert xlabel_calls[-1] == "サンプル番号"
+
+    async def test_inventory_empty_samples_uses_inventory_message(self, tui_state) -> None:
+        from anno_save_analyzer.trade import IslandStorageTrend, PointSeries
+        from anno_save_analyzer.tui.state import TuiState
+
+        trend = IslandStorageTrend(
+            island_name="StorageZero",
+            product_guid=100,
+            points=PointSeries(capacity=0, size=0, samples=()),
+        )
+        new_state = TuiState(
+            save_path=tui_state.save_path,
+            title=tui_state.title,
+            locale="en",
+            events=tui_state.events,
+            items=tui_state.items,
+            overview=tui_state.overview,
+            item_summaries=tui_state.item_summaries,
+            route_summaries=tui_state.route_summaries,
+            session_ids=tui_state.session_ids,
+            session_locale_keys=tui_state.session_locale_keys,
+            islands_by_session=tui_state.islands_by_session,
+            routes_by_session=tui_state.routes_by_session,
+            storage_by_island={"StorageZero": (trend,)},
+        )
+        app = TradeApp(new_state, localizer=Localizer.load("en"))
+        async with app.run_test() as pilot:
+            await pilot.pause()
+            await pilot.press("ctrl+t")
+            await pilot.pause()
+            screen = pilot.app.screen
+            called: list[str] = []
+            orig = screen._render_empty_chart
+
+            def _spy_render_empty_chart(message: str) -> None:
+                called.append(message)
+                orig(message)
+
+            screen._render_empty_chart = _spy_render_empty_chart
+            screen._update_inventory_chart(("StorageZero", 100))
+            await pilot.pause()
+            assert called[-1].endswith("no inventory samples")
+
     async def test_row_highlight_early_returns(self, tui_state) -> None:
         """items-table 以外 / row_key が数値でない / None → pane 無更新 (early return)．"""
         from textual.widgets import DataTable, Static

@@ -72,7 +72,7 @@ class TuiState:
     # を列挙するために使う．
     routes_by_session: dict[str, tuple[TradeRouteDef, ...]] = field(default_factory=dict)
     # island_name (CityName) → 在庫時系列 (物資別) のリスト．
-    # Inventory tab の入力．session 横断キー (島名は全 session 合計でユニーク想定)．
+    # Inventory tab の入力．同名島が複数 session にある場合は上書きせず連結する．
     storage_by_island: dict[str, tuple[IslandStorageTrend, ...]] = field(default_factory=dict)
 
 
@@ -246,8 +246,9 @@ def _collect_storage_by_island(
 ) -> dict[str, tuple[IslandStorageTrend, ...]]:
     """プリロード済 inner payloads 横断で島別 StorageTrends を集める．
 
-    島名 (CityName) は session 横断でユニーク前提．同名が別 session にあれば
-    後勝ちになるが，書記長の実セーブで観測済の 13 島は全て unique．
+    島名 (CityName) をキーに全 session 分を集約する実装であり，同名が別
+    session に存在する場合は後勝ちで上書きせず，対応する trends を同じ
+    island 名の配列へ連結する．
     """
     aggregated: dict[str, list[IslandStorageTrend]] = {}
     for inner in inner_payloads:

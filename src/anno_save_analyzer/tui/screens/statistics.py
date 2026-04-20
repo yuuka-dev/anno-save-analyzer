@@ -279,12 +279,13 @@ class TradeStatisticsScreen(Screen):
         )
 
     def _current_inventory_rows(self):
-        """現在の ``_filter`` を Inventory 表示用の (島, trend) 列に落とす．
+        """現在の ``_filter`` に対応する ``IslandStorageTrend`` の一覧を返す．
 
         island filter → その島のみ / session filter → 当該 session の島 /
-        filter 無し → 全島を連結．``IslandStorageTrend`` は session 情報を持たない
-        ので session filter は ``islands_by_session`` からその session の島名
-        集合を引いて交差を取る．
+        filter 無し → 全島を連結．返り値は ``(島, trend)`` の組ではなく，
+        各行が島名を内包した ``IslandStorageTrend`` のフラットなリスト．
+        ``IslandStorageTrend`` は session 情報を持たないので，session filter は
+        ``islands_by_session`` からその session の島名集合を引いて交差を取る．
         """
         storage = self._state.storage_by_island
         if self._filter.island is not None:
@@ -313,9 +314,7 @@ class TradeStatisticsScreen(Screen):
             t("statistics.col.trend"),
         )
         for tr in self._current_inventory_rows():
-            table.add_row(
-                *self._format_inventory_row(tr), key=f"{tr.island_name}|{tr.product_guid}"
-            )
+            table.add_row(*self._format_inventory_row(tr), key=(tr.island_name, tr.product_guid))
         return table
 
     def _format_inventory_row(self, tr) -> tuple[str, ...]:
@@ -378,7 +377,7 @@ class TradeStatisticsScreen(Screen):
         """items / routes / inventory テーブルの行 highlight で右 pane を更新．"""
         table_id = event.data_table.id
         row_key = event.row_key.value if event.row_key is not None else None
-        if not row_key:
+        if row_key is None or row_key == "":
             return
         if table_id == "inventory-table":
             self._update_inventory_chart(row_key)
@@ -452,19 +451,20 @@ class TradeStatisticsScreen(Screen):
             unit_key=unit_key,
         )
 
-    def _update_inventory_chart(self, row_key: str) -> None:
+    def _update_inventory_chart(self, row_key: tuple[str, int] | object) -> None:
         """inventory-table 選択時に Points 時系列を chart pane に描画．
 
-        row_key は ``f"{island}|{guid}"`` 形式．
+        row_key は ``(island_name, product_guid)`` の tuple を受け取る．
         """
         t = self._localizer.t
-        if "|" not in row_key:
+        if not (
+            isinstance(row_key, tuple)
+            and len(row_key) == 2
+            and isinstance(row_key[0], str)
+            and isinstance(row_key[1], int)
+        ):
             return
-        island, guid_str = row_key.rsplit("|", 1)
-        try:
-            guid = int(guid_str)
-        except ValueError:
-            return
+        island, guid = row_key
         trend = next(
             (tr for tr in self._state.storage_by_island.get(island, ()) if tr.product_guid == guid),
             None,
@@ -475,7 +475,7 @@ class TradeStatisticsScreen(Screen):
         title = f"{island} · {item.display_name(self._localizer.code)}"
         samples = list(trend.points.samples)
         if not samples:
-            self._render_empty_chart(t("statistics.chart.no_timed_events", title=title))
+            self._render_empty_chart(t("statistics.chart.no_inventory_samples", title=title))
             return
         x_values = list(range(len(samples)))
         chart = self.query_one("#chart-pane", PlotextPlot)
@@ -483,7 +483,7 @@ class TradeStatisticsScreen(Screen):
         chart.plt.clear_figure()
         chart.plt.plot(x_values, samples, marker="hd")
         chart.plt.title(title)
-        chart.plt.xlabel("sample index")
+        chart.plt.xlabel(t("statistics.chart.sample_index"))
         chart.plt.ylabel(t("statistics.col.latest"))
         chart.refresh()
 
