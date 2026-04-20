@@ -67,6 +67,7 @@ class TradeApp(App[None]):
         *,
         localizer: Localizer | None = None,
         theme: str = "default",
+        persist_settings: bool = False,
     ) -> None:
         super().__init__()
         self._state = state
@@ -78,6 +79,9 @@ class TradeApp(App[None]):
             self.CSS = theme_css(theme)
         self._apply_localized_bindings()
         self.title = self._localized_title()
+        # 設定を ``~/.config/anno-save-analyzer/config.toml`` に逆流させるか．
+        # CLI 経由では True．純粋な unit test から直接起動した場合は False．
+        self._persist_settings = persist_settings
 
     def _localized_title(self) -> str:
         base = self._localizer.t("app.title")
@@ -122,6 +126,41 @@ class TradeApp(App[None]):
         for screen in (self.get_screen("overview"), self.get_screen("statistics")):
             screen.set_localizer(self._localizer)
             screen.refresh(recompose=True)
+        self.persist_user_settings()
+
+    def persist_user_settings(self) -> None:
+        """現在の UI 設定を ``config.toml`` に保存．``persist_settings=False`` なら no-op．
+
+        Statistics 画面から chart_window / recent_window_minutes を読み出し，
+        app レベルの locale / theme と合わせて ``UserConfig`` を組み立てて書く．
+        IO エラーは ``save_config`` 側で warning に落ちるので crash しない．
+        """
+        if not self._persist_settings:
+            return
+        from anno_save_analyzer.config import (
+            UiConfig,
+            UserConfig,
+            chart_window_to_token,
+            save_config,
+        )
+        from anno_save_analyzer.trade.chart_window import ChartTimeWindow
+
+        chart_window = ChartTimeWindow.LAST_120_MIN
+        recent_window: float | None = None
+        try:
+            stats = self.get_screen("statistics")
+        except KeyError:
+            stats = None
+        if stats is not None:
+            chart_window = getattr(stats, "_chart_window", chart_window)
+            recent_window = getattr(stats, "_recent_window_minutes", None)
+        ui = UiConfig(
+            locale=self._localizer.code,
+            theme=self._theme_name,
+            chart_window=chart_window_to_token(chart_window),
+            recent_window_minutes=recent_window,
+        )
+        save_config(UserConfig(ui=ui))
 
     def action_show_help(self) -> None:  # pragma: no cover - manual interaction only
         self.notify(self._localizer.t("binding.help"))

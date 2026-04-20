@@ -143,6 +143,64 @@ class TestFromSaveClassmethod:
         assert app._localizer.code == "ja"
 
 
+@pytest.mark.asyncio
+class TestPersistSettings:
+    """``persist_settings=True`` 起動時の自動書き出し．"""
+
+    async def test_persist_disabled_by_default(self, tui_state, tmp_path, monkeypatch) -> None:
+        cfg_path = tmp_path / "cfg.toml"
+        monkeypatch.setenv("ANNO_SAVE_ANALYZER_CONFIG", str(cfg_path))
+        app = TradeApp(tui_state)
+        async with app.run_test() as pilot:
+            await pilot.pause()
+            await pilot.press("ctrl+l")
+            await pilot.pause()
+        # persist_settings=False なのでファイル作られない
+        assert not cfg_path.exists()
+
+    async def test_locale_switch_writes_config_when_persist_enabled(
+        self, tui_state, tmp_path, monkeypatch
+    ) -> None:
+        cfg_path = tmp_path / "cfg.toml"
+        monkeypatch.setenv("ANNO_SAVE_ANALYZER_CONFIG", str(cfg_path))
+        app = TradeApp(tui_state, persist_settings=True)
+        async with app.run_test() as pilot:
+            await pilot.pause()
+            assert app._localizer.code == "en"
+            await pilot.press("ctrl+l")
+            await pilot.pause()
+        assert cfg_path.exists()
+        text = cfg_path.read_text(encoding="utf-8")
+        assert 'locale = "ja"' in text
+
+    async def test_chart_window_cycle_writes_config(self, tui_state, tmp_path, monkeypatch) -> None:
+        cfg_path = tmp_path / "cfg.toml"
+        monkeypatch.setenv("ANNO_SAVE_ANALYZER_CONFIG", str(cfg_path))
+        app = TradeApp(tui_state, persist_settings=True)
+        async with app.run_test() as pilot:
+            await pilot.pause()
+            await pilot.press("ctrl+t")
+            await pilot.pause()
+            await pilot.press("ctrl+r")
+            await pilot.pause()
+        assert cfg_path.exists()
+        text = cfg_path.read_text(encoding="utf-8")
+        # LAST_120_MIN → LAST_4H に cycle したはず
+        assert 'chart_window = "4h"' in text
+
+    async def test_persist_is_noop_without_statistics_screen(
+        self, tui_state, tmp_path, monkeypatch
+    ) -> None:
+        """統計画面を install する前に呼ばれても crash しない．"""
+        cfg_path = tmp_path / "cfg.toml"
+        monkeypatch.setenv("ANNO_SAVE_ANALYZER_CONFIG", str(cfg_path))
+        app = TradeApp(tui_state, persist_settings=True)
+        # install_screen は on_mount で行われるので，明示的に呼ばない状態で persist
+        app.persist_user_settings()
+        # ファイルは書かれる (statistics 画面から値を読めないので default)
+        assert cfg_path.exists()
+
+
 def test_sanitize_filename_component_fallback_for_empty_or_whitespace() -> None:
     """``_sanitize_filename_component`` が空文字になる入力で unknown-<digest> を返す．
 
