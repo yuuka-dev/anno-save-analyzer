@@ -62,22 +62,39 @@ def extract(
     interpreter: GameInterpreter | None = None,
 ) -> Iterator[TradeEvent]:
     """``.a7s`` / ``.a8s`` セーブから TradeEvent ストリームを yield する．"""
+    outer_filedb = load_outer_filedb(Path(save_path))
+    yield from extract_from_outer(outer_filedb, title=title, items=items, interpreter=interpreter)
+
+
+def extract_from_outer(
+    outer_filedb: bytes,
+    *,
+    title: GameTitle,
+    items: ItemDictionary,
+    interpreter: GameInterpreter | None = None,
+) -> Iterator[TradeEvent]:
+    """既に解凍済みの outer FileDB bytes から TradeEvent ストリームを yield．
+
+    TUI のロードパスでは outer を 1 回だけ解凍して使い回すために使う
+    (``extract`` が内部で毎回 ``extract_inner_filedb`` を呼ぶと RDA + zlib
+    を重複実行する)．
+    """
     interpreter = interpreter or select_interpreter(title)
-    outer_filedb = _load_outer_filedb(Path(save_path))
     version = detect_version(outer_filedb)
     section = parse_tag_section(outer_filedb, version)
     for raw in interpreter.find_traded_goods(outer_filedb, section):
         yield normalise(raw, items)
 
 
-def _load_outer_filedb(save_path: Path) -> bytes:
-    """``.a7s`` / ``.a8s`` を解凍して内部 FileDB バイナリを返す．"""
+def load_outer_filedb(save_path: Path) -> bytes:
+    """``.a7s`` / ``.a8s`` を解凍して内部 FileDB バイナリを返す．
+
+    bare FileDB バイナリ (テスト用 ``.bin``) も自動判定．zlib 圧縮済なら展開．
+    """
     suffix = save_path.suffix.lower()
     if suffix in {".a7s", ".a8s"}:
         return extract_inner_filedb(save_path)
-    # bare FileDB バイナリ（テスト用）
     raw = save_path.read_bytes()
-    # zlib 圧縮されてる可能性があれば自動解凍
     if raw[:2] in (b"\x78\x9c", b"\x78\xda", b"\x78\x01"):
         return zlib.decompress(raw)
     return raw

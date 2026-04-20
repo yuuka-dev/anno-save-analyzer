@@ -14,13 +14,13 @@ from anno_save_analyzer.trade.models import GameTitle
 from .i18n import Localizer
 from .screens import OverviewScreen, TradeStatisticsScreen
 from .state import TuiState, load_state
-from .theme import DEFAULT_CSS
+from .theme import USSR_TITLE_PREFIX, theme_css
 
 
 class TradeApp(App[None]):
     """nano-flavored binding 契約をもつトップレベル App．"""
 
-    CSS = DEFAULT_CSS
+    CSS = theme_css("default")
 
     # App-level に置く事で画面横断的に効く．screen-level binding はキーが
     # 子 widget に吸われて届かないことがある．
@@ -37,12 +37,24 @@ class TradeApp(App[None]):
         state: TuiState,
         *,
         localizer: Localizer | None = None,
+        theme: str = "default",
     ) -> None:
         super().__init__()
         self._state = state
         self._localizer = localizer or Localizer.load(state.locale)
+        self._theme_name = theme
+        # App.CSS は class attr なので runtime 切替時は instance attr で上書きする．
+        # (default は ``CSS`` class attr がそのまま使われる)
+        if theme != "default":
+            self.CSS = theme_css(theme)
         self._apply_localized_bindings()
-        self.title = self._localizer.t("app.title")
+        self.title = self._localized_title()
+
+    def _localized_title(self) -> str:
+        base = self._localizer.t("app.title")
+        if self._theme_name == "ussr":
+            return USSR_TITLE_PREFIX + base + " " + USSR_TITLE_PREFIX.strip()
+        return base
 
     @classmethod
     def from_save(
@@ -77,7 +89,7 @@ class TradeApp(App[None]):
         """
         self._localizer = self._localizer.with_locale(code)
         self._apply_localized_bindings()
-        self.title = self._localizer.t("app.title")
+        self.title = self._localized_title()
         for screen in (self.get_screen("overview"), self.get_screen("statistics")):
             screen._localizer = self._localizer
             screen.refresh(recompose=True)

@@ -19,16 +19,29 @@ class GameTitleArg(StrEnum):
         return GameTitle(self.value)
 
 
+class ThemeArg(StrEnum):
+    DEFAULT = "default"
+    USSR = "ussr"
+
+
 def _launch(
     save: Annotated[Path, typer.Argument(help="Save file (.a7s / .a8s).")],
     title: Annotated[
         GameTitleArg, typer.Option("--title", help="Game title.")
     ] = GameTitleArg.ANNO_117,
     locale: Annotated[str, typer.Option("--locale", help="UI locale (en / ja).")] = "en",
+    theme: Annotated[
+        ThemeArg, typer.Option("--theme", help="UI theme (default / ussr).")
+    ] = ThemeArg.DEFAULT,
 ) -> None:
-    """Open the Textual trade-history viewer on SAVE."""
+    """Open the Textual trade-history viewer on SAVE.
+
+    Long saves may take 10–40 seconds to parse; a progress log is printed to
+    stderr while loading.
+    """
     try:
         from anno_save_analyzer.tui import TradeApp
+        from anno_save_analyzer.tui.state import load_state
     except ImportError as exc:
         typer.secho(
             "The TUI dependencies are not installed. Install "
@@ -39,7 +52,16 @@ def _launch(
         )
         raise typer.Exit(code=1) from exc
 
-    app = TradeApp.from_save(save, title=title.to_title(), locale=locale)
+    # stderr にステージラベルを流すプログレス．Textual が stdout を掴むので
+    # stderr 固定で書き出す．
+    def _progress(stage: str) -> None:
+        typer.secho(f"  … {stage}", err=True, fg=typer.colors.CYAN)
+
+    typer.secho(f"Loading {save.name} …", err=True, bold=True)
+    state = load_state(save, title=title.to_title(), locale=locale, progress=_progress)
+    typer.secho("  ✓ ready", err=True, fg=typer.colors.GREEN)
+
+    app = TradeApp(state, theme=theme.value)
     app.run()
 
 
