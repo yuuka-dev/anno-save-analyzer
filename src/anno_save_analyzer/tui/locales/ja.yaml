@@ -58,7 +58,6 @@ statistics.chart.xlabel.minutes_ago: "分 (0=最新)"
 statistics.chart.xlabel.hours_ago: "時間 (0=最新)"
 statistics.chart.idle_suffix: "{status}, {legs} レグ"
 statistics.chart.no_inventory_samples: "{title} — 在庫サンプルなし"
-statistics.chart.sample_index: "サンプル番号"
 
 partners.heading: "取引相手"
 partners.empty: "テーブルから物資を選ぶと相手リストを表示．"

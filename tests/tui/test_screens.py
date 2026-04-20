@@ -923,7 +923,8 @@ class TestStatisticsScreen:
             inv_table = screen.query_one("#inventory-table", DataTable)
             screen.on_data_table_row_highlighted(_Evt(inv_table, ("A|B", 100)))
             await pilot.pause()
-            assert xlabel_calls[-1] == "サンプル番号"
+            # 3 サンプル = spread 2 分なので minutes_ago 単位．ja ロケール．
+            assert xlabel_calls[-1] == "分 (0=最新)"
 
     async def test_inventory_empty_samples_uses_inventory_message(self, tui_state) -> None:
         from anno_save_analyzer.trade import IslandStorageTrend, PointSeries
