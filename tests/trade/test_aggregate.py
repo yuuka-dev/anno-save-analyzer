@@ -150,6 +150,14 @@ class TestByRoute:
         assert rows[0].route_name == "新ルート"
         assert rows[0].display_route == "新ルート"
 
+    def test_route_name_latest_tick_wins_even_if_events_are_out_of_order(self) -> None:
+        events = [
+            _ev(1, 1, 1, route_id="7", kind="route", timestamp=200, route_name="新ルート"),
+            _ev(1, 1, 1, route_id="7", kind="route", timestamp=100, route_name="旧ルート"),
+        ]
+        rows = by_route(events)
+        assert rows[0].route_name == "新ルート"
+
     def test_display_route_fallback_chain(self) -> None:
         """route_name > ``#{route_id}`` > ``—``."""
         events = [
