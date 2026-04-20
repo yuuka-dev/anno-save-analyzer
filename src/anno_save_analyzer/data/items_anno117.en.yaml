@@ -1,0 +1,306 @@
+# Anno 117: Pax Romana — item dictionary (en).
+# Auto-generated from config.rda/assets.xml + texts_<lang>.xml
+# by scripts/generate_items_anno117.py. Re-run after game updates.
+
+2063:
+  name: "Flax"
+2068:
+  name: "Oats"
+2069:
+  name: "Wheat"
+2070:
+  name: "Grapes"
+2071:
+  name: "Lavender"
+2072:
+  name: "Olives"
+2073:
+  name: "Sheep"
+2074:
+  name: "Pigs"
+2075:
+  name: "Horses"
+2076:
+  name: "Honeycombs"
+2077:
+  name: "Wood"
+2078:
+  name: "Limestone"
+2079:
+  name: "Silver Ore"
+2080:
+  name: "Iron Ore"
+2084:
+  name: "Uncut Marble"
+2085:
+  name: "Coal"
+2086:
+  name: "Clay"
+2087:
+  name: "Sturgeon"
+2088:
+  name: "Sardines"
+2089:
+  name: "Mackerel"
+2090:
+  name: "Salt"
+2091:
+  name: "Silica"
+2093:
+  name: "Barley"
+2094:
+  name: "Dye Plants"
+2097:
+  name: "Cockles"
+2099:
+  name: "Copper Ore"
+2100:
+  name: "Tin Ore"
+2101:
+  name: "Granite Block"
+2102:
+  name: "Mud"
+2103:
+  name: "Reeds"
+2105:
+  name: "Ochs"
+2106:
+  name: "Small Birds"
+2108:
+  name: "Eels"
+2110:
+  name: "Leather"
+2112:
+  name: "Oysters"
+2115:
+  name: "Iron"
+2117:
+  name: "Glass"
+2119:
+  name: "Flour"
+2121:
+  name: "Cloth"
+2123:
+  name: "Ornate Wood"
+2124:
+  name: "Pigments"
+2126:
+  name: "Celtic Green"
+2127:
+  name: "Bronze"
+2128:
+  name: "Chassis"
+2129:
+  name: "Silver"
+2131:
+  name: "Malt"
+2132:
+  name: "Lard"
+2133:
+  name: "Bird Tongues"
+2135:
+  name: "String"
+2136:
+  name: "Porridge"
+2137:
+  name: "Bread"
+2138:
+  name: "Wine"
+2139:
+  name: "Garum"
+2140:
+  name: "Oysters with Caviar"
+2141:
+  name: "Tunics"
+2142:
+  name: "Pileus"
+2143:
+  name: "Soap"
+2144:
+  name: "Sandals"
+2145:
+  name: "Togas"
+2146:
+  name: "Necklaces"
+2147:
+  name: "Loungers"
+2149:
+  name: "Olive Oil"
+2150:
+  name: "Writing Tablets"
+2151:
+  name: "Fine Glass"
+2152:
+  name: "Mosaics"
+2153:
+  name: "Cheese"
+2154:
+  name: "Beer"
+2155:
+  name: "Bird Tongues in Aspic"
+2156:
+  name: "Brooches"
+2157:
+  name: "Torcs"
+2158:
+  name: "Trousers"
+2159:
+  name: "Reed Shoes"
+2161:
+  name: "Cloaks"
+2162:
+  name: "Handmirrors"
+2163:
+  name: "Chariots"
+2166:
+  name: "Standing Lyres"
+2169:
+  name: "Wattle & Daub"
+2171:
+  name: "Rope"
+2172:
+  name: "Sails"
+2173:
+  name: "Weapons"
+2174:
+  name: "Timber"
+2176:
+  name: "Tiles"
+2178:
+  name: "Concrete"
+2179:
+  name: "Marble"
+2180:
+  name: "Tyrian Purple"
+2181:
+  name: "Libertus Workforce"
+2184:
+  name: "Plebeian Workforce"
+2185:
+  name: "Equites Workforce"
+2186:
+  name: "Patrician Workforce"
+2192:
+  name: "Wader Workforce"
+2196:
+  name: "Smith Workforce"
+2197:
+  name: "Alderman Workforce"
+2198:
+  name: "Mercators Workforce"
+2199:
+  name: "Nobles Workforce"
+2671:
+  name: "Market"
+2677:
+  name: "Tavern"
+2678:
+  name: "Library"
+2679:
+  name: "Sanctuary"
+2680:
+  name: "Grammaticus"
+2681:
+  name: "Forum"
+2683:
+  name: "Theatre"
+2684:
+  name: "Temple"
+2685:
+  name: "Baths"
+2686:
+  name: "Amphitheatre"
+3158:
+  name: "Murex Snails"
+6706:
+  name: "Market"
+6707:
+  name: "Recreation Ground"
+6708:
+  name: "Alder Council"
+6709:
+  name: "Bardic Hearth"
+6710:
+  name: "Fanum"
+7985:
+  name: "Saltwort"
+8404:
+  name: "Ponies"
+8405:
+  name: "Sausages"
+8420:
+  name: "Seashells"
+8558:
+  name: "Caviar"
+8561:
+  name: "Sandarac Wood"
+8562:
+  name: "Cushions"
+8563:
+  name: "Minerals"
+13810:
+  name: "Armour"
+16200:
+  name: "Temple"
+16201:
+  name: "Grammaticus"
+16202:
+  name: "Baths"
+30724:
+  name: "Aqueduct Cistern"
+30733:
+  name: "Aqueduct Cistern"
+31694:
+  name: "Hemp"
+31695:
+  name: "Resin"
+31697:
+  name: "Gold Ore"
+31698:
+  name: "Gold"
+31700:
+  name: "Amphorae"
+31701:
+  name: "Herbs"
+31702:
+  name: "Beavers"
+31703:
+  name: "Saltwash"
+31704:
+  name: "Head Piece"
+31706:
+  name: "Clan Shields"
+31707:
+  name: "Fur Hats"
+31708:
+  name: "Wigs"
+31709:
+  name: "Granite"
+31757:
+  name: "Gambling House"
+31768:
+  name: "Roast Beef"
+37132:
+  name: "Theatre"
+37133:
+  name: "Gambling House"
+55954:
+  name: "Drinking Horns"
+55955:
+  name: "Barrow"
+55956:
+  name: "Sacred Grove"
+91372:
+  name: "Officium Permit"
+93770:
+  name: "Depot Permit"
+93771:
+  name: "Shrine Permit"
+108222:
+  name: "Garrison Auxilia Available"
+108223:
+  name: "Garrison Archers Available"
+108224:
+  name: "Garrison Cavalry Available"
+1010017:
+  name: "Denarii"

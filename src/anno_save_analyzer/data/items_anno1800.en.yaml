@@ -1,0 +1,7 @@
+# Anno 1800 — canonical English item dictionary stub.
+# Populate as needed. Anno 1800 GUIDs differ from Anno 117.
+
+# Placeholder entry — real GUIDs to be filled in during Week 3.
+1010001:
+  name: "Wood"
+  category: "raw"

@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Roadmap
+    url: https://github.com/yuuka-dev/anno-save-analyzer/blob/main/docs/ROADMAP.md
+    about: See planned milestones before filing a new feature request.
+  - name: RDA format spec
+    url: https://github.com/yuuka-dev/anno-save-analyzer/blob/main/docs/rda_format_spec.md
+    about: Format documentation for the outer .a7s container.

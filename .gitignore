@@ -49,14 +49,17 @@ Thumbs.db
 # 外部実行ファイル（tools/ 配下の FileDBReader.exe, RDAExplorerGUI.exe など）
 tools/
 # セーブデータサンプル（書記長の個人資産，公開しない）
-sample.a7s
-sample.a8s
+# sample*.a7s / sample*.a8s / *.a7s / *.a8s いずれも除外．合成フィクスチャのみ同梱．
+*.a7s
+*.a8s
 data/samples/
 # 展開中間生成物
 output/
 *.a7s.extracted/
 *.a8s.extracted/
 *.xml.tmp
+# ゲームのスクリーンショット類は著作権 (Ubisoft/BlueByte) 配慮でローカル参照のみ
+_screenshots/
 
 # ---- 環境変数 ----
 .env
@@ -71,3 +74,10 @@ logs/
 # refs/RDAExplorer は GPL-v3．本プロジェクト (MIT) との license 混在を避けるため
 # ローカル read-only 参照のみ扱いとし，commit しない．
 refs/
+
+# ---- Notebook ----
+# notebook 実行時の CSV/parquet 出力はセーブ由来 (書記長の個人資産)．
+# .ipynb 自体は commit するが出力アーティファクトは除外．
+notebooks/out/
+notebooks/.ipynb_checkpoints/
+*.ipynb_checkpoints/

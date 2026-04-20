@@ -1,8 +1,14 @@
 # anno-save-analyzer
 
+[![CI](https://github.com/yuuka-dev/anno-save-analyzer/actions/workflows/ci.yml/badge.svg)](https://github.com/yuuka-dev/anno-save-analyzer/actions/workflows/ci.yml)
+[![codecov](https://codecov.io/gh/yuuka-dev/anno-save-analyzer/branch/main/graph/badge.svg)](https://codecov.io/gh/yuuka-dev/anno-save-analyzer)
+[![Python 3.12+](https://img.shields.io/badge/python-3.12%2B-blue)](https://www.python.org/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Status: WIP](https://img.shields.io/badge/status-WIP-orange)](docs/ROADMAP.md)
+
 > **One-liner**: Save file analyzer for *Anno 1800* and *Anno 117: Pax Romana* — decompress `.a7s` / `.a8s` containers, parse FileDB binaries, and visualize supply chains, trade routes, and quest progress.
 
-> **Status: Work in Progress.** This project is under active development and APIs may break between commits. See the [Roadmap](#roadmap) for current status. Japanese README: [README.ja.md](README.ja.md).
+> **Status: Work in Progress.** This project is under active development and APIs may break between commits. See [docs/ROADMAP.md](docs/ROADMAP.md) for detailed milestones. Japanese README: [README.ja.md](README.ja.md).
 
 ## Overview
 
@@ -14,7 +20,7 @@ Anno 1800 saves are matryoshka-style containers:
 4. `data.xml` — multi-million-line XML tree (approximately 2.2M lines on a real late-game save)
 5. `<SessionData><BinaryData>` — re-embedded binary blobs inside that XML (still being reverse-engineered)
 
-This project aims to peel every layer natively in Python (with a possible Rust re-port later) and expose the data in ways that let players actually use it: supply-chain balance tables, route-efficiency reports, and quest dashboards.
+This project peels every layer natively in Python and exposes the data in ways that let players actually use it: supply-chain balance tables, route-efficiency reports, and quest dashboards. A Textual-based TUI ships in v0.6 so the whole toolkit runs in a terminal, no Electron or web stack required.
 
 ## Current features (v0.1.0)
 
@@ -24,6 +30,7 @@ This project aims to peel every layer natively in Python (with a possible Rust r
   - `entries` / `read(name)` / `extract(...)` / `extract_all(...)`
   - Clean-room reimplementation of [@lysannschlegel/RDAExplorer](https://github.com/lysannschlegel/RDAExplorer) based on format spec only
 - `parser.pipeline.extract_inner_filedb` — one call `a7s` to inner FileDB bytes
+- Test suite: 45 tests, **100% line + branch coverage** enforced in CI via `--cov-fail-under=100`. All branches are covered by synthetic fixtures so CI stays at 100% even when `sample.a7s` is absent; real-save tests auto-skip with no coverage gap
 
 ## Roadmap
 
@@ -34,9 +41,11 @@ This project aims to peel every layer natively in Python (with a possible Rust r
 | v0.3 | `SessionData` / `BinaryData` decoder (the hard part) | planned |
 | v0.4 | Per-island supply-chain balance sheet | planned |
 | v0.5 | OR-Tools MILP route optimizer | planned |
-| v0.6 | Tauri v2 desktop GUI | planned |
-| v1.0 | Public release, English-only docs | planned |
-| v1.1 | Anno 117 (`.a8s`) support | planned |
+| v0.6 | **Textual** TUI dashboard | planned |
+| v1.0 | Public stable release, PyPI packaging | planned |
+| _Future_ | Anno 117 (`.a8s`) support | version TBD |
+
+See [docs/ROADMAP.md](docs/ROADMAP.md) (English) / [docs/ROADMAP.ja.md](docs/ROADMAP.ja.md) (Japanese) for the detailed plan and [GitHub Milestones](https://github.com/yuuka-dev/anno-save-analyzer/milestones) for tracking.
 
 ## Tech stack
 
@@ -47,7 +56,10 @@ This project aims to peel every layer natively in Python (with a possible Rust r
 | XML parser | lxml (`huge_tree=True`, `recover=True`) |
 | Data models | pydantic v2 |
 | Aggregation | pandas |
+| TUI (v0.6+) | [Textual](https://github.com/Textualize/Textual) |
 | Optimization (optional) | OR-Tools |
+| CI | GitHub Actions, pytest-cov, Codecov |
+| Lint / format | ruff |
 
 ## Architecture
 
@@ -95,11 +107,18 @@ with RDAArchive("Autosave 182.a7s") as rda:
 ### Run tests
 
 ```bash
-uv run pytest
-# or: .venv/bin/python -m pytest
+uv run pytest --cov=anno_save_analyzer --cov-report=term-missing
 ```
 
 Tests that require a real save are auto-skipped if none is present. To run them, place a save as `sample.a7s` at the repo root, or set the `SAMPLE_A7S` environment variable.
+
+## Contributing
+
+Pull requests are welcome. See [CONTRIBUTING.md](CONTRIBUTING.md) for the branch strategy, commit conventions, Copilot-review policy, and coverage expectations. In short:
+
+- Feature work goes on `feature/*` branches, merges into `dev`; releases promote `dev` → `main`.
+- Every PR requests GitHub Copilot code review and must pass CI with coverage not below base.
+- New parser logic must cite a format reference (upstream code, spec doc, or new `docs/` entry).
 
 ## Disclaimer
 

@@ -7,21 +7,26 @@ from __future__ import annotations
 
 import os
 import zlib
+from collections.abc import Iterator
 from dataclasses import dataclass
 from pathlib import Path
 from types import TracebackType
-from typing import BinaryIO, Iterator
+from typing import BinaryIO
 
 from .block import (
-    BlockInfo,
-    DirEntry,
     FLAG_COMPRESSED,
     FLAG_ENCRYPTED,
+    BlockInfo,
+    DirEntry,
     read_block_info,
     read_directory,
 )
 from .exceptions import EncryptedBlockError, RDAParseError
 from .header import FileHeader, RDAVersion, read_file_header
+
+# ブロックチェーン走査時のループ検出上限．異常な .a7s で無限ループになるのを防ぐ防御値．
+# テスト時に monkeypatch で下げてループ検出を発動させる．
+MAX_BLOCK_CHAIN_LENGTH = 1_000_000
 
 
 @dataclass(frozen=True)
@@ -45,9 +50,7 @@ class RDAEntry:
         return bool(self.flags & FLAG_ENCRYPTED)
 
 
-def _entry_from(
-    dir_entry: DirEntry, block: BlockInfo, version: RDAVersion
-) -> RDAEntry:
+def _entry_from(dir_entry: DirEntry, block: BlockInfo, version: RDAVersion) -> RDAEntry:
     # RDAFile.FromUnmanaged と同じロジック: block flag を file flag として引き継ぐ．
     # ただし MemoryResident (4) / Deleted (8) の場合は Compressed/Encrypted を個別 file 属性としない．
     flags = 0
@@ -83,7 +86,7 @@ class RDAArchive:
 
     # -------- context manager --------
 
-    def __enter__(self) -> "RDAArchive":
+    def __enter__(self) -> RDAArchive:
         self.open()
         return self
 
@@ -101,7 +104,8 @@ class RDAArchive:
             return
         if not self.path.is_file():
             raise FileNotFoundError(self.path)
-        self._stream = open(self.path, "rb")
+        # RDAArchive 自身がライフタイムを管理するため context manager は使わない
+        self._stream = open(self.path, "rb")  # noqa: SIM115
         try:
             self._header = read_file_header(self._stream)
             self._entries = list(self._walk_blocks())
@@ -190,8 +194,10 @@ class RDAArchive:
         guard = 0
         while current < file_size:
             guard += 1
-            if guard > 1_000_000:
-                raise RDAParseError("block chain loop detected (>1M iterations)")
+            if guard > MAX_BLOCK_CHAIN_LENGTH:
+                raise RDAParseError(
+                    f"block chain loop detected (>{MAX_BLOCK_CHAIN_LENGTH} iterations)"
+                )
 
             stream.seek(current)
             block = read_block_info(stream, version)
@@ -211,9 +217,7 @@ class RDAArchive:
         assert self._stream is not None
 
         if entry.is_encrypted:
-            raise EncryptedBlockError(
-                "encrypted file data is not supported in v0.1.0"
-            )
+            raise EncryptedBlockError("encrypted file data is not supported in v0.1.0")
 
         self._stream.seek(entry.offset)
         raw = self._stream.read(entry.compressed_size)
@@ -226,7 +230,5 @@ class RDAArchive:
             try:
                 raw = zlib.decompress(raw, bufsize=entry.uncompressed_size)
             except zlib.error as e:
-                raise RDAParseError(
-                    f"zlib decompress failed for {entry.filename!r}: {e}"
-                ) from e
+                raise RDAParseError(f"zlib decompress failed for {entry.filename!r}: {e}") from e
         return raw
