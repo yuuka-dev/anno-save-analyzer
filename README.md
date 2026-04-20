@@ -71,10 +71,10 @@ This project peels every layer natively in Python and turns the raw trade events
 
 ```bash
 # Install the latest released version from the GitHub tag
-uv pip install "anno-save-analyzer[tui] @ git+https://github.com/yuuka-dev/anno-save-analyzer@v0.4.0"
+uv pip install "anno-save-analyzer[tui] @ git+https://github.com/yuuka-dev/anno-save-analyzer@v0.4.1"
 
 # Or install as a standalone CLI tool (no venv management)
-uv tool install "anno-save-analyzer[tui] @ git+https://github.com/yuuka-dev/anno-save-analyzer@v0.4.0"
+uv tool install "anno-save-analyzer[tui] @ git+https://github.com/yuuka-dev/anno-save-analyzer@v0.4.1"
 ```
 
 The `[tui]` extra pulls in Textual and textual-plotext. Omit it if you only need the CLI / library.
@@ -90,7 +90,7 @@ uv sync --extra tui        # or: python -m venv .venv && .venv/bin/pip install -
 ### Without uv (plain pip)
 
 ```bash
-pip install "anno-save-analyzer[tui] @ git+https://github.com/yuuka-dev/anno-save-analyzer@v0.4.0"
+pip install "anno-save-analyzer[tui] @ git+https://github.com/yuuka-dev/anno-save-analyzer@v0.4.1"
 ```
 
 > PyPI publication is planned for v1.0. Until then, Git tags are the supported distribution channel.
