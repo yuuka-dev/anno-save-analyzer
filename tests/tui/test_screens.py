@@ -11,6 +11,35 @@ from anno_save_analyzer.tui.state import TuiState, build_overview
 
 
 @pytest.mark.asyncio
+class TestScreenLocalizerSetter:
+    """Cursor レビュー指摘: App からの ``_localizer`` 直書きを setter 化．"""
+
+    async def test_overview_set_localizer_swaps_instance(self, tui_state) -> None:
+        from anno_save_analyzer.tui.screens import OverviewScreen
+
+        app = TradeApp(tui_state)
+        async with app.run_test() as pilot:
+            await pilot.pause()
+            overview = pilot.app.get_screen("overview")
+            assert isinstance(overview, OverviewScreen)
+            new_localizer = Localizer.load("ja")
+            overview.set_localizer(new_localizer)
+            assert overview._localizer is new_localizer
+
+    async def test_statistics_set_localizer_swaps_instance(self, tui_state) -> None:
+        from anno_save_analyzer.tui.screens import TradeStatisticsScreen
+
+        app = TradeApp(tui_state)
+        async with app.run_test() as pilot:
+            await pilot.pause()
+            stats = pilot.app.get_screen("statistics")
+            assert isinstance(stats, TradeStatisticsScreen)
+            new_localizer = Localizer.load("ja")
+            stats.set_localizer(new_localizer)
+            assert stats._localizer is new_localizer
+
+
+@pytest.mark.asyncio
 class TestOverviewScreen:
     async def test_overview_renders_with_session_ids(self, tui_state) -> None:
         app = TradeApp(tui_state)

@@ -91,7 +91,7 @@ class TradeApp(App[None]):
         self._apply_localized_bindings()
         self.title = self._localized_title()
         for screen in (self.get_screen("overview"), self.get_screen("statistics")):
-            screen._localizer = self._localizer
+            screen.set_localizer(self._localizer)
             screen.refresh(recompose=True)
 
     def action_show_help(self) -> None:  # pragma: no cover - manual interaction only

@@ -57,6 +57,14 @@ class TradeStatisticsScreen(Screen):
         self._state = state
         self._localizer = localizer
 
+    def set_localizer(self, localizer: Localizer) -> None:
+        """``TradeApp.switch_locale`` から呼ばれる公開 setter．
+
+        ``_localizer`` の直書き回避．再描画はコール側の ``refresh(recompose=True)``
+        に委譲する．
+        """
+        self._localizer = localizer
+
     def compose(self) -> ComposeResult:
         t = self._localizer.t
         yield Header()
