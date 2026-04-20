@@ -52,17 +52,42 @@ def _launch(
         )
         raise typer.Exit(code=1) from exc
 
-    # stderr にステージラベルを流すプログレス．Textual が stdout を掴むので
-    # stderr 固定で書き出す．
-    def _progress(stage: str) -> None:
-        typer.secho(f"  … {stage}", err=True, fg=typer.colors.CYAN)
-
+    # 進捗ゲージ (stderr)．Textual を起動すると stdout を掴むため err=True 固定．
+    # ``load_state`` は各ステージ開始時に progress(stage_label) を呼び，
+    # ゲージはステージ粒度 (1/5, 2/5, …) で正直に進む．
+    # データ量に比例した細かいゲージは v0.4 以降で検討 (各ステージ内で
+    # chunk progress を報告する設計変更が必要)．
+    stage_total = 5
     typer.secho(f"Loading {save.name} …", err=True, bold=True)
-    state = load_state(save, title=title.to_title(), locale=locale, progress=_progress)
+    with typer.progressbar(
+        length=stage_total,
+        label="  starting",
+        file=_stderr(),
+        fill_char="█",
+        empty_char="░",
+        show_eta=False,
+        show_percent=True,
+    ) as bar:
+        step = 0
+
+        def _progress(stage: str) -> None:
+            nonlocal step
+            step += 1
+            bar.label = f"  [{step}/{stage_total}] {stage}"
+            bar.update(1)
+
+        state = load_state(save, title=title.to_title(), locale=locale, progress=_progress)
     typer.secho("  ✓ ready", err=True, fg=typer.colors.GREEN)
 
     app = TradeApp(state, theme=theme.value)
     app.run()
+
+
+def _stderr():
+    """``typer.progressbar`` に渡す stderr stream．小さな helper で test 容易化．"""
+    import sys
+
+    return sys.stderr
 
 
 def register(parent: typer.Typer) -> None:
