@@ -78,7 +78,7 @@ class TradeStatisticsScreen(Screen):
         self._localizer = localizer
         self._filter = TradeFilter()
         self._filtered_events_cache: list[TradeEvent] | None = None
-        self._filtered_events_cache_filter: TradeFilter | None = None
+        self._filtered_events_cache_key: tuple[str | None, str | None] | None = None
 
     def set_localizer(self, localizer: Localizer) -> None:
         """``TradeApp.switch_locale`` から呼ばれる公開 setter．
@@ -153,15 +153,13 @@ class TradeStatisticsScreen(Screen):
 
     def _filtered_events(self) -> list:
         """現在の ``self._filter`` を適用した events．"""
-        if (
-            self._filtered_events_cache_filter == self._filter
-            and self._filtered_events_cache is not None
-        ):
+        key = (self._filter.session, self._filter.island)
+        if self._filtered_events_cache_key == key and self._filtered_events_cache is not None:
             return self._filtered_events_cache
         self._filtered_events_cache = filter_events(
             self._state.events, session=self._filter.session, island=self._filter.island
         )
-        self._filtered_events_cache_filter = self._filter
+        self._filtered_events_cache_key = key
         return self._filtered_events_cache
 
     def _current_item_summaries(self) -> tuple[ItemSummary, ...]:
@@ -319,7 +317,7 @@ class TradeStatisticsScreen(Screen):
             return
         self._filter = new_filter
         self._filtered_events_cache = None
-        self._filtered_events_cache_filter = None
+        self._filtered_events_cache_key = None
         self.refresh(recompose=True)
 
     def on_data_table_row_highlighted(self, event: DataTable.RowHighlighted) -> None:
