@@ -21,10 +21,12 @@ from anno_save_analyzer.parser.filedb import (
 from anno_save_analyzer.parser.pipeline import extract_inner_filedb
 from anno_save_analyzer.trade import (
     GameTitle,
+    IslandStorageTrend,
     ItemDictionary,
     TradeRouteDef,
     by_item,
     by_route,
+    list_storage_trends,
     list_trade_routes,
 )
 from anno_save_analyzer.trade.aggregate import ItemSummary, RouteSummary
@@ -69,6 +71,9 @@ class TuiState:
     # 履歴に現れない idle route も含まれる．Statistics 画面で active/idle 両方
     # を列挙するために使う．
     routes_by_session: dict[str, tuple[TradeRouteDef, ...]] = field(default_factory=dict)
+    # island_name (CityName) → 在庫時系列 (物資別) のリスト．
+    # Inventory tab の入力．session 横断キー (島名は全 session 合計でユニーク想定)．
+    storage_by_island: dict[str, tuple[IslandStorageTrend, ...]] = field(default_factory=dict)
 
 
 def build_overview(
@@ -170,6 +175,7 @@ def load_state(
     progress("enumerating islands and routes")
     islands_by_session = _collect_islands_by_session(inner_payloads, overview.session_ids)
     routes_by_session = _collect_routes_by_session(inner_payloads, overview.session_ids)
+    storage_by_island = _collect_storage_by_island(inner_payloads)
 
     return TuiState(
         save_path=save_path,
@@ -184,6 +190,7 @@ def load_state(
         session_locale_keys=locale_keys,
         islands_by_session=islands_by_session,
         routes_by_session=routes_by_session,
+        storage_by_island=storage_by_island,
     )
 
 
@@ -232,3 +239,20 @@ def _collect_routes_by_session(
         else ()
         for sid in session_ids
     }
+
+
+def _collect_storage_by_island(
+    inner_payloads: list[bytes],
+) -> dict[str, tuple[IslandStorageTrend, ...]]:
+    """プリロード済 inner payloads 横断で島別 StorageTrends を集める．
+
+    島名 (CityName) は session 横断でユニーク前提．同名が別 session にあれば
+    後勝ちになるが，書記長の実セーブで観測済の 13 島は全て unique．
+    """
+    aggregated: dict[str, list[IslandStorageTrend]] = {}
+    for inner in inner_payloads:
+        if not inner:
+            continue
+        for t in list_storage_trends(inner):
+            aggregated.setdefault(t.island_name, []).append(t)
+    return {name: tuple(items) for name, items in aggregated.items()}

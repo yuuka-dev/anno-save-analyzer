@@ -83,10 +83,10 @@ class TestTradeAppLifecycle:
             await pilot.pause()
             await pilot.press("ctrl+o")
             await pilot.pause()
-        # fake.bin basename に基づく 3 ファイル
+        # fake.bin basename に基づく 4 ファイル (items / routes / events / inventory)
         stems = sorted(p.name for p in tmp_path.glob("fake_*.csv"))
         kinds = {s.split("_")[1] for s in stems}
-        assert kinds == {"items", "routes", "events"}
+        assert kinds == {"items", "routes", "events", "inventory"}
         # items CSV に header 行があることを verify
         items_csv = next(p for p in tmp_path.glob("fake_items_*.csv"))
         content = items_csv.read_text(encoding="utf-8").splitlines()

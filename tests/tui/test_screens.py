@@ -207,7 +207,7 @@ class TestFilteredRenderingAndExport:
             await pilot.press("ctrl+o")
             await pilot.pause()
         csvs = sorted(tmp_path.glob("fake_*_island-*_*.csv"))
-        assert len(csvs) == 3  # items / routes / events
+        assert len(csvs) == 4  # items / routes / events / inventory
 
     async def test_export_filename_has_session_suffix(
         self, tui_state, tmp_path, monkeypatch
@@ -225,7 +225,7 @@ class TestFilteredRenderingAndExport:
             await pilot.press("ctrl+o")
             await pilot.pause()
         csvs = sorted(tmp_path.glob("fake_*_session-*_*.csv"))
-        assert len(csvs) == 3
+        assert len(csvs) == 4
 
     async def test_export_session_filter_keeps_idle_routes(
         self, tui_state, tmp_path, monkeypatch
@@ -288,7 +288,7 @@ class TestFilteredRenderingAndExport:
             await pilot.pause()
 
         csvs = sorted(tmp_path.glob("fake_*_island-*_*.csv"))
-        assert len(csvs) == 3
+        assert len(csvs) == 4
         for path in csvs:
             assert "/" not in path.name
             assert "\\" not in path.name

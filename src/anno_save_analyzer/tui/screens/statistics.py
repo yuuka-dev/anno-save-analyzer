@@ -99,6 +99,8 @@ class TradeStatisticsScreen(Screen):
                     yield self._render_items_table()
                 with TabPane(t("statistics.tab.routes"), id="routes-tab"):
                     yield self._render_routes_table()
+                with TabPane(t("statistics.tab.inventory"), id="inventory-tab"):
+                    yield self._render_inventory_table()
             with Vertical(id="right-column"):
                 yield Static(
                     f"[b]{t('partners.heading')}[/b]\n\n{t('partners.empty')}",
@@ -276,6 +278,58 @@ class TradeStatisticsScreen(Screen):
             f"{s.event_count:,}",
         )
 
+    def _current_inventory_rows(self):
+        """現在の ``_filter`` を Inventory 表示用の (島, trend) 列に落とす．
+
+        island filter → その島のみ / session filter → 当該 session の島 /
+        filter 無し → 全島を連結．``IslandStorageTrend`` は session 情報を持たない
+        ので session filter は ``islands_by_session`` からその session の島名
+        集合を引いて交差を取る．
+        """
+        storage = self._state.storage_by_island
+        if self._filter.island is not None:
+            names = {self._filter.island}
+        elif self._filter.session is not None:
+            islands = self._state.islands_by_session.get(self._filter.session, ())
+            names = {i.city_name for i in islands}
+        else:
+            names = set(storage)
+        rows: list = []
+        for name in sorted(names):
+            rows.extend(storage.get(name, ()))
+        return rows
+
+    def _render_inventory_table(self) -> DataTable:
+        table = DataTable(id="inventory-table")
+        table.cursor_type = "row"
+        t = self._localizer.t
+        table.add_columns(
+            t("statistics.col.island"),
+            t("statistics.col.good"),
+            t("statistics.col.latest"),
+            t("statistics.col.peak"),
+            t("statistics.col.mean"),
+            t("statistics.col.slope"),
+            t("statistics.col.trend"),
+        )
+        for tr in self._current_inventory_rows():
+            table.add_row(
+                *self._format_inventory_row(tr), key=f"{tr.island_name}|{tr.product_guid}"
+            )
+        return table
+
+    def _format_inventory_row(self, tr) -> tuple[str, ...]:
+        item = self._state.items[tr.product_guid]
+        return (
+            tr.island_name,
+            item.display_name(self._localizer.code),
+            f"{tr.latest:,}",
+            f"{tr.peak:,}",
+            f"{tr.points.mean:,.0f}",
+            f"{tr.points.slope:+.2f}",
+            sparkline(tr.points.samples, width=12),
+        )
+
     def _format_route_row(self, s: RouteSummary, legs: int, *, active: bool) -> tuple[str, ...]:
         t = self._localizer.t
         route_id = s.route_id if s.route_id is not None else "—"
@@ -321,10 +375,13 @@ class TradeStatisticsScreen(Screen):
         self.refresh(recompose=True)
 
     def on_data_table_row_highlighted(self, event: DataTable.RowHighlighted) -> None:
-        """items / routes テーブル双方の行 highlight で右 pane を更新．"""
+        """items / routes / inventory テーブルの行 highlight で右 pane を更新．"""
         table_id = event.data_table.id
         row_key = event.row_key.value if event.row_key is not None else None
         if not row_key:
+            return
+        if table_id == "inventory-table":
+            self._update_inventory_chart(row_key)
             return
         if table_id == "items-table":
             try:
@@ -394,6 +451,41 @@ class TradeStatisticsScreen(Screen):
             ylabel=t("statistics.chart.ylabel.cumulative_gold"),
             unit_key=unit_key,
         )
+
+    def _update_inventory_chart(self, row_key: str) -> None:
+        """inventory-table 選択時に Points 時系列を chart pane に描画．
+
+        row_key は ``f"{island}|{guid}"`` 形式．
+        """
+        t = self._localizer.t
+        if "|" not in row_key:
+            return
+        island, guid_str = row_key.rsplit("|", 1)
+        try:
+            guid = int(guid_str)
+        except ValueError:
+            return
+        trend = next(
+            (tr for tr in self._state.storage_by_island.get(island, ()) if tr.product_guid == guid),
+            None,
+        )
+        if trend is None:
+            return
+        item = self._state.items[guid]
+        title = f"{island} · {item.display_name(self._localizer.code)}"
+        samples = list(trend.points.samples)
+        if not samples:
+            self._render_empty_chart(t("statistics.chart.no_timed_events", title=title))
+            return
+        x_values = list(range(len(samples)))
+        chart = self.query_one("#chart-pane", PlotextPlot)
+        chart.plt.clear_data()
+        chart.plt.clear_figure()
+        chart.plt.plot(x_values, samples, marker="hd")
+        chart.plt.title(title)
+        chart.plt.xlabel("sample index")
+        chart.plt.ylabel(t("statistics.col.latest"))
+        chart.refresh()
 
     def _find_idle_route_tasks(self, route_id: str) -> tuple:
         """routes_by_session から ship_id 一致の TradeRouteDef を探し tasks を返す．"""
