@@ -785,13 +785,19 @@ class TestStatisticsScreen:
         from textual.widgets import Static
 
         from anno_save_analyzer.trade import Item, TradeEvent
+        from anno_save_analyzer.trade.clock import TICKS_PER_MINUTE
 
         item = Item(guid=5555, names={"en": "X"})
-        # 最新 tick=1_000_000．60 min 前 (36_000 tick) と 180 min 前 (108_000 tick)．
+        # 最新 / 60 分前 / 180 分前．180 分は 120 分閾値を超えて "h ago" に切替．
+        now = 10 * TICKS_PER_MINUTE
         events = (
-            TradeEvent(item=item, amount=1, total_price=1, timestamp_tick=1_000_000),
-            TradeEvent(item=item, amount=1, total_price=1, timestamp_tick=964_000),
-            TradeEvent(item=item, amount=1, total_price=1, timestamp_tick=892_000),
+            TradeEvent(item=item, amount=1, total_price=1, timestamp_tick=now),
+            TradeEvent(
+                item=item, amount=1, total_price=1, timestamp_tick=now - 60 * TICKS_PER_MINUTE
+            ),
+            TradeEvent(
+                item=item, amount=1, total_price=1, timestamp_tick=now - 180 * TICKS_PER_MINUTE
+            ),
         )
         new_state = dataclasses.replace(tui_state, events=(*tui_state.events, *events))
         app = TradeApp(new_state)
