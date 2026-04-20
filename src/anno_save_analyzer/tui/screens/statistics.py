@@ -66,10 +66,9 @@ class TradeStatisticsScreen(Screen):
     TradeStatisticsScreen #right-column {
         width: 42;
     }
-    TradeStatisticsScreen #partners-pane {
+    TradeStatisticsScreen #partners-scroll {
         height: 40%;
         border: solid $secondary;
-        overflow: auto;
     }
     TradeStatisticsScreen #chart-pane {
         height: 60%;
