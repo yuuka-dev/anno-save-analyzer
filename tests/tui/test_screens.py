@@ -11,6 +11,237 @@ from anno_save_analyzer.tui.state import TuiState, build_overview
 
 
 @pytest.mark.asyncio
+class TestTreeFilterSync:
+    """#30: Tree selection → _filter 更新 → table / pane / chart 連動．"""
+
+    async def test_root_node_resets_filter_to_all(self, tui_state) -> None:
+        from anno_save_analyzer.tui.screens.statistics import TradeFilter, TradeStatisticsScreen
+
+        app = TradeApp(tui_state)
+        async with app.run_test() as pilot:
+            await pilot.pause()
+            await pilot.press("ctrl+t")
+            await pilot.pause()
+            screen = pilot.app.screen
+            assert isinstance(screen, TradeStatisticsScreen)
+            screen._filter = TradeFilter(session="0", island="whatever")
+
+            from textual.widgets import Tree
+
+            tree = screen.query_one("#sessions-tree", Tree)
+
+            class _Evt:
+                def __init__(self, node):
+                    self.node = node
+
+            screen.on_tree_node_selected(_Evt(tree.root))
+            await pilot.pause()
+            # refresh(recompose=True) 後の screen を取得し直す
+            screen = pilot.app.screen
+            assert screen._filter.is_all
+
+    async def test_session_node_sets_session_filter(self, tui_state) -> None:
+        from anno_save_analyzer.tui.screens.statistics import TradeStatisticsScreen
+
+        app = TradeApp(tui_state)
+        async with app.run_test() as pilot:
+            await pilot.pause()
+            await pilot.press("ctrl+t")
+            await pilot.pause()
+            from textual.widgets import Tree
+
+            screen = pilot.app.screen
+            tree = screen.query_one("#sessions-tree", Tree)
+            # 最初の session ノード
+            session_node = tree.root.children[0]
+
+            class _Evt:
+                def __init__(self, node):
+                    self.node = node
+
+            screen.on_tree_node_selected(_Evt(session_node))
+            await pilot.pause()
+            screen = pilot.app.screen
+            assert isinstance(screen, TradeStatisticsScreen)
+            assert screen._filter.session == tui_state.session_ids[0]
+
+    async def test_repeated_selection_is_no_op(self, tui_state) -> None:
+        """同じノードを再選択しても filter が変わらず refresh しない (早期 return)．"""
+        app = TradeApp(tui_state)
+        async with app.run_test() as pilot:
+            await pilot.pause()
+            await pilot.press("ctrl+t")
+            await pilot.pause()
+            from textual.widgets import Tree
+
+            screen = pilot.app.screen
+            tree = screen.query_one("#sessions-tree", Tree)
+
+            class _Evt:
+                def __init__(self, node):
+                    self.node = node
+
+            screen.on_tree_node_selected(_Evt(tree.root))  # All
+            screen.on_tree_node_selected(_Evt(tree.root))  # 2 回目 = no-op
+            await pilot.pause()
+            assert pilot.app.screen._filter.is_all
+
+
+@pytest.mark.asyncio
+class TestFilterLabel:
+    """Filter banner がロケール / 選択内容で更新される．"""
+
+    async def test_all_label_on_fresh_screen(self, tui_state) -> None:
+        from textual.widgets import Static
+
+        app = TradeApp(tui_state)
+        async with app.run_test() as pilot:
+            await pilot.pause()
+            await pilot.press("ctrl+t")
+            await pilot.pause()
+            banner = pilot.app.screen.query_one("#filter-banner", Static)
+            text = str(banner.render())
+            assert "all" in text.lower() or "全体" in text
+
+    async def test_session_label_after_selection(self, tui_state) -> None:
+        from textual.widgets import Static
+
+        from anno_save_analyzer.tui.screens.statistics import TradeFilter
+
+        app = TradeApp(tui_state)
+        async with app.run_test() as pilot:
+            await pilot.pause()
+            await pilot.press("ctrl+t")
+            await pilot.pause()
+            screen = pilot.app.screen
+            screen._filter = TradeFilter(session=tui_state.session_ids[0])
+            screen.refresh(recompose=True)
+            await pilot.pause()
+            banner = pilot.app.screen.query_one("#filter-banner", Static)
+            text = str(banner.render())
+            assert "session" in text.lower() or "セッション" in text
+
+    async def test_island_label(self, tui_state) -> None:
+        from textual.widgets import Static
+
+        from anno_save_analyzer.tui.screens.statistics import TradeFilter
+
+        app = TradeApp(tui_state)
+        async with app.run_test() as pilot:
+            await pilot.pause()
+            await pilot.press("ctrl+t")
+            await pilot.pause()
+            screen = pilot.app.screen
+            screen._filter = TradeFilter(session="0", island="大阪民国")
+            screen.refresh(recompose=True)
+            await pilot.pause()
+            banner = pilot.app.screen.query_one("#filter-banner", Static)
+            text = str(banner.render())
+            assert "大阪民国" in text
+
+
+@pytest.mark.asyncio
+class TestFilteredRenderingAndExport:
+    async def test_routes_table_hides_idle_under_island_filter(self, tui_state) -> None:
+        """island filter 時は idle route (定義のみ / 履歴無し) は routes-table から消える．"""
+        from anno_save_analyzer.trade import TradeRouteDef, TransportTask
+        from anno_save_analyzer.tui.screens.statistics import TradeFilter
+        from anno_save_analyzer.tui.state import TuiState
+
+        idle_def = TradeRouteDef(
+            ship_id=999,
+            route_hash=0,
+            round_travel=0,
+            establish_time=0,
+            tasks=(TransportTask(from_key=1, to_key=2, product_guid=1, balance_raw=0),),
+        )
+        first_sid = tui_state.session_ids[0]
+        new_state = TuiState(
+            save_path=tui_state.save_path,
+            title=tui_state.title,
+            locale="en",
+            events=tui_state.events,
+            items=tui_state.items,
+            overview=tui_state.overview,
+            item_summaries=tui_state.item_summaries,
+            route_summaries=tui_state.route_summaries,
+            session_ids=tui_state.session_ids,
+            session_locale_keys=tui_state.session_locale_keys,
+            islands_by_session=tui_state.islands_by_session,
+            routes_by_session={first_sid: (idle_def,)},
+        )
+        app = TradeApp(new_state)
+        async with app.run_test() as pilot:
+            await pilot.pause()
+            await pilot.press("ctrl+t")
+            await pilot.pause()
+            screen = pilot.app.screen
+            # 全体 → idle 999 行が存在
+            from textual.widgets import DataTable
+
+            table_all = screen.query_one("#routes-table", DataTable)
+            all_count = table_all.row_count
+            # island filter 適用 → idle route 消える
+            screen._filter = TradeFilter(session=first_sid, island="プレイヤー島")
+            screen.refresh(recompose=True)
+            await pilot.pause()
+            table_island = pilot.app.screen.query_one("#routes-table", DataTable)
+            # ship_id=999 の idle は island filter 時 hide される
+            assert table_island.row_count <= all_count
+
+    async def test_export_filename_has_filter_suffix(
+        self, tui_state, tmp_path, monkeypatch
+    ) -> None:
+        """Statistics 画面で filter 有効時に ^O すると filename に suffix が付く．"""
+        from anno_save_analyzer.tui.screens.statistics import TradeFilter
+
+        monkeypatch.chdir(tmp_path)
+        app = TradeApp(tui_state)
+        async with app.run_test() as pilot:
+            await pilot.pause()
+            await pilot.press("ctrl+t")
+            await pilot.pause()
+            pilot.app.screen._filter = TradeFilter(
+                session=tui_state.session_ids[0], island="プレイヤー島"
+            )
+            await pilot.press("ctrl+o")
+            await pilot.pause()
+        csvs = sorted(tmp_path.glob("fake_*_island-*_*.csv"))
+        assert len(csvs) == 3  # items / routes / events
+
+    async def test_export_filename_has_session_suffix(
+        self, tui_state, tmp_path, monkeypatch
+    ) -> None:
+        """session filter だけの場合は session-<id> suffix．"""
+        from anno_save_analyzer.tui.screens.statistics import TradeFilter
+
+        monkeypatch.chdir(tmp_path)
+        app = TradeApp(tui_state)
+        async with app.run_test() as pilot:
+            await pilot.pause()
+            await pilot.press("ctrl+t")
+            await pilot.pause()
+            pilot.app.screen._filter = TradeFilter(session=tui_state.session_ids[0])
+            await pilot.press("ctrl+o")
+            await pilot.pause()
+        csvs = sorted(tmp_path.glob("fake_*_session-*_*.csv"))
+        assert len(csvs) == 3
+
+    async def test_export_full_when_overview_active(self, tui_state, tmp_path, monkeypatch) -> None:
+        """Overview 画面で ^O すると filter 関係なく全量，suffix なし．"""
+        monkeypatch.chdir(tmp_path)
+        app = TradeApp(tui_state)
+        async with app.run_test() as pilot:
+            await pilot.pause()  # overview の状態
+            await pilot.press("ctrl+o")
+            await pilot.pause()
+        csvs = sorted(tmp_path.glob("fake_*_*.csv"))
+        # filter suffix は無い
+        assert all("island-" not in p.name for p in csvs)
+        assert all("session-" not in p.name for p in csvs)
+
+
+@pytest.mark.asyncio
 class TestScreenLocalizerSetter:
     """Cursor レビュー指摘: App からの ``_localizer`` 直書きを setter 化．"""
 

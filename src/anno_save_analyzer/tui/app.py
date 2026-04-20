@@ -8,7 +8,14 @@ from pathlib import Path
 from textual.app import App
 from textual.binding import Binding
 
-from anno_save_analyzer.trade import events_to_csv, items_to_csv, routes_to_csv
+from anno_save_analyzer.trade import (
+    by_item,
+    by_route,
+    events_to_csv,
+    items_to_csv,
+    routes_to_csv,
+)
+from anno_save_analyzer.trade.aggregate import filter_events
 from anno_save_analyzer.trade.models import GameTitle
 
 from .i18n import Localizer
@@ -110,27 +117,72 @@ class TradeApp(App[None]):
         label = ", ".join(p.name for p in paths)
         self.notify(f"exported: {label}")
 
+    def _active_filter(self):
+        """現在の画面が Statistics なら ``TradeFilter``，それ以外は None．
+
+        循環 import 回避のためローカル import．export は画面横断的に呼ばれるので
+        ここで画面種別を見て filter を取りに行く．
+        """
+        from .screens import TradeStatisticsScreen
+
+        screen = self.screen
+        if isinstance(screen, TradeStatisticsScreen):
+            return screen._filter
+        return None
+
     def _write_exports(self) -> list[Path]:
         stamp = _dt.datetime.now().strftime("%Y%m%d_%H%M%S")
         basename = self._state.save_path.stem or "anno_save"
         out_dir = Path.cwd()
         locale = self._localizer.code
-        idle_routes = [rd for routes in self._state.routes_by_session.values() for rd in routes]
-        active_ids = {s.route_id for s in self._state.route_summaries if s.route_id is not None}
+
+        # Statistics 画面が active なら ``_filter`` を汲む．それ以外は全量．
+        filt = self._active_filter()
+        events = (
+            filter_events(self._state.events, session=filt.session, island=filt.island)
+            if filt is not None
+            else list(self._state.events)
+        )
+        item_rows = (
+            by_item(events) if filt is not None and not filt.is_all else self._state.item_summaries
+        )
+        route_rows = (
+            by_route(events)
+            if filt is not None and not filt.is_all
+            else self._state.route_summaries
+        )
+        # filter 時は idle route (history 無し) は CSV からも除外する (意味が逆転するため)
+        idle_routes = (
+            [rd for routes in self._state.routes_by_session.values() for rd in routes]
+            if filt is None or filt.is_all
+            else []
+        )
+        active_ids = {s.route_id for s in route_rows if s.route_id is not None}
+
+        suffix_parts: list[str] = []
+        if filt is not None and filt.island:
+            suffix_parts.append(f"island-{filt.island}")
+        elif filt is not None and filt.session:
+            suffix_parts.append(f"session-{filt.session}")
+        suffix = ("_" + "_".join(suffix_parts)) if suffix_parts else ""
+
         targets = [
             (
-                f"{basename}_items_{stamp}.csv",
-                items_to_csv(self._state.item_summaries, locale=locale),
+                f"{basename}_items{suffix}_{stamp}.csv",
+                items_to_csv(item_rows, locale=locale),
             ),
             (
-                f"{basename}_routes_{stamp}.csv",
+                f"{basename}_routes{suffix}_{stamp}.csv",
                 routes_to_csv(
-                    self._state.route_summaries,
+                    route_rows,
                     idle_routes=idle_routes,
                     active_ids=active_ids,
                 ),
             ),
-            (f"{basename}_events_{stamp}.csv", events_to_csv(self._state.events, locale=locale)),
+            (
+                f"{basename}_events{suffix}_{stamp}.csv",
+                events_to_csv(events, locale=locale),
+            ),
         ]
         written: list[Path] = []
         for name, content in targets:
