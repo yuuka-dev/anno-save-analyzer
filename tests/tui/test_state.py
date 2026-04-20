@@ -108,6 +108,20 @@ class TestCollectIslandsBySession:
         assert "0" in result
         assert called["n"] == 1
 
+    def test_maps_by_session_id_not_event_order(self, tmp_path: Path, monkeypatch) -> None:
+        import anno_save_analyzer.tui.state as state_mod
+
+        monkeypatch.setattr(state_mod, "_load_inner_sessions", lambda _: [b"first", b"second"])
+        monkeypatch.setattr(
+            state_mod,
+            "list_player_islands",
+            lambda inner: (state_mod.PlayerIsland(city_name=inner.decode("utf-8")),),
+        )
+
+        result = _collect_islands_by_session(tmp_path / "x.bin", ("1", "0"))
+        assert result["1"][0].city_name == "second"
+        assert result["0"][0].city_name == "first"
+
 
 class TestCollectRoutesBySession:
     def test_empty_session_ids_returns_empty_dict(self, tmp_path: Path) -> None:
@@ -119,3 +133,26 @@ class TestCollectRoutesBySession:
         assert set(result) == set(tui_state.session_ids)
         for sid in tui_state.session_ids:
             assert result[sid] == ()
+
+    def test_maps_by_session_id_not_event_order(self, tmp_path: Path, monkeypatch) -> None:
+        import anno_save_analyzer.tui.state as state_mod
+        from anno_save_analyzer.trade import TradeRouteDef
+
+        monkeypatch.setattr(state_mod, "_load_inner_sessions", lambda _: [b"first", b"second"])
+        monkeypatch.setattr(
+            state_mod,
+            "list_trade_routes",
+            lambda inner: (
+                TradeRouteDef(
+                    ship_id=1 if inner == b"first" else 2,
+                    route_hash=0,
+                    round_travel=0,
+                    establish_time=0,
+                    tasks=(),
+                ),
+            ),
+        )
+
+        result = _collect_routes_by_session(tmp_path / "x.bin", ("1", "0"))
+        assert result["1"][0].ship_id == 2
+        assert result["0"][0].ship_id == 1

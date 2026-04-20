@@ -141,7 +141,7 @@ def partners_for_item(events: Iterable[TradeEvent], item_guid: int) -> list[Part
     """指定 item GUID の取引を (route_id, partner_id, kind) 別に集計．
 
     物資を選んだときの Partners pane に出す "この物資を誰と取引したか" を
-    net_gold 降順 → event_count 降順で返す．
+    event_count 降順 → abs(net_gold) 降順 → route_id 昇順で返す．
     """
     buckets: dict[tuple[str | None, str | None, str], dict] = defaultdict(
         lambda: {

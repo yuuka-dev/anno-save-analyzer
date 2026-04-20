@@ -69,7 +69,7 @@ class TradeStatisticsScreen(Screen):
                     yield self._render_routes_table()
             with Vertical(id="right-column"):
                 yield Static(
-                    f"[b]{t('partners.heading')}[/b]\n\n{t('partners.placeholder')}",
+                    f"[b]{t('partners.heading')}[/b]\n\n{t('partners.empty')}",
                     id="partners-pane",
                 )
                 yield PlotextPlot(id="chart-pane")
@@ -112,7 +112,7 @@ class TradeStatisticsScreen(Screen):
     def _build_item_trends(self) -> dict[int, str]:
         """item GUID → 累積数量 sparkline 文字列 (width=12)．
 
-        timestamp 昇順に累積を取る．timestamp 無しイベントは既存順を維持．
+        timestamp を持つイベントのみ対象に，時刻昇順で累積を取る．
         """
         series: dict[int, list[tuple[int, int]]] = {}
         for ev in self._state.events:
@@ -229,6 +229,7 @@ class TradeStatisticsScreen(Screen):
 
     def _update_chart_pane(self, item_guid: int) -> None:
         """選択物資の取引を (timestamp_tick, 累積数量) の折れ線で描画．"""
+        t = self._localizer.t
         events = sorted(
             (
                 e
@@ -240,10 +241,10 @@ class TradeStatisticsScreen(Screen):
         item = self._state.items[item_guid]
         title = item.display_name(self._localizer.code)
         if not events:
-            self._render_empty_chart(f"{title} — no timed events")
+            self._render_empty_chart(t("statistics.chart.no_timed_events", title=title))
             return
         x_scaled, y_values = self._cumulative_series(events, by="amount")
-        self._plot_line(title, x_scaled, y_values, ylabel="cumulative qty")
+        self._plot_line(title, x_scaled, y_values, ylabel=t("statistics.chart.ylabel.cumulative_qty"))
 
     def _update_route_detail(self, route_id: str) -> None:
         """選択ルートの累積 net gold 時系列を chart pane に描画．"""
@@ -261,11 +262,14 @@ class TradeStatisticsScreen(Screen):
             # idle route: 履歴なし．定義 leg を簡潔に表示．
             idle_tasks = self._find_idle_route_tasks(route_id)
             if idle_tasks:
-                title = f"{title} ({t('statistics.status.idle')}, {len(idle_tasks)} legs)"
-            self._render_empty_chart(f"{title} — no timed events")
+                title = (
+                    f"{title} "
+                    f"({t('statistics.chart.idle_suffix', status=t('statistics.status.idle'), legs=len(idle_tasks))})"
+                )
+            self._render_empty_chart(t("statistics.chart.no_timed_events", title=title))
             return
         x_scaled, y_values = self._cumulative_series(events, by="total_price")
-        self._plot_line(title, x_scaled, y_values, ylabel="cumulative gold")
+        self._plot_line(title, x_scaled, y_values, ylabel=t("statistics.chart.ylabel.cumulative_gold"))
 
     def _find_idle_route_tasks(self, route_id: str) -> tuple:
         """routes_by_session から ship_id 一致の TradeRouteDef を探し tasks を返す．"""
@@ -287,11 +291,12 @@ class TradeStatisticsScreen(Screen):
 
     def _plot_line(self, title: str, x: list[float], y: list[int], *, ylabel: str) -> None:
         chart = self.query_one("#chart-pane", PlotextPlot)
+        t = self._localizer.t
         chart.plt.clear_data()
         chart.plt.clear_figure()
         chart.plt.plot(x, y, marker="hd")
         chart.plt.title(title)
-        chart.plt.xlabel("tick / 1000")
+        chart.plt.xlabel(t("statistics.chart.xlabel.tick_scaled"))
         chart.plt.ylabel(ylabel)
         chart.refresh()
 

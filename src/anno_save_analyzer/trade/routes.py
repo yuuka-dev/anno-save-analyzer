@@ -73,7 +73,7 @@ def list_trade_routes(inner_session: bytes) -> tuple[TradeRouteDef, ...]:
     """内側 Session FileDB から登録済貿易ルートを全件抽出．
 
     複数 ``ConstructionAI`` ブロックがある場合 (プレイヤー + AI) はそれぞれ展開し，
-    呼び出し側が必要に応じて ship_id などで fiter する．
+    呼び出し側が必要に応じて ship_id などで filter する．
     """
     if not inner_session:
         return ()

@@ -170,9 +170,12 @@ def _collect_islands_by_session(
     if not session_ids:
         return {}
     inner_payloads = _load_inner_sessions(save_path)
+    by_extracted_sid = {str(i): inner for i, inner in enumerate(inner_payloads)}
     return {
-        sid: list_player_islands(inner)
-        for sid, inner in zip(session_ids, inner_payloads, strict=False)
+        sid: list_player_islands(by_extracted_sid[sid])
+        if sid.isdigit() and sid in by_extracted_sid
+        else ()
+        for sid in session_ids
     }
 
 
@@ -187,7 +190,10 @@ def _collect_routes_by_session(
     if not session_ids:
         return {}
     inner_payloads = _load_inner_sessions(save_path)
+    by_extracted_sid = {str(i): inner for i, inner in enumerate(inner_payloads)}
     return {
-        sid: list_trade_routes(inner)
-        for sid, inner in zip(session_ids, inner_payloads, strict=False)
+        sid: list_trade_routes(by_extracted_sid[sid])
+        if sid.isdigit() and sid in by_extracted_sid
+        else ()
+        for sid in session_ids
     }
