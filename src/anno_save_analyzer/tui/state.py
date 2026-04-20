@@ -117,7 +117,7 @@ def _decompress_outer(save_path: Path) -> tuple[bytes, list[bytes]]:
 
 def _build_aggregates_and_overview(
     save_path: Path, title: GameTitle, events: list[TradeEvent]
-) -> tuple:
+) -> tuple[list[ItemSummary], list[RouteSummary], OverviewSnapshot, tuple[str, ...]]:
     """events から集計 (item / route)，Overview，session locale keys を作る．"""
     item_rows = by_item(events)
     route_rows = by_route(events)

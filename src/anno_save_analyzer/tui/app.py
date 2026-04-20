@@ -24,6 +24,13 @@ from .state import TuiState, load_state
 from .theme import USSR_TITLE_PREFIX, theme_css
 
 
+def _sanitize_filename_component(value: str) -> str:
+    """ファイル名 suffix に使える安全な文字列へ正規化する．"""
+    sanitized = "".join("-" if ch in '/\\<>:"|?*' or ord(ch) < 32 else ch for ch in value)
+    cleaned = sanitized.strip(" .")
+    return cleaned or "unknown"
+
+
 class TradeApp(App[None]):
     """nano-flavored binding 契約をもつトップレベル App．"""
 
@@ -151,19 +158,24 @@ class TradeApp(App[None]):
             if filt is not None and not filt.is_all
             else self._state.route_summaries
         )
-        # filter 時は idle route (history 無し) は CSV からも除外する (意味が逆転するため)
-        idle_routes = (
-            [rd for routes in self._state.routes_by_session.values() for rd in routes]
-            if filt is None or filt.is_all
-            else []
-        )
+        # idle route (history 無し) は全量/全 session export では全件含める。
+        # session-only filter 時は当該 session の idle route を含め、
+        # island filter 時のみ CSV から除外する。
+        if filt is None or filt.is_all:
+            idle_routes = [rd for routes in self._state.routes_by_session.values() for rd in routes]
+        elif filt.island:
+            idle_routes = []
+        elif filt.session:
+            idle_routes = list(self._state.routes_by_session.get(filt.session, []))
+        else:
+            idle_routes = [rd for routes in self._state.routes_by_session.values() for rd in routes]
         active_ids = {s.route_id for s in route_rows if s.route_id is not None}
 
         suffix_parts: list[str] = []
         if filt is not None and filt.island:
-            suffix_parts.append(f"island-{filt.island}")
+            suffix_parts.append(f"island-{_sanitize_filename_component(filt.island)}")
         elif filt is not None and filt.session:
-            suffix_parts.append(f"session-{filt.session}")
+            suffix_parts.append(f"session-{_sanitize_filename_component(filt.session)}")
         suffix = ("_" + "_".join(suffix_parts)) if suffix_parts else ""
 
         targets = [

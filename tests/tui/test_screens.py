@@ -227,6 +227,76 @@ class TestFilteredRenderingAndExport:
         csvs = sorted(tmp_path.glob("fake_*_session-*_*.csv"))
         assert len(csvs) == 3
 
+    async def test_export_session_filter_keeps_idle_routes(
+        self, tui_state, tmp_path, monkeypatch
+    ) -> None:
+        from anno_save_analyzer.trade import TradeRouteDef, TransportTask
+        from anno_save_analyzer.tui.screens.statistics import TradeFilter
+        from anno_save_analyzer.tui.state import TuiState
+
+        first_sid = tui_state.session_ids[0]
+        idle_def = TradeRouteDef(
+            ship_id=999,
+            route_hash=0,
+            round_travel=0,
+            establish_time=0,
+            tasks=(TransportTask(from_key=1, to_key=2, product_guid=1, balance_raw=0),),
+        )
+        new_state = TuiState(
+            save_path=tui_state.save_path,
+            title=tui_state.title,
+            locale="en",
+            events=tui_state.events,
+            items=tui_state.items,
+            overview=tui_state.overview,
+            item_summaries=tui_state.item_summaries,
+            route_summaries=tui_state.route_summaries,
+            session_ids=tui_state.session_ids,
+            session_locale_keys=tui_state.session_locale_keys,
+            islands_by_session=tui_state.islands_by_session,
+            routes_by_session={first_sid: (idle_def,)},
+        )
+        monkeypatch.chdir(tmp_path)
+        app = TradeApp(new_state)
+        async with app.run_test() as pilot:
+            await pilot.pause()
+            await pilot.press("ctrl+t")
+            await pilot.pause()
+            pilot.app.screen._filter = TradeFilter(session=first_sid)
+            await pilot.press("ctrl+o")
+            await pilot.pause()
+
+        routes_csv = next(tmp_path.glob("fake_routes_session-*_*.csv"))
+        rows = routes_csv.read_text(encoding="utf-8").splitlines()
+        assert any(row.startswith("999,idle,route,") for row in rows)
+
+    async def test_export_filename_suffix_is_sanitized(
+        self, tui_state, tmp_path, monkeypatch
+    ) -> None:
+        from anno_save_analyzer.tui.screens.statistics import TradeFilter
+
+        monkeypatch.chdir(tmp_path)
+        app = TradeApp(tui_state)
+        async with app.run_test() as pilot:
+            await pilot.pause()
+            await pilot.press("ctrl+t")
+            await pilot.pause()
+            pilot.app.screen._filter = TradeFilter(
+                session=tui_state.session_ids[0], island="../bad\\name:*?"
+            )
+            await pilot.press("ctrl+o")
+            await pilot.pause()
+
+        csvs = sorted(tmp_path.glob("fake_*_island-*_*.csv"))
+        assert len(csvs) == 3
+        for path in csvs:
+            name = path.name
+            assert "/" not in name
+            assert "\\" not in name
+            assert ":" not in name
+            assert "*" not in name
+            assert "?" not in name
+
     async def test_export_full_when_overview_active(self, tui_state, tmp_path, monkeypatch) -> None:
         """Overview 画面で ^O すると filter 関係なく全量，suffix なし．"""
         monkeypatch.chdir(tmp_path)
@@ -268,6 +338,29 @@ class TestScreenLocalizerSetter:
             new_localizer = Localizer.load("ja")
             stats.set_localizer(new_localizer)
             assert stats._localizer is new_localizer
+
+
+class TestFilteredEventCache:
+    def test_filtered_events_reused_across_aggregations(self, tui_state, monkeypatch) -> None:
+        import anno_save_analyzer.tui.screens.statistics as statistics_mod
+        from anno_save_analyzer.tui.i18n import Localizer
+        from anno_save_analyzer.tui.screens.statistics import TradeFilter, TradeStatisticsScreen
+
+        calls = {"count": 0}
+        original = statistics_mod.filter_events
+
+        def wrapped(events, *, session=None, island=None):
+            calls["count"] += 1
+            return original(events, session=session, island=island)
+
+        monkeypatch.setattr(statistics_mod, "filter_events", wrapped)
+        screen = TradeStatisticsScreen(tui_state, Localizer.load("en"))
+        screen._filter = TradeFilter(session=tui_state.session_ids[0])
+        screen._current_item_summaries()
+        screen._current_route_summaries()
+        screen._build_item_trends()
+
+        assert calls["count"] == 1
 
 
 @pytest.mark.asyncio

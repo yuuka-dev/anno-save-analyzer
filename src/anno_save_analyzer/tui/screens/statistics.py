@@ -76,6 +76,8 @@ class TradeStatisticsScreen(Screen):
         self._state = state
         self._localizer = localizer
         self._filter = TradeFilter()
+        self._filtered_events_cache: list | None = None
+        self._filtered_events_cache_filter: TradeFilter | None = None
 
     def set_localizer(self, localizer: Localizer) -> None:
         """``TradeApp.switch_locale`` から呼ばれる公開 setter．
@@ -150,9 +152,16 @@ class TradeStatisticsScreen(Screen):
 
     def _filtered_events(self) -> list:
         """現在の ``self._filter`` を適用した events．"""
-        return filter_events(
+        if (
+            self._filtered_events_cache_filter == self._filter
+            and self._filtered_events_cache is not None
+        ):
+            return self._filtered_events_cache
+        self._filtered_events_cache = filter_events(
             self._state.events, session=self._filter.session, island=self._filter.island
         )
+        self._filtered_events_cache_filter = self._filter
+        return self._filtered_events_cache
 
     def _current_item_summaries(self) -> tuple[ItemSummary, ...]:
         """TuiState の pre-computed と同値．``_filter.is_all`` なら cache 再利用．"""
@@ -308,6 +317,8 @@ class TradeStatisticsScreen(Screen):
         if new_filter == self._filter:
             return
         self._filter = new_filter
+        self._filtered_events_cache = None
+        self._filtered_events_cache_filter = None
         self.refresh(recompose=True)
 
     def on_data_table_row_highlighted(self, event: DataTable.RowHighlighted) -> None:
