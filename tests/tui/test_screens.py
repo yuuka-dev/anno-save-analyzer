@@ -1020,6 +1020,38 @@ class TestStatisticsScreen:
             await pilot.press("ctrl+r")
             await pilot.pause()
 
+    async def test_chart_window_cycle_redraws_active_tab_only(self, tui_state) -> None:
+        """inventory を一度見た後でも items tab なら item chart を再描画する．"""
+        from textual.widgets import TabbedContent
+
+        app = TradeApp(tui_state)
+        async with app.run_test() as pilot:
+            await pilot.pause()
+            await pilot.press("ctrl+t")
+            await pilot.pause()
+            screen = pilot.app.screen
+
+            # stale な「最後に選択された inventory」を残しつつ，items tab をアクティブにする
+            screen._last_selected_inventory_key = ("島", 1)
+            screen._last_selected_item_guid = 2088
+            tabs = screen.query_one("#stats-tabs", TabbedContent)
+            tabs.active = "items-tab"
+
+            called: list[str] = []
+
+            def _inv(_key) -> None:
+                called.append("inventory")
+
+            def _item(_guid) -> None:
+                called.append("item")
+
+            screen._update_inventory_chart = _inv  # type: ignore[method-assign]
+            screen._update_chart_pane = _item  # type: ignore[method-assign]
+
+            await pilot.press("ctrl+r")
+            await pilot.pause()
+            assert called == ["item"]
+
     async def test_chart_window_filters_old_events(self, tui_state) -> None:
         """LAST_120_MIN で窓外の event は chart から消える (item chart 経由で確認)．"""
         import dataclasses

@@ -49,6 +49,7 @@ def filter_events[T: TradeEvent](events: Iterable[T], window: ChartTimeWindow) -
     ``ALL`` や最新 tick が取れない場合 (全 event tick=None) は全量返す．
     ``timestamp_tick is None`` の event は常に除外 (chart プロット不能のため)．
     """
+    events = list(events)
     tick_values = [ev.timestamp_tick for ev in events if ev.timestamp_tick is not None]
     now_tick = latest_tick(tick_values)
     if window.max_minutes is None or now_tick is None:

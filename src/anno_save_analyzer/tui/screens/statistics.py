@@ -277,13 +277,16 @@ class TradeStatisticsScreen(Screen):
         self._chart_window = self._chart_window.next()
         t = self._localizer.t
         self.app.notify(t("chart.window.notice", label=t(self._chart_window.locale_key)))
-        # 現在描画中のチャートを新しい window で再描画．優先順位は
-        # inventory > route > item (route 選択中に item を重ね表示しない)．
-        if self._last_selected_inventory_key is not None:
+        self._redraw_active_chart_window()
+
+    def _redraw_active_chart_window(self) -> None:
+        """現在アクティブな tab に対応する chart だけ再描画する．"""
+        active_tab = self.query_one("#stats-tabs", TabbedContent).active
+        if active_tab == "inventory-tab" and self._last_selected_inventory_key is not None:
             self._update_inventory_chart(self._last_selected_inventory_key)
-        elif self._last_selected_route_id is not None:
+        elif active_tab == "routes-tab" and self._last_selected_route_id is not None:
             self._update_route_detail(self._last_selected_route_id)
-        elif self._last_selected_item_guid is not None:
+        elif active_tab == "items-tab" and self._last_selected_item_guid is not None:
             self._update_chart_pane(self._last_selected_item_guid)
 
     def compose(self) -> ComposeResult:

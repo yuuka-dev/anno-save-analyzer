@@ -76,6 +76,12 @@ class TestFilterEvents:
         out = filter_events(events, ChartTimeWindow.LAST_120_MIN)
         assert out == []
 
+    def test_iterator_input_is_supported(self) -> None:
+        """iterable が generator でも 2-pass で消費されず正しく残る．"""
+        events = (_ev(t) for t in (100, 200, 300))
+        out = filter_events(events, ChartTimeWindow.ALL)
+        assert [e.timestamp_tick for e in out] == [100, 200, 300]
+
 
 class TestFilterInventoryMinutes:
     def test_all_keeps_everything(self) -> None:
