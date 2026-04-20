@@ -25,6 +25,7 @@ from anno_save_analyzer.trade.aggregate import (
     RouteSummary,
     filter_events,
 )
+from anno_save_analyzer.trade.models import TradeEvent
 
 from ..i18n import Localizer
 from ..sparkline import sparkline
@@ -76,7 +77,7 @@ class TradeStatisticsScreen(Screen):
         self._state = state
         self._localizer = localizer
         self._filter = TradeFilter()
-        self._filtered_events_cache: list | None = None
+        self._filtered_events_cache: list[TradeEvent] | None = None
         self._filtered_events_cache_filter: TradeFilter | None = None
 
     def set_localizer(self, localizer: Localizer) -> None:

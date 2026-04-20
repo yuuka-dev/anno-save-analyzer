@@ -296,6 +296,7 @@ class TestFilteredRenderingAndExport:
             assert ":" not in name
             assert "*" not in name
             assert "?" not in name
+            assert ".." not in name
 
     async def test_export_full_when_overview_active(self, tui_state, tmp_path, monkeypatch) -> None:
         """Overview 画面で ^O すると filter 関係なく全量，suffix なし．"""

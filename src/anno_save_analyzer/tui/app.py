@@ -23,10 +23,12 @@ from .screens import OverviewScreen, TradeStatisticsScreen
 from .state import TuiState, load_state
 from .theme import USSR_TITLE_PREFIX, theme_css
 
+_UNSAFE_FILENAME_CHARS = '/\\<>:"|?*'
+
 
 def _sanitize_filename_component(value: str) -> str:
     """ファイル名 suffix に使える安全な文字列へ正規化する．"""
-    sanitized = "".join("-" if ch in '/\\<>:"|?*' or ord(ch) < 32 else ch for ch in value)
+    sanitized = "".join("-" if ch in _UNSAFE_FILENAME_CHARS or ord(ch) < 32 else ch for ch in value)
     cleaned = sanitized.strip(" .")
     return cleaned or "unknown"
 
