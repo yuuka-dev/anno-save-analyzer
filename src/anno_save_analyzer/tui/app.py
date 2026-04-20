@@ -13,6 +13,7 @@ from anno_save_analyzer.trade import (
     by_item,
     by_route,
     events_to_csv,
+    inventory_to_csv,
     items_to_csv,
     routes_to_csv,
 )
@@ -188,6 +189,22 @@ class TradeApp(App[None]):
             suffix_parts.append(f"session-{_sanitize_filename_component(filt.session)}")
         suffix = ("_" + "_".join(suffix_parts)) if suffix_parts else ""
 
+        # Inventory (StorageTrends): session 横断で島単位の時系列．
+        # filter によって対象島を絞る．
+        inventory_trends: list = []
+        if filt is None or filt.is_all:
+            for trends in self._state.storage_by_island.values():
+                inventory_trends.extend(trends)
+        elif filt.island:
+            inventory_trends.extend(self._state.storage_by_island.get(filt.island, ()))
+        else:
+            # session filter: 当該 session に属する島のみ
+            island_names = {
+                i.city_name for i in self._state.islands_by_session.get(filt.session or "", ())
+            }
+            for name in island_names:
+                inventory_trends.extend(self._state.storage_by_island.get(name, ()))
+
         targets = [
             (
                 f"{basename}_items{suffix}_{stamp}.csv",
@@ -204,6 +221,10 @@ class TradeApp(App[None]):
             (
                 f"{basename}_events{suffix}_{stamp}.csv",
                 events_to_csv(events, locale=locale),
+            ),
+            (
+                f"{basename}_inventory{suffix}_{stamp}.csv",
+                inventory_to_csv(inventory_trends, items=self._state.items, locale=locale),
             ),
         ]
         written: list[Path] = []

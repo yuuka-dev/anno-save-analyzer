@@ -252,3 +252,81 @@ class TestEventsToCsvAndJson:
         events = [self._ev(island_name="Osaka")]
         parsed = json.loads(events_to_json(events))
         assert parsed[0]["island_name"] == "Osaka"
+
+
+class TestInventoryToCsv:
+    def _items_dict(self, locales=("en",)):
+        from anno_save_analyzer.trade import GameTitle, ItemDictionary
+
+        return ItemDictionary.load(GameTitle.ANNO_117, locales=locales)
+
+    def test_writes_header_and_rows(self) -> None:
+        from anno_save_analyzer.trade import (
+            IslandStorageTrend,
+            PointSeries,
+            inventory_to_csv,
+        )
+
+        trends = [
+            IslandStorageTrend(
+                island_name="大阪民国",
+                product_guid=2077,
+                last_point_tick=144380000,
+                estimation=0,
+                points=PointSeries(capacity=3, size=3, samples=(1, 2, 3)),
+            ),
+            IslandStorageTrend(
+                island_name="ジョウト地方",
+                product_guid=2088,
+                last_point_tick=None,
+                estimation=None,
+                points=PointSeries(capacity=3, size=3, samples=(5, 5, 5)),
+            ),
+        ]
+        out = inventory_to_csv(trends, items=self._items_dict(), locale="en")
+        rows = list(csv.reader(io.StringIO(out)))
+        assert rows[0] == [
+            "island_name",
+            "product_guid",
+            "product_name",
+            "latest",
+            "peak",
+            "mean",
+            "slope",
+            "last_point_tick",
+            "samples",
+        ]
+        # 1 行目: 大阪民国 + Wood (2077)
+        assert rows[1][0] == "大阪民国"
+        assert rows[1][1] == "2077"
+        assert rows[1][2] == "Wood"
+        assert rows[1][3] == "3"  # latest
+        assert rows[1][4] == "3"  # peak
+        assert rows[1][7] == "144380000"
+        assert rows[1][8] == "1|2|3"
+        # 2 行目: last_point_tick 無し → 空
+        assert rows[2][7] == ""
+
+    def test_respects_locale(self) -> None:
+        from anno_save_analyzer.trade import (
+            IslandStorageTrend,
+            PointSeries,
+            inventory_to_csv,
+        )
+
+        trends = [
+            IslandStorageTrend(
+                island_name="x",
+                product_guid=2088,
+                points=PointSeries(capacity=1, size=1, samples=(5,)),
+            )
+        ]
+        out = inventory_to_csv(trends, items=self._items_dict(locales=("en", "ja")), locale="ja")
+        # 2088 = Sardines (en) / イワシ (ja)
+        assert "イワシ" in out
+
+    def test_empty_returns_header_only(self) -> None:
+        from anno_save_analyzer.trade import inventory_to_csv
+
+        out = inventory_to_csv([], items=self._items_dict())
+        assert len(list(csv.reader(io.StringIO(out)))) == 1
