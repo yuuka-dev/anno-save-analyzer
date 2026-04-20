@@ -312,6 +312,109 @@ class TestFilteredRenderingAndExport:
 
 
 @pytest.mark.asyncio
+class TestResponsiveLayout:
+    """#34: terminal 幅で layout class を切替 + Trend 列出し分け．"""
+
+    async def test_wide_default_class_on_120plus(self, tui_state) -> None:
+        from anno_save_analyzer.tui.screens.statistics import TradeStatisticsScreen
+
+        app = TradeApp(tui_state)
+        async with app.run_test(size=(140, 30)) as pilot:
+            await pilot.pause()
+            await pilot.press("ctrl+t")
+            await pilot.pause()
+            screen = pilot.app.screen
+            assert isinstance(screen, TradeStatisticsScreen)
+            assert screen._layout_class == "wide"
+            assert screen.has_class("wide")
+
+    async def test_mid_class_between_80_and_120(self, tui_state) -> None:
+        app = TradeApp(tui_state)
+        async with app.run_test(size=(100, 30)) as pilot:
+            await pilot.pause()
+            await pilot.press("ctrl+t")
+            await pilot.pause()
+            screen = pilot.app.screen
+            assert screen._layout_class == "mid"
+            assert screen.has_class("mid")
+
+    async def test_narrow_class_below_80(self, tui_state) -> None:
+        app = TradeApp(tui_state)
+        async with app.run_test(size=(70, 30)) as pilot:
+            await pilot.pause()
+            await pilot.press("ctrl+t")
+            await pilot.pause()
+            screen = pilot.app.screen
+            assert screen._layout_class == "narrow"
+            assert screen.has_class("narrow")
+
+    async def test_narrow_hides_trend_column_in_items_table(self, tui_state) -> None:
+        from textual.widgets import DataTable
+
+        app = TradeApp(tui_state)
+        async with app.run_test(size=(70, 30)) as pilot:
+            await pilot.pause()
+            await pilot.press("ctrl+t")
+            await pilot.pause()
+            table = pilot.app.screen.query_one("#items-table", DataTable)
+            # Trend 列 hide → 列数 6 (good / bought / sold / net_qty / net_gold / events)
+            assert len(table.columns) == 6
+
+    async def test_wide_keeps_trend_column(self, tui_state) -> None:
+        from textual.widgets import DataTable
+
+        app = TradeApp(tui_state)
+        async with app.run_test(size=(140, 30)) as pilot:
+            await pilot.pause()
+            await pilot.press("ctrl+t")
+            await pilot.pause()
+            table = pilot.app.screen.query_one("#items-table", DataTable)
+            assert len(table.columns) == 7  # + Trend
+
+    async def test_resize_switches_class_and_recomposes(self, tui_state) -> None:
+        """wide → narrow の resize で class 切替 + recompose が起こる．"""
+        from anno_save_analyzer.tui.screens.statistics import TradeStatisticsScreen
+
+        app = TradeApp(tui_state)
+        async with app.run_test(size=(140, 30)) as pilot:
+            await pilot.pause()
+            await pilot.press("ctrl+t")
+            await pilot.pause()
+            screen = pilot.app.screen
+            assert isinstance(screen, TradeStatisticsScreen)
+            assert screen._layout_class == "wide"
+            await pilot.resize_terminal(60, 30)
+            await pilot.pause()
+            assert pilot.app.screen._layout_class == "narrow"
+
+    async def test_same_breakpoint_resize_is_noop(self, tui_state) -> None:
+        """同 breakpoint 域内の resize は layout class を変えない．"""
+        app = TradeApp(tui_state)
+        async with app.run_test(size=(140, 30)) as pilot:
+            await pilot.pause()
+            await pilot.press("ctrl+t")
+            await pilot.pause()
+            await pilot.resize_terminal(130, 30)
+            await pilot.pause()
+            assert pilot.app.screen._layout_class == "wide"
+
+
+@pytest.mark.asyncio
+class TestPartnersPaneScroll:
+    async def test_partners_pane_inside_vertical_scroll(self, tui_state) -> None:
+        """長い Partners 出力が切れないよう VerticalScroll 包装を確認．"""
+        from textual.containers import VerticalScroll
+
+        app = TradeApp(tui_state)
+        async with app.run_test() as pilot:
+            await pilot.pause()
+            await pilot.press("ctrl+t")
+            await pilot.pause()
+            scroll = pilot.app.screen.query_one("#partners-scroll", VerticalScroll)
+            assert scroll is not None
+
+
+@pytest.mark.asyncio
 class TestScreenLocalizerSetter:
     """Cursor レビュー指摘: App からの ``_localizer`` 直書きを setter 化．"""
 

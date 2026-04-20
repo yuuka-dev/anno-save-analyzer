@@ -4,8 +4,9 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 
+from textual import events
 from textual.app import ComposeResult
-from textual.containers import Horizontal, Vertical
+from textual.containers import Horizontal, Vertical, VerticalScroll
 from textual.screen import Screen
 from textual.widgets import (
     DataTable,
@@ -59,10 +60,13 @@ class TradeStatisticsScreen(Screen):
         width: 1fr;
         border: solid $secondary;
     }
+    TradeStatisticsScreen DataTable {
+        height: 1fr;
+    }
     TradeStatisticsScreen #right-column {
         width: 42;
     }
-    TradeStatisticsScreen #partners-pane {
+    TradeStatisticsScreen #partners-scroll {
         height: 40%;
         border: solid $secondary;
     }
@@ -70,7 +74,24 @@ class TradeStatisticsScreen(Screen):
         height: 60%;
         border: solid $secondary;
     }
+    /* Responsive: mid (80-119 cols) では右カラムを縮めて sparkline 列は維持 */
+    TradeStatisticsScreen.mid #right-column {
+        width: 32;
+    }
+    /* Responsive: narrow (<80 cols) では Tree を縮め右カラムを完全 hide．
+       Partners / Chart は ^T で Overview 往復の方が素直なので非表示で十分． */
+    TradeStatisticsScreen.narrow Tree {
+        width: 16;
+    }
+    TradeStatisticsScreen.narrow #right-column {
+        display: none;
+    }
     """
+
+    # 幅の境界値 (terminal cols)．上端は含まない閉区間．
+    # wide: >= 120 / mid: 80-119 / narrow: < 80
+    _MID_BREAKPOINT = 120
+    _NARROW_BREAKPOINT = 80
 
     def __init__(self, state: TuiState, localizer: Localizer) -> None:
         super().__init__(name="statistics")
@@ -79,6 +100,31 @@ class TradeStatisticsScreen(Screen):
         self._filter = TradeFilter()
         self._filtered_events_cache: list[TradeEvent] | None = None
         self._filtered_events_cache_key: tuple[str | None, str | None] | None = None
+        self._layout_class: str | None = None
+
+    def _classify_width(self, width: int) -> str:
+        """terminal 幅から layout class を選ぶ (wide / mid / narrow)．"""
+        if width < self._NARROW_BREAKPOINT:
+            return "narrow"
+        if width < self._MID_BREAKPOINT:
+            return "mid"
+        return "wide"
+
+    def _apply_layout_class(self, width: int) -> bool:
+        """幅から layout class を決定し，screen に付け替える．
+
+        変わったら True を返す．compose 直後と resize 時に呼ぶ．
+        wide / mid / narrow の 3 択はいずれも明示的に class 付与 (CSS の
+        ``TradeStatisticsScreen.narrow ...`` のような選択子と対応させるため)．
+        """
+        new_cls = self._classify_width(width)
+        if new_cls == self._layout_class:
+            return False
+        for cls in ("wide", "mid", "narrow"):
+            self.remove_class(cls)
+        self.add_class(new_cls)
+        self._layout_class = new_cls
+        return True
 
     def set_localizer(self, localizer: Localizer) -> None:
         """``TradeApp.switch_locale`` から呼ばれる公開 setter．
@@ -89,6 +135,10 @@ class TradeStatisticsScreen(Screen):
         self._localizer = localizer
 
     def compose(self) -> ComposeResult:
+        # Trend 列 / 右カラム hide 等の layout 判定は compose の早い段階で固める．
+        # ``app.size`` は compose 呼出時に有効．on_mount で recompose する実装
+        # にすると Header.mount_title タイミングと衝突するため採らない．
+        self._apply_layout_class(self.app.size.width)
         t = self._localizer.t
         yield Header()
         yield Static(self._filter_label(), id="filter-banner")
@@ -102,12 +152,21 @@ class TradeStatisticsScreen(Screen):
                 with TabPane(t("statistics.tab.inventory"), id="inventory-tab"):
                     yield self._render_inventory_table()
             with Vertical(id="right-column"):
-                yield Static(
-                    f"[b]{t('partners.heading')}[/b]\n\n{t('partners.empty')}",
-                    id="partners-pane",
-                )
+                # Partners pane は本文が長くなり得るので VerticalScroll 経由．
+                # narrow layout 時はこの Vertical ごと display:none で隠れる．
+                with VerticalScroll(id="partners-scroll"):
+                    yield Static(
+                        f"[b]{t('partners.heading')}[/b]\n\n{t('partners.empty')}",
+                        id="partners-pane",
+                    )
                 yield PlotextPlot(id="chart-pane")
         yield Footer()
+
+    def on_resize(self, event: events.Resize) -> None:
+        """terminal 幅変更で layout class を切替 (width のみ見る)．"""
+        if self._apply_layout_class(event.size.width):
+            # class が変わった場合のみ再 compose．Trend 列の出し分け等も拾うため．
+            self.refresh(recompose=True)
 
     def _render_tree(self) -> Tree:
         t = self._localizer.t
@@ -179,19 +238,23 @@ class TradeStatisticsScreen(Screen):
         table = DataTable(id="items-table")
         table.cursor_type = "row"
         t = self._localizer.t
-        table.add_columns(
+        # narrow layout (<80 cols) 時は Trend sparkline 列を省略．文字幅節約．
+        include_trend = self._layout_class != "narrow"
+        columns: list[str] = [
             t("statistics.col.good"),
             t("statistics.col.bought"),
             t("statistics.col.sold"),
             t("statistics.col.net_qty"),
             t("statistics.col.net_gold"),
             t("statistics.col.events"),
-            t("statistics.col.trend"),
-        )
-        # 各物資の累積数量 sparkline を先に算出．1 物資 = 1 sparkline string．
-        trends = self._build_item_trends()
+        ]
+        if include_trend:
+            columns.append(t("statistics.col.trend"))
+        table.add_columns(*columns)
+        trends = self._build_item_trends() if include_trend else {}
         for s in self._current_item_summaries():
-            row = (*self._format_item_row(s), trends.get(s.item.guid, ""))
+            base = self._format_item_row(s)
+            row = (*base, trends.get(s.item.guid, "")) if include_trend else base
             table.add_row(*row, key=str(s.item.guid))
         return table
 
