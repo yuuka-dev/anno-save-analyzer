@@ -901,7 +901,10 @@ class TestStatisticsScreen:
             await pilot.press("ctrl+t")
             await pilot.pause()
             screen = pilot.app.screen
-            assert next(b.description for b in screen.BINDINGS if b.key == "ctrl+p") == "History window"
+            assert (
+                next(b.description for b in screen.BINDINGS if b.key == "ctrl+p")
+                == "History window"
+            )
             await pilot.press("ctrl+l")
             await pilot.pause()
             screen = pilot.app.screen
