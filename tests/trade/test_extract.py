@@ -8,7 +8,7 @@ from pathlib import Path
 import pytest
 
 from anno_save_analyzer.trade import GameTitle, ItemDictionary, extract
-from anno_save_analyzer.trade.extract import _load_outer_filedb, normalise
+from anno_save_analyzer.trade.extract import load_outer_filedb, normalise
 from anno_save_analyzer.trade.interpreter.base import (
     ExtractionContext,
     RawTradedGoodTriple,
@@ -111,13 +111,13 @@ class TestLoadOuterFiledb:
     def test_bare_bin_returns_raw(self, tmp_path: Path) -> None:
         path = tmp_path / "x.bin"
         path.write_bytes(b"\x00\x01\x02")
-        assert _load_outer_filedb(path) == b"\x00\x01\x02"
+        assert load_outer_filedb(path) == b"\x00\x01\x02"
 
     def test_zlib_bin_is_decompressed(self, tmp_path: Path) -> None:
         payload = b"hello FileDB-ish payload"
         path = tmp_path / "z.bin"
         path.write_bytes(zlib.compress(payload))
-        assert _load_outer_filedb(path) == payload
+        assert load_outer_filedb(path) == payload
 
     def test_unknown_extension_with_invalid_zlib_magic_passthrough(self, tmp_path: Path) -> None:
         # 偶然先頭 2B が zlib magic 風になる場合の境界．`\x78\x01` を持つ非 zlib
@@ -126,4 +126,4 @@ class TestLoadOuterFiledb:
             path = tmp_path / "y.bin"
             # \x78\x01 prefix だが続きが invalid → zlib.error が伝播
             path.write_bytes(b"\x78\x01\xff\xff\xff\xff")
-            _load_outer_filedb(path)
+            load_outer_filedb(path)

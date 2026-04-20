@@ -1,7 +1,7 @@
 """``.a7s`` / ``.a8s`` 拡張子経由の extract 動作テスト．
 
 実 RDA を組み立てるのは大掛かりなため，``extract_inner_filedb`` を monkeypatch
-で差し替えて ``_load_outer_filedb`` の suffix branch（line 77）を踏ませる．
+で差し替えて ``load_outer_filedb`` の suffix branch（line 77）を踏ませる．
 """
 
 from __future__ import annotations
@@ -29,4 +29,4 @@ def test_a7s_a8s_suffix_dispatches_to_pipeline(
         return expected
 
     monkeypatch.setattr(extract_mod, "extract_inner_filedb", _fake_extract)
-    assert extract_mod._load_outer_filedb(fake_save) == expected
+    assert extract_mod.load_outer_filedb(fake_save) == expected

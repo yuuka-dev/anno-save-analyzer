@@ -77,68 +77,69 @@ class TestLoadState:
         ja = ls(save, title=GameTitle.ANNO_117, locale="ja")
         assert ja.locale == "ja"
 
+    def test_progress_callback_invoked_per_stage(self, tui_state) -> None:
+        """``progress`` コールバック指定時に各ステージの label が通知される．"""
+        from anno_save_analyzer.tui.state import load_state as ls
+
+        stages: list[str] = []
+        ls(
+            tui_state.save_path,
+            title=GameTitle.ANNO_117,
+            locale="en",
+            items=tui_state.items,
+            progress=stages.append,
+        )
+        # 少なくとも outer / events / aggregate / islands のラベルは呼ばれる
+        assert any("outer" in s for s in stages)
+        assert any("events" in s for s in stages)
+        assert any("aggregat" in s for s in stages)
+        assert any("islands" in s for s in stages)
+
 
 class TestCollectIslandsBySession:
-    def test_empty_session_ids_returns_empty_dict(self, tmp_path: Path) -> None:
-        # session_ids 空なら save 読み込みすら不要
-        result = _collect_islands_by_session(tmp_path / "anything.bin", ())
+    def test_empty_session_ids_returns_empty_dict(self) -> None:
+        result = _collect_islands_by_session([], ())
         assert result == {}
 
-    def test_a8s_suffix_routes_through_extract_inner_filedb(
-        self, tmp_path: Path, tui_state, monkeypatch
-    ) -> None:
-        """``.a8s`` 拡張子の場合 ``extract_inner_filedb`` を経由する分岐を踏む．"""
-        import importlib
-
-        state_mod = importlib.import_module("anno_save_analyzer.tui.state")
-
-        # tui_state.save_path は ``.bin``．``.a8s`` 拡張子に rename した copy を作る
-        a8s = tmp_path / "fake.a8s"
-        a8s.write_bytes(tui_state.save_path.read_bytes())
-
-        called: dict[str, int] = {"n": 0}
-
-        def fake_extract(path):
-            called["n"] += 1
-            return tui_state.save_path.read_bytes()
-
-        monkeypatch.setattr(state_mod, "extract_inner_filedb", fake_extract)
-        result = _collect_islands_by_session(a8s, ("0", "1"))
-        # session ごとに何かしら（空 tuple でも良い）入ってる
-        assert "0" in result
-        assert called["n"] == 1
-
-    def test_maps_by_session_id_not_event_order(self, tmp_path: Path, monkeypatch) -> None:
+    def test_maps_by_session_id_not_event_order(self, monkeypatch) -> None:
         import anno_save_analyzer.tui.state as state_mod
 
-        monkeypatch.setattr(state_mod, "_load_inner_sessions", lambda _: [b"first", b"second"])
         monkeypatch.setattr(
             state_mod,
             "list_player_islands",
             lambda inner: (state_mod.PlayerIsland(city_name=inner.decode("utf-8")),),
         )
-
-        result = _collect_islands_by_session(tmp_path / "x.bin", ("1", "0"))
+        result = _collect_islands_by_session([b"first", b"second"], ("1", "0"))
         assert result["1"][0].city_name == "second"
         assert result["0"][0].city_name == "first"
 
+    def test_non_digit_session_id_returns_empty_tuple(self) -> None:
+        result = _collect_islands_by_session([b"x"], ("unknown",))
+        assert result == {"unknown": ()}
+
+    def test_out_of_range_session_id_returns_empty_tuple(self) -> None:
+        result = _collect_islands_by_session([b"x"], ("99",))
+        assert result == {"99": ()}
+
 
 class TestCollectRoutesBySession:
-    def test_empty_session_ids_returns_empty_dict(self, tmp_path: Path) -> None:
-        assert _collect_routes_by_session(tmp_path / "anything.bin", ()) == {}
+    def test_empty_session_ids_returns_empty_dict(self) -> None:
+        assert _collect_routes_by_session([], ()) == {}
 
     def test_returns_tuple_per_session(self, tui_state) -> None:
         """合成 fixture は ConstructionAI を持たないため空 tuple が返る．"""
-        result = _collect_routes_by_session(tui_state.save_path, tui_state.session_ids)
+        from anno_save_analyzer.tui.state import _load_inner_sessions
+
+        inner_payloads = _load_inner_sessions(tui_state.save_path)
+        result = _collect_routes_by_session(inner_payloads, tui_state.session_ids)
         assert set(result) == set(tui_state.session_ids)
         for sid in tui_state.session_ids:
             assert result[sid] == ()
 
-    def test_maps_by_session_id_not_event_order(self, tmp_path: Path, monkeypatch) -> None:
+    def test_maps_by_session_id_not_event_order(self, monkeypatch) -> None:
         import anno_save_analyzer.tui.state as state_mod
         from anno_save_analyzer.trade import TradeRouteDef
 
-        monkeypatch.setattr(state_mod, "_load_inner_sessions", lambda _: [b"first", b"second"])
         monkeypatch.setattr(
             state_mod,
             "list_trade_routes",
@@ -152,7 +153,28 @@ class TestCollectRoutesBySession:
                 ),
             ),
         )
-
-        result = _collect_routes_by_session(tmp_path / "x.bin", ("1", "0"))
+        result = _collect_routes_by_session([b"first", b"second"], ("1", "0"))
         assert result["1"][0].ship_id == 2
         assert result["0"][0].ship_id == 1
+
+
+class TestLoadInnerSessionsHelper:
+    def test_reads_a8s_via_extract_inner_filedb(
+        self, tmp_path: Path, tui_state, monkeypatch
+    ) -> None:
+        """legacy helper は extract_inner_filedb 経由 (``.a7s`` / ``.a8s``) を踏む．"""
+        import anno_save_analyzer.tui.state as state_mod
+
+        a8s = tmp_path / "fake.a8s"
+        a8s.write_bytes(tui_state.save_path.read_bytes())
+
+        called: dict[str, int] = {"n": 0}
+
+        def fake_extract(path):
+            called["n"] += 1
+            return tui_state.save_path.read_bytes()
+
+        monkeypatch.setattr(state_mod, "extract_inner_filedb", fake_extract)
+        result = state_mod._load_inner_sessions(a8s)
+        assert called["n"] == 1
+        assert isinstance(result, list)

@@ -7,7 +7,7 @@
 from __future__ import annotations
 
 import zlib
-from collections.abc import Iterable
+from collections.abc import Callable, Iterable
 from dataclasses import dataclass, field
 from pathlib import Path
 
@@ -25,10 +25,10 @@ from anno_save_analyzer.trade import (
     TradeRouteDef,
     by_item,
     by_route,
-    extract,
     list_trade_routes,
 )
 from anno_save_analyzer.trade.aggregate import ItemSummary, RouteSummary
+from anno_save_analyzer.trade.extract import extract_from_outer, load_outer_filedb
 from anno_save_analyzer.trade.models import TradeEvent
 from anno_save_analyzer.trade.sessions import session_locale_key
 
@@ -108,17 +108,37 @@ def load_state(
     title: GameTitle,
     locale: str = "en",
     items: ItemDictionary | None = None,
+    progress: Callable[[str], None] | None = None,
 ) -> TuiState:
     """セーブを読み込み，TUI 用 state を構築する．
 
-    呼び出し側がすでに ``ItemDictionary`` を持っているなら ``items`` で渡せる
-    （二重ロード回避）．
+    ``progress`` callback を渡すと各ステージ開始時にラベルを通知する
+    (CLI 側でプログレスバーを描画する用)．``items`` を渡せば辞書ロードを
+    スキップできる．
+
+    outer FileDB の解凍は 1 回だけ行い，extract / islands / routes で共有する．
+    これをやらないと RDA + zlib 展開が 3 回走って体感ロードが重くなる．
     """
+    if progress is None:
+
+        def progress(_stage: str) -> None:
+            pass
+
     if items is None:
+        progress("loading item dictionary")
         locales: tuple[str, ...] = ("en",) if locale == "en" else ("en", locale)
         items = ItemDictionary.load(title, locales=locales)
 
-    events = list(extract(save_path, title=title, items=items))
+    progress("extracting outer FileDB")
+    outer_filedb = load_outer_filedb(save_path)
+    version = detect_version(outer_filedb)
+    section = parse_tag_section(outer_filedb, version)
+    inner_payloads = extract_sessions(outer_filedb, version=version, tag_section=section)
+
+    progress("walking trade events")
+    events = list(extract_from_outer(outer_filedb, title=title, items=items))
+
+    progress("aggregating by item and route")
     item_rows = by_item(events)
     route_rows = by_route(events)
     overview = build_overview(save_path, title, events, item_rows, route_rows)
@@ -127,9 +147,9 @@ def load_state(
         for sid in overview.session_ids
     )
 
-    # 内側 Session の AreaManager_* 列挙．Tree の島階層に使う．
-    islands_by_session = _collect_islands_by_session(save_path, overview.session_ids)
-    routes_by_session = _collect_routes_by_session(save_path, overview.session_ids)
+    progress("enumerating islands and routes")
+    islands_by_session = _collect_islands_by_session(inner_payloads, overview.session_ids)
+    routes_by_session = _collect_routes_by_session(inner_payloads, overview.session_ids)
 
     return TuiState(
         save_path=save_path,
@@ -148,7 +168,11 @@ def load_state(
 
 
 def _load_inner_sessions(save_path: Path) -> list[bytes]:
-    """save から内側 Session FileDB の bytes 列を取り出す．"""
+    """save から内側 Session FileDB の bytes 列を取り出す (下位互換 API)．
+
+    ``load_state`` 本体はもう使わず，outer を 1 度解凍して extract_sessions を
+    直接呼ぶ．この関数はテストや外部呼び出し用に保持．
+    """
     suffix = save_path.suffix.lower()
     if suffix in {".a7s", ".a8s"}:
         outer = extract_inner_filedb(save_path)
@@ -161,15 +185,11 @@ def _load_inner_sessions(save_path: Path) -> list[bytes]:
 
 
 def _collect_islands_by_session(
-    save_path: Path, session_ids: tuple[str, ...]
+    inner_payloads: list[bytes], session_ids: tuple[str, ...]
 ) -> dict[str, tuple[PlayerIsland, ...]]:
-    """内側 Session ごとに「プレイヤー保有島」（CityName 持ち）を列挙．
-
-    NPC や空島は除外．書記長の dogfooding 時の見た目を「自分の島だけ」にする．
-    """
+    """プリロード済 inner payloads からプレイヤー保有島を sid 別に列挙．"""
     if not session_ids:
         return {}
-    inner_payloads = _load_inner_sessions(save_path)
     by_extracted_sid = {str(i): inner for i, inner in enumerate(inner_payloads)}
     return {
         sid: list_player_islands(by_extracted_sid[sid])
@@ -180,16 +200,11 @@ def _collect_islands_by_session(
 
 
 def _collect_routes_by_session(
-    save_path: Path, session_ids: tuple[str, ...]
+    inner_payloads: list[bytes], session_ids: tuple[str, ...]
 ) -> dict[str, tuple[TradeRouteDef, ...]]:
-    """内側 Session ごとに定義済 TradeRoute を列挙．
-
-    履歴に現れない idle route も含む．active/idle の区別は呼び出し側が
-    履歴の ship_id セットと突き合わせて行う．
-    """
+    """プリロード済 inner payloads から定義済 TradeRoute を sid 別に列挙．"""
     if not session_ids:
         return {}
-    inner_payloads = _load_inner_sessions(save_path)
     by_extracted_sid = {str(i): inner for i, inner in enumerate(inner_payloads)}
     return {
         sid: list_trade_routes(by_extracted_sid[sid])

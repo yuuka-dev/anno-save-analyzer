@@ -92,6 +92,29 @@ class TestTradeAppLifecycle:
         content = items_csv.read_text(encoding="utf-8").splitlines()
         assert content[0].startswith("guid,name,")
 
+    async def test_ussr_theme_adds_sickle_hammer_prefix_to_title(self, tui_state) -> None:
+        """``theme="ussr"`` で ☭ が title に付く．"""
+        app = TradeApp(tui_state, theme="ussr")
+        async with app.run_test() as pilot:
+            await pilot.pause()
+            assert "☭" in pilot.app.title
+
+    async def test_default_theme_keeps_title_unchanged(self, tui_state) -> None:
+        """default テーマでは ☭ なし．"""
+        app = TradeApp(tui_state)
+        async with app.run_test() as pilot:
+            await pilot.pause()
+            assert "☭" not in pilot.app.title
+
+    async def test_ussr_title_persists_across_locale_switch(self, tui_state) -> None:
+        """locale 切替後も USSR の ☭ prefix は維持される．"""
+        app = TradeApp(tui_state, theme="ussr")
+        async with app.run_test() as pilot:
+            await pilot.pause()
+            await pilot.press("ctrl+l")
+            await pilot.pause()
+            assert "☭" in pilot.app.title
+
     async def test_ctrl_o_after_locale_switch_uses_ja_names(
         self, tui_state, tmp_path, monkeypatch
     ) -> None:
