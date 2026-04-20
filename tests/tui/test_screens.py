@@ -358,11 +358,16 @@ class TestFilteredEventCache:
         monkeypatch.setattr(statistics_mod, "filter_events", wrapped)
         screen = TradeStatisticsScreen(tui_state, Localizer.load("en"))
         screen._filter = TradeFilter(session=tui_state.session_ids[0])
-        screen._current_item_summaries()
-        screen._current_route_summaries()
+        items = screen._current_item_summaries()
+        routes = screen._current_route_summaries()
         screen._build_item_trends()
+        expected_events = original(tui_state.events, session=tui_state.session_ids[0], island=None)
+        expected_items = statistics_mod.by_item(expected_events)
+        expected_routes = statistics_mod.by_route(expected_events)
 
         assert calls["count"] == 1
+        assert tuple(expected_items) == items
+        assert tuple(expected_routes) == routes
 
 
 @pytest.mark.asyncio

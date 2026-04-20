@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import datetime as _dt
+import hashlib
 from pathlib import Path
 
 from textual.app import App
@@ -34,7 +35,10 @@ def _sanitize_filename_component(value: str) -> str:
         for ch in value
     )
     cleaned = sanitized.strip(" .")
-    return cleaned or "unknown"
+    if cleaned:
+        return cleaned
+    digest = hashlib.sha1(value.encode("utf-8")).hexdigest()[:8]
+    return f"unknown-{digest}"
 
 
 class TradeApp(App[None]):
