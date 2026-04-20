@@ -64,7 +64,7 @@ partners.empty: "Pick a good in the table to see partners."
 partners.placeholder: "(per-good partner list arrives in Week 3)"
 partners.recent_heading: "Recent trades"
 partners.recent_empty: "No timed trades recorded for this good."
-partners.recent_row.minutes_ago: "{value:>4.0f} min ago"
+partners.recent_row.minutes_ago: "{value:>4.1f} min ago"
 partners.recent_row.hours_ago: "{value:>4.1f} h ago"
 partners.recent_row.unknown: "         —"
 

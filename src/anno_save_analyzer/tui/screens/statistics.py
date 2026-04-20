@@ -31,7 +31,7 @@ from anno_save_analyzer.trade.aggregate import (
     RouteSummary,
     filter_events,
 )
-from anno_save_analyzer.trade.clock import TICKS_PER_MINUTE, latest_tick
+from anno_save_analyzer.trade.clock import TICKS_PER_MINUTE, latest_tick, pick_time_unit
 from anno_save_analyzer.trade.models import TradeEvent
 
 from ..i18n import Localizer
@@ -668,7 +668,8 @@ class TradeStatisticsScreen(Screen):
             for ev in recent
             if ev.timestamp_tick is not None and now_tick is not None
         ]
-        use_hours = bool(minutes_values) and (max(minutes_values) - min(minutes_values)) > 120.0
+        unit_key, _ = pick_time_unit(minutes_values)
+        use_hours = unit_key == "hours_ago"
         lines: list[str] = [header]
         for ev in recent:
             lines.append(self._format_recent_trade_row(ev, now_tick=now_tick, use_hours=use_hours))
