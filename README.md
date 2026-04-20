@@ -9,7 +9,7 @@
 
 > **One-liner**: Save file analyzer for *Anno 1800* and *Anno 117: Pax Romana* — decompress `.a7s` / `.a8s` containers, parse FileDB binaries, and surface trade history through a Textual TUI and a JSON-friendly CLI.
 
-> **Status**: v0.4.0 shipped (trade history + per-island inventory). Not on PyPI yet; install from Git tag or a local clone. Japanese README: [README.ja.md](README.ja.md).
+> **Status**: v0.4.2 shipped (custom route names, chart time windows, recent-trades pane, settings persistence). Not on PyPI yet; install from Git tag or a local clone. Japanese README: [README.ja.md](README.ja.md).
 
 ## Overview
 
@@ -23,7 +23,7 @@ Anno saves are matryoshka-style containers:
 
 This project peels every layer natively in Python and turns the raw trade events into things players actually want: aggregated ledgers, partner breakdowns, cumulative charts, sparklines, and snapshot diffs between saves.
 
-## Features (v0.4.0)
+## Features (v0.4.2)
 
 ### Textual TUI (`anno-save-analyzer tui <save>`)
 
@@ -31,13 +31,20 @@ This project peels every layer natively in Python and turns the raw trade events
 - **Tree filter**: click a session / island node to scope every pane (items / routes / Partners / chart / CSV export) to that subset
 - **Inventory tab**: per-island StorageTrends (120-sample ring buffer) with latest/peak/mean/slope + sparkline; row highlight plots the series
 - **Responsive**: wide (≥120) / mid (80-119) / narrow (<80) breakpoints auto-switch column visibility; Partners pane is a scrollable container
-- nano-flavored hotkeys: `^X` exit / `^G` help / `^T` switch screen / `^L` locale / `^O` export
+- **Screen switch**: every launch opens the Overview screen; press `^T` to flip between Overview and Statistics (your current filter / selection is preserved)
+- nano-flavored hotkeys:
+  - `^X` exit · `^G` help · `^T` switch screen · `^L` toggle locale · `^O` export CSVs
+  - `^R` cycle chart time window (120 min → 4 h → 12 h → 24 h → all) · `^P` pick a recent-trades window (all / 60 / 120 / 360 min / 24 h)
+- **Custom route names** (`route_name`) extracted from Anno 117 save — your in-game route labels show up everywhere a bare `route_id` used to
+- **Recent trades pane**: picking a good lists the latest 50 individual trades with a per-row "N min / h ago" timestamp, island, partner, quantity, gold
+- **Chart time window** with `^R` cycle — default 120 min so 200 h saves don't drown the plot in ancient history; window suffix (`· last 120 min`) is always visible in chart titles
 - Sparkline column (`▁▂▃▄▅▆▇█`) for cumulative quantity per good
 - Selecting a row updates Partners pane + line chart in sync
 - Chart x-axis auto-switches between minutes / hours ago by spread
 - en / ja locale toggle; Anno 117 / 1800 session names localized
 - Stage-granularity load gauge (`[n/5] <stage>`) on startup
 - **USSR theme** (`--theme ussr`) — joke-tier palette with a ☭ title prefix
+- **Settings persistence** — locale / theme / chart window / recent-trades window are remembered across launches via `~/.config/anno-save-analyzer/config.toml` (XDG-compliant; `%APPDATA%` on Windows). CLI flags still win when given; set `ANNO_SAVE_ANALYZER_CONFIG` to override the path
 
 ### CLI
 
@@ -71,10 +78,10 @@ This project peels every layer natively in Python and turns the raw trade events
 
 ```bash
 # Install the latest released version from the GitHub tag
-uv pip install "anno-save-analyzer[tui] @ git+https://github.com/yuuka-dev/anno-save-analyzer@v0.4.1"
+uv pip install "anno-save-analyzer[tui] @ git+https://github.com/yuuka-dev/anno-save-analyzer@v0.4.2"
 
 # Or install as a standalone CLI tool (no venv management)
-uv tool install "anno-save-analyzer[tui] @ git+https://github.com/yuuka-dev/anno-save-analyzer@v0.4.1"
+uv tool install "anno-save-analyzer[tui] @ git+https://github.com/yuuka-dev/anno-save-analyzer@v0.4.2"
 ```
 
 The `[tui]` extra pulls in Textual and textual-plotext. Omit it if you only need the CLI / library.
@@ -90,7 +97,7 @@ uv sync --extra tui        # or: python -m venv .venv && .venv/bin/pip install -
 ### Without uv (plain pip)
 
 ```bash
-pip install "anno-save-analyzer[tui] @ git+https://github.com/yuuka-dev/anno-save-analyzer@v0.4.1"
+pip install "anno-save-analyzer[tui] @ git+https://github.com/yuuka-dev/anno-save-analyzer@v0.4.2"
 ```
 
 > PyPI publication is planned for v1.0. Until then, Git tags are the supported distribution channel.
@@ -106,9 +113,11 @@ game (`anno117` / `anno1800`); `--locale` controls UI names (`en` / `ja`).
 anno-save-analyzer tui sample_anno117.a8s --title anno117 --locale ja
 ```
 
-- `^X` exit · `^G` help · `^T` switch screen · `^L` toggle locale · `^O` export CSVs
+- `^X` exit · `^G` help · `^T` switch screen (Overview ⇄ Statistics) · `^L` toggle locale · `^O` export CSVs
+- `^R` cycle chart time window · `^P` pick recent-trades history window
 - Add `--theme ussr` for the 書記長 palette (☭ title prefix)
 - On load, a 5-stage gauge streams to stderr so you can see what's happening
+- Your locale / theme / window picks are saved to `~/.config/anno-save-analyzer/config.toml` so subsequent launches remember them
 
 ### Inspect trades from the CLI
 
@@ -143,7 +152,9 @@ anno-save-analyzer tui --help
 | v0.1.0 | RDA V2.2 native parser | ✅ done |
 | v0.2.x | FileDB V3 parser, recursive SessionData, island metadata | ✅ done (rolled into 0.3.0) |
 | v0.3.0 | Trade history viewer: Textual TUI + CLI + snapshot diff | ✅ released |
-| **v0.4.0** | **Per-island inventory (StorageTrends) + Tree filter + responsive layout** | ✅ **released** |
+| v0.4.0 | Per-island inventory (StorageTrends) + Tree filter + responsive layout | ✅ released |
+| v0.4.1 | Inventory chart x-axis as relative time | ✅ released |
+| **v0.4.2** | **Custom route names + chart time window (`^R`) + recent-trades pane (`^P`) + settings persistence** | ✅ **released** |
 | v0.4+ | Data-volume progress gauge ([#26](https://github.com/yuuka-dev/anno-save-analyzer/issues/26)), Anno 1800 parity ([#24](https://github.com/yuuka-dev/anno-save-analyzer/issues/24)) | planned |
 | v0.5 | OR-Tools MILP route optimizer | planned |
 | v0.6 | Typed Pydantic models across the DOM (Island / Building / Population) | planned |
