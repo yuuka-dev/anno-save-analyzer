@@ -37,7 +37,7 @@ def _sanitize_filename_component(value: str) -> str:
     cleaned = sanitized.strip(" .")
     if cleaned:
         return cleaned
-    digest = hashlib.sha1(value.encode("utf-8")).hexdigest()[:8]
+    digest = hashlib.sha256(value.encode("utf-8")).hexdigest()[:8]
     return f"unknown-{digest}"
 
 

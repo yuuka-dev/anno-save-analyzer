@@ -351,7 +351,16 @@ class TestFilteredEventCache:
         original = statistics_mod.filter_events
 
         def wrapped(events, *, session=None, island=None):
-            """Spy wrapper to count how many times filter_events is invoked."""
+            """Spy wrapper for filter_events.
+
+            Args:
+                events: TradeEvent sequence to filter.
+                session: Optional session id.
+                island: Optional island name.
+
+            Returns:
+                Filtered event list from the original function.
+            """
             calls["count"] += 1
             return original(events, session=session, island=island)
 
