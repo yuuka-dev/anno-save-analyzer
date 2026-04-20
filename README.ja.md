@@ -73,10 +73,10 @@ Anno のセーブはマトリョーシカ構造:
 
 ```bash
 # 最新タグからインストール
-uv pip install "anno-save-analyzer[tui] @ git+https://github.com/yuuka-dev/anno-save-analyzer@v0.4.0"
+uv pip install "anno-save-analyzer[tui] @ git+https://github.com/yuuka-dev/anno-save-analyzer@v0.4.1"
 
 # CLI ツールとして globally install (venv 管理不要)
-uv tool install "anno-save-analyzer[tui] @ git+https://github.com/yuuka-dev/anno-save-analyzer@v0.4.0"
+uv tool install "anno-save-analyzer[tui] @ git+https://github.com/yuuka-dev/anno-save-analyzer@v0.4.1"
 ```
 
 `[tui]` extra で Textual + textual-plotext が入る．CLI / ライブラリだけなら外して良い．
@@ -92,7 +92,7 @@ uv sync --extra tui    # または: python -m venv .venv && .venv/bin/pip instal
 ### uv なし (plain pip)
 
 ```bash
-pip install "anno-save-analyzer[tui] @ git+https://github.com/yuuka-dev/anno-save-analyzer@v0.4.0"
+pip install "anno-save-analyzer[tui] @ git+https://github.com/yuuka-dev/anno-save-analyzer@v0.4.1"
 ```
 
 > PyPI 配信は v1.0 予定．それまで Git tag が正式配布経路．
