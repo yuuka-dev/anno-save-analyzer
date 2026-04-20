@@ -51,6 +51,7 @@ def normalise(
         route_id=raw.context.route_id,
         session_id=raw.context.session_id,
         island_name=raw.context.island_name,
+        route_name=raw.context.route_name,
         source_method="history",
     )
 

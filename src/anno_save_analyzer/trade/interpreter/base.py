@@ -32,6 +32,11 @@ class ExtractionContext:
     attach する．Anno 117 で実測．Anno 1800 でも同構造なら取れるはず (v0.3.1 は
     117 のみ対象)．
     """
+    route_name: str | None = None
+    """書記長がゲーム内で命名したトレードルート名．``TradeRouteEntries > <1> >
+    <1>`` inner entry の ``RouteName`` attrib (UTF-16LE) から抽出．``partner_kind``
+    が ``"route"`` のときのみ意味を持つ．CityName と同じく U+200B strip．
+    """
 
 
 @dataclass(frozen=True)

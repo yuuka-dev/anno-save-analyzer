@@ -268,7 +268,8 @@ class TestFilteredRenderingAndExport:
 
         routes_csv = next(tmp_path.glob("fake_routes_session-*_*.csv"))
         rows = routes_csv.read_text(encoding="utf-8").splitlines()
-        assert any(row.startswith("999,idle,route,") for row in rows)
+        # columns: route_id, route_name, status, partner_kind, ...
+        assert any(row.startswith("999,,idle,route,") for row in rows)
 
     async def test_export_filename_suffix_is_sanitized(
         self, tui_state, tmp_path, monkeypatch
@@ -630,12 +631,12 @@ class TestStatisticsScreen:
                 for i in range(routes_table.row_count)
             ]
             statuses = [row[1] for row in all_rows]
-            route_ids = [row[0] for row in all_rows]
+            route_labels = [row[0] for row in all_rows]
             assert "idle" in statuses
             assert "active" in statuses
-            assert "999" in route_ids
+            assert "#999" in route_labels
             # active row (ship=7) の legs は active_def.tasks=1 に反映されてる
-            row_7 = next(row for row in all_rows if row[0] == "7")
+            row_7 = next(row for row in all_rows if row[0] == "#7")
             assert row_7[3] == "1"  # Legs
             _ = active_ids
 
@@ -711,6 +712,388 @@ class TestStatisticsScreen:
             rendered = str(pane.render())
             # en fallback 名が表示される
             assert "Good_999999" in rendered
+
+    async def test_partners_pane_shows_recent_trades_section(self, tui_state) -> None:
+        """物資を選ぶと Partners pane 下に "直近取引 / Recent trades" セクションが出る．"""
+        import dataclasses
+
+        from textual.widgets import Static
+
+        from anno_save_analyzer.trade import Item, TradeEvent, TradingPartner
+
+        # 時刻付き event を注入して min ago 表記を検証可能に．
+        item = Item(guid=4242, names={"en": "Bricks"})
+        partner = TradingPartner(id="route:9", display_name="r9", kind="route")
+        events = (
+            TradeEvent(
+                item=item,
+                amount=5,
+                total_price=50,
+                partner=partner,
+                route_id="9",
+                route_name="商会ルート",
+                timestamp_tick=1_000_000,
+                island_name="プレイヤー島",
+            ),
+            TradeEvent(
+                item=item,
+                amount=-2,
+                total_price=-20,
+                partner=partner,
+                route_id="9",
+                route_name="商会ルート",
+                timestamp_tick=999_400,  # 1 分前 (TICKS_PER_MINUTE=600)
+                island_name="プレイヤー島",
+            ),
+        )
+        new_state = dataclasses.replace(tui_state, events=(*tui_state.events, *events))
+        app = TradeApp(new_state)
+        async with app.run_test() as pilot:
+            await pilot.pause()
+            await pilot.press("ctrl+t")
+            await pilot.pause()
+            screen = pilot.app.screen
+            screen._update_partners_pane(4242)
+            pane = screen.query_one("#partners-pane", Static)
+            rendered = str(pane.render())
+            assert "Recent trades" in rendered
+            # 最新 event は 0 min ago，もう 1 件が 1 min ago で出る
+            assert "min ago" in rendered
+            # route_name 優先で表示
+            assert "商会ルート" in rendered
+
+    async def test_partners_pane_recent_section_hidden_for_unknown_item(self, tui_state) -> None:
+        """fixture に events を持たない guid を直接渡した場合，partners empty メッセージのみ．"""
+        from textual.widgets import Static
+
+        app = TradeApp(tui_state)
+        async with app.run_test() as pilot:
+            await pilot.pause()
+            await pilot.press("ctrl+t")
+            await pilot.pause()
+            screen = pilot.app.screen
+            screen._update_partners_pane(999_999)
+            pane = screen.query_one("#partners-pane", Static)
+            rendered = str(pane.render())
+            # partners empty branch が先に返る → Recent trades は出ない
+            assert "Recent trades" not in rendered
+
+    async def test_partners_pane_recent_row_per_row_unit_switch(self, tui_state) -> None:
+        """書記長フィードバック: 最新側は "分前"，120 分超は "時間前" を row 毎に判定．"""
+        import dataclasses
+
+        from textual.widgets import Static
+
+        from anno_save_analyzer.trade import Item, TradeEvent
+        from anno_save_analyzer.trade.clock import TICKS_PER_MINUTE
+
+        item = Item(guid=5555, names={"en": "X"})
+        # 最新 / 60 分前 / 180 分前．180 分は 120 分閾値を超えて "h ago" に切替．
+        now = 10 * TICKS_PER_MINUTE
+        events = (
+            TradeEvent(item=item, amount=1, total_price=1, timestamp_tick=now),
+            TradeEvent(
+                item=item, amount=1, total_price=1, timestamp_tick=now - 60 * TICKS_PER_MINUTE
+            ),
+            TradeEvent(
+                item=item, amount=1, total_price=1, timestamp_tick=now - 180 * TICKS_PER_MINUTE
+            ),
+        )
+        new_state = dataclasses.replace(tui_state, events=(*tui_state.events, *events))
+        app = TradeApp(new_state)
+        async with app.run_test() as pilot:
+            await pilot.pause()
+            await pilot.press("ctrl+t")
+            await pilot.pause()
+            screen = pilot.app.screen
+            screen._update_partners_pane(5555)
+            pane = screen.query_one("#partners-pane", Static)
+            rendered = str(pane.render())
+            # 0 min / 60 min は "min ago"，180 min は "h ago" が混在する
+            assert "min ago" in rendered
+            assert "h ago" in rendered
+
+    async def test_recent_window_action_filters_old_events(self, tui_state) -> None:
+        """``_on_recent_window_chosen`` で window を 1 分に絞ると古い event が消える．"""
+        import dataclasses
+
+        from textual.widgets import Static
+
+        from anno_save_analyzer.trade import Item, TradeEvent
+
+        item = Item(guid=6666, names={"en": "X"})
+        events = (
+            TradeEvent(
+                item=item,
+                amount=1,
+                total_price=1,
+                timestamp_tick=1_000_000,
+                island_name="Recent",
+            ),
+            TradeEvent(
+                item=item,
+                amount=1,
+                total_price=1,
+                timestamp_tick=1_000 - 600_000,  # かなり古い (遥か前)
+                island_name="Ancient",
+            ),
+        )
+        new_state = dataclasses.replace(tui_state, events=(*tui_state.events, *events))
+        app = TradeApp(new_state)
+        async with app.run_test() as pilot:
+            await pilot.pause()
+            await pilot.press("ctrl+t")
+            await pilot.pause()
+            screen = pilot.app.screen
+            screen._update_partners_pane(6666)
+            pane = screen.query_one("#partners-pane", Static)
+            assert "Ancient" in str(pane.render())
+            # 時間窓 1 分を適用
+            screen._on_recent_window_chosen(1.0)
+            await pilot.pause()
+            pane = screen.query_one("#partners-pane", Static)
+            rendered = str(pane.render())
+            assert "Recent" in rendered
+            assert "Ancient" not in rendered
+
+    async def test_recent_window_action_all_restores(self, tui_state) -> None:
+        """``None`` を渡すと全期間に戻る．"""
+        app = TradeApp(tui_state)
+        async with app.run_test() as pilot:
+            await pilot.pause()
+            await pilot.press("ctrl+t")
+            await pilot.pause()
+            screen = pilot.app.screen
+            screen._recent_window_minutes = 30.0
+            screen._on_recent_window_chosen(None)
+            assert screen._recent_window_minutes is None
+
+    async def test_recent_window_same_value_is_noop(self, tui_state) -> None:
+        """現行と同値を渡しても再描画を発火しない (notify 抑制)．"""
+        app = TradeApp(tui_state)
+        async with app.run_test() as pilot:
+            await pilot.pause()
+            await pilot.press("ctrl+t")
+            await pilot.pause()
+            screen = pilot.app.screen
+            # 既存値と同じ None → 早期 return のみで副作用無し
+            before = screen._recent_window_minutes
+            screen._on_recent_window_chosen(None)
+            assert screen._recent_window_minutes == before
+
+    async def test_recent_window_palette_opens_on_ctrl_p(self, tui_state) -> None:
+        """``^P`` で ``RecentWindowPalette`` が push される．"""
+        from textual.widgets import OptionList
+
+        from anno_save_analyzer.tui.screens.statistics import RecentWindowPalette
+
+        app = TradeApp(tui_state)
+        async with app.run_test() as pilot:
+            await pilot.pause()
+            await pilot.press("ctrl+t")
+            await pilot.pause()
+            await pilot.press("ctrl+p")
+            await pilot.pause()
+            assert isinstance(pilot.app.screen, RecentWindowPalette)
+            option_list = pilot.app.screen.query_one(OptionList)
+            labels = [str(option.prompt) for option in option_list.options]
+            assert any("Last 24 h" in label for label in labels)
+            assert not any("1440 h" in label for label in labels)
+
+    async def test_recent_window_binding_localizes_on_locale_switch(self, tui_state) -> None:
+        app = TradeApp(tui_state)
+        async with app.run_test() as pilot:
+            await pilot.pause()
+            await pilot.press("ctrl+t")
+            await pilot.pause()
+            screen = pilot.app.screen
+            assert (
+                next(b.description for b in screen.BINDINGS if b.key == "ctrl+p")
+                == "History window"
+            )
+            await pilot.press("ctrl+l")
+            await pilot.pause()
+            screen = pilot.app.screen
+            assert next(b.description for b in screen.BINDINGS if b.key == "ctrl+p") == "履歴窓"
+
+    async def test_partners_pane_recent_row_marks_untimed_events(self, tui_state) -> None:
+        """``timestamp_tick=None`` の event は "—" マーク (時刻不明) で末尾に並ぶ．"""
+        import dataclasses
+
+        from textual.widgets import Static
+
+        from anno_save_analyzer.trade import Item, TradeEvent
+        from anno_save_analyzer.tui.i18n import Localizer
+
+        item = Item(guid=8888, names={"en": "Ghost"})
+        untimed = TradeEvent(item=item, amount=1, total_price=1)
+        new_state = dataclasses.replace(tui_state, events=(*tui_state.events, untimed))
+        app = TradeApp(new_state, localizer=Localizer.load("ja"))
+        async with app.run_test() as pilot:
+            await pilot.pause()
+            await pilot.press("ctrl+t")
+            await pilot.pause()
+            screen = pilot.app.screen
+            screen._update_partners_pane(8888)
+            pane = screen.query_one("#partners-pane", Static)
+            rendered = str(pane.render())
+            assert "直近取引" in rendered
+            # "分前" は付かず，unknown marker locale 文言が出る
+            assert "分前" not in rendered
+            assert "時刻不明" in rendered
+
+    async def test_chart_window_cycle_updates_state(self, tui_state) -> None:
+        """``^R`` で chart window が次候補に cycle する．"""
+        from anno_save_analyzer.trade.chart_window import ChartTimeWindow
+
+        app = TradeApp(tui_state)
+        async with app.run_test() as pilot:
+            await pilot.pause()
+            await pilot.press("ctrl+t")
+            await pilot.pause()
+            screen = pilot.app.screen
+            assert screen._chart_window == ChartTimeWindow.LAST_120_MIN
+            await pilot.press("ctrl+r")
+            await pilot.pause()
+            assert screen._chart_window == ChartTimeWindow.LAST_4H
+
+    async def test_chart_window_cycle_wraps_around(self, tui_state) -> None:
+        """末尾 (ALL) から次を押すと先頭 (LAST_120_MIN) に戻る．"""
+        from anno_save_analyzer.trade.chart_window import ChartTimeWindow
+
+        app = TradeApp(tui_state)
+        async with app.run_test() as pilot:
+            await pilot.pause()
+            await pilot.press("ctrl+t")
+            await pilot.pause()
+            screen = pilot.app.screen
+            screen._chart_window = ChartTimeWindow.ALL
+            await pilot.press("ctrl+r")
+            await pilot.pause()
+            assert screen._chart_window == ChartTimeWindow.LAST_120_MIN
+
+    async def test_chart_window_cycle_redraws_last_inventory(self, tui_state) -> None:
+        """inventory chart 選択中に ^R しても例外を出さず再描画する．"""
+        import dataclasses
+
+        from anno_save_analyzer.trade import IslandStorageTrend, PointSeries
+
+        trend = IslandStorageTrend(
+            island_name="プレイヤー島",
+            product_guid=2088,
+            points=PointSeries(capacity=3, size=3, samples=(1, 2, 3)),
+        )
+        new_state = dataclasses.replace(tui_state, storage_by_island={"プレイヤー島": (trend,)})
+        app = TradeApp(new_state)
+        async with app.run_test() as pilot:
+            await pilot.pause()
+            await pilot.press("ctrl+t")
+            await pilot.pause()
+            screen = pilot.app.screen
+            screen._update_inventory_chart(("プレイヤー島", 2088))
+            await pilot.press("ctrl+r")
+            await pilot.pause()
+            # 新しい window で再描画済 = 例外出ずに通る
+
+    async def test_chart_window_cycle_redraws_last_route(self, tui_state) -> None:
+        """route 選択中に ^R で再描画．"""
+        import dataclasses
+
+        from anno_save_analyzer.trade import Item, TradeEvent, TradingPartner
+
+        item = Item(guid=1234, names={"en": "X"})
+        partner = TradingPartner(id="route:99", display_name="r", kind="route")
+        events = tuple(
+            TradeEvent(
+                item=item,
+                amount=1,
+                total_price=10,
+                partner=partner,
+                route_id="99",
+                timestamp_tick=1000 + i,
+                session_id="0",
+            )
+            for i in range(3)
+        )
+        new_state = dataclasses.replace(tui_state, events=(*tui_state.events, *events))
+        app = TradeApp(new_state)
+        async with app.run_test() as pilot:
+            await pilot.pause()
+            await pilot.press("ctrl+t")
+            await pilot.pause()
+            screen = pilot.app.screen
+            screen._update_route_detail("99")
+            await pilot.press("ctrl+r")
+            await pilot.pause()
+
+    async def test_chart_window_cycle_redraws_active_tab_only(self, tui_state) -> None:
+        """inventory を一度見た後でも items tab なら item chart を再描画する．"""
+        from textual.widgets import TabbedContent
+
+        app = TradeApp(tui_state)
+        async with app.run_test() as pilot:
+            await pilot.pause()
+            await pilot.press("ctrl+t")
+            await pilot.pause()
+            screen = pilot.app.screen
+
+            # stale な「最後に選択された inventory」を残しつつ，items tab をアクティブにする
+            screen._last_selected_inventory_key = ("島", 1)
+            screen._last_selected_item_guid = 2088
+            tabs = screen.query_one("#stats-tabs", TabbedContent)
+            tabs.active = "items-tab"
+
+            called: list[str] = []
+
+            def _inv(_key) -> None:
+                called.append("inventory")
+
+            def _item(_guid) -> None:
+                called.append("item")
+
+            screen._update_inventory_chart = _inv  # type: ignore[method-assign]
+            screen._update_chart_pane = _item  # type: ignore[method-assign]
+
+            await pilot.press("ctrl+r")
+            await pilot.pause()
+            assert called == ["item"]
+
+    async def test_chart_window_filters_old_events(self, tui_state) -> None:
+        """LAST_120_MIN で窓外の event は chart から消える (item chart 経由で確認)．"""
+        import dataclasses
+
+        from anno_save_analyzer.trade import Item, TradeEvent
+        from anno_save_analyzer.trade.chart_window import ChartTimeWindow
+        from anno_save_analyzer.trade.clock import TICKS_PER_MINUTE
+
+        item = Item(guid=7777, names={"en": "X"})
+        events = (
+            # 121 分前 = LAST_120_MIN 窓外
+            TradeEvent(
+                item=item,
+                amount=1,
+                total_price=1,
+                timestamp_tick=1_000_000 - 121 * TICKS_PER_MINUTE,
+                session_id="0",
+            ),
+            # 0 分前 = 最新
+            TradeEvent(
+                item=item, amount=1, total_price=1, timestamp_tick=1_000_000, session_id="0"
+            ),
+        )
+        new_state = dataclasses.replace(tui_state, events=(*tui_state.events, *events))
+        app = TradeApp(new_state)
+        async with app.run_test() as pilot:
+            await pilot.pause()
+            await pilot.press("ctrl+t")
+            await pilot.pause()
+            screen = pilot.app.screen
+            screen._chart_window = ChartTimeWindow.LAST_120_MIN
+            # _update_chart_pane は例外を出さずに完了する (= 窓 filter が通った)
+            screen._update_chart_pane(7777)
+            # ALL に切り替えても例外を出さない
+            screen._chart_window = ChartTimeWindow.ALL
+            screen._update_chart_pane(7777)
 
     async def test_route_detail_plots_cumulative_gold_for_active_route(self, tui_state) -> None:
         """履歴のある route_id を routes-table で選ぶと chart に累積 gold が描画される．"""

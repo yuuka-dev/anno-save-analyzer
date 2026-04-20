@@ -17,16 +17,16 @@ class TestMinutesRelativeTo:
         assert minutes_relative_to(1000, now_tick=1000) == pytest.approx(0.0)
 
     def test_past_tick_is_negative(self) -> None:
-        # 600 ticks 前 = -1.0 分
-        assert minutes_relative_to(400, now_tick=1000) == pytest.approx(-1.0)
+        # TPM ticks 前 = -1.0 分．TPM 自体の精度は clock.py docstring 参照．
+        assert minutes_relative_to(1000 - TICKS_PER_MINUTE, now_tick=1000) == pytest.approx(-1.0)
 
     def test_future_tick_is_positive(self) -> None:
-        # 理論上 future は無いが式としては正値で返る
-        assert minutes_relative_to(1600, now_tick=1000) == pytest.approx(1.0)
+        # 理論上 future は無いが式としては正値で返る．
+        assert minutes_relative_to(1000 + TICKS_PER_MINUTE, now_tick=1000) == pytest.approx(1.0)
 
-    def test_ticks_per_minute_constant_is_600(self) -> None:
-        """Anno 1 tick ≈ 100 ms = 600 ticks/min の仮定を文書化テスト．"""
-        assert TICKS_PER_MINUTE == 600
+    def test_ticks_per_minute_constant_is_calibrated_57k(self) -> None:
+        """Anno 1800 UI との突き合わせ校正値．clock.py docstring の表を参照．"""
+        assert TICKS_PER_MINUTE == 57_000
 
 
 class TestLatestTick:
@@ -91,9 +91,10 @@ class TestInventorySampleMinutes:
         assert out[-1] - out[0] == 119.0
 
     def test_custom_step_ticks(self) -> None:
-        """step を ticks_per_minute=600 / 10 = 60 (= 0.1 分) にすると細かくなる．"""
+        """step を TPM/10 に渡すと 0.1 分刻みになる．TPM 依存の数値は式で表現．"""
         from anno_save_analyzer.trade.clock import inventory_sample_minutes
 
-        out = inventory_sample_minutes(5, step_ticks=60)
-        # 60 tick = 0.1 分
-        assert out == pytest.approx([-0.4, -0.3, -0.2, -0.1, 0.0])
+        step = TICKS_PER_MINUTE // 10
+        out = inventory_sample_minutes(5, step_ticks=step)
+        expected = [i * (step / TICKS_PER_MINUTE) for i in range(-4, 1)]
+        assert out == pytest.approx(expected)

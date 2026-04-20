@@ -122,15 +122,25 @@ class TestRoutesToCsv:
         ]
         out = routes_to_csv(summaries, idle_routes=idle, active_ids=("7",))
         rows = list(csv.reader(io.StringIO(out)))
-        assert rows[0][:4] == ["route_id", "status", "partner_kind", "legs"]
+        assert rows[0] == [
+            "route_id",
+            "route_name",
+            "status",
+            "partner_kind",
+            "legs",
+            "bought",
+            "sold",
+            "net_gold",
+            "event_count",
+        ]
         # active row (route_id=7) の legs は idle_routes 由来で 1
         active_row = next(r for r in rows[1:] if r[0] == "7")
-        assert active_row[1] == "active"
-        assert active_row[3] == "1"
+        assert active_row[2] == "active"
+        assert active_row[4] == "1"
         # idle row (ship=99) は status=idle
         idle_row = next(r for r in rows[1:] if r[0] == "99")
-        assert idle_row[1] == "idle"
-        assert idle_row[3] == "2"
+        assert idle_row[2] == "idle"
+        assert idle_row[4] == "2"
 
     def test_idle_routes_with_none_ship_id_skipped(self) -> None:
         idle = [
@@ -152,8 +162,27 @@ class TestRoutesToCsv:
         out = routes_to_csv(summaries)
         rows = list(csv.reader(io.StringIO(out)))
         assert len(rows) == 2
-        assert rows[1][0] == ""
-        assert rows[1][1] == "active"
+        assert rows[1][0] == ""  # route_id
+        assert rows[1][1] == ""  # route_name
+        assert rows[1][2] == "active"
+
+    def test_active_summary_with_route_name_emits_name_column(self) -> None:
+        """RouteSummary.route_name が route_name 列に流れ込む．"""
+        summaries = [
+            RouteSummary(
+                route_id="7",
+                partner_kind="route",
+                bought=10,
+                sold=0,
+                net_gold=100,
+                event_count=3,
+                route_name="商会ルート",
+            )
+        ]
+        out = routes_to_csv(summaries)
+        rows = list(csv.reader(io.StringIO(out)))
+        assert rows[1][0] == "7"
+        assert rows[1][1] == "商会ルート"
 
     def test_idle_route_already_in_active_ids_is_skipped(self) -> None:
         """active_ids に含まれる ship_id は idle として重複出力しない．"""
@@ -189,19 +218,17 @@ class TestEventsToCsvAndJson:
 
     def test_events_csv_has_all_columns(self) -> None:
         events = [
-            self._ev(route_id="7", session_id="0", timestamp_tick=100),
+            self._ev(route_id="7", session_id="0", timestamp_tick=100, route_name="商会ルート"),
             self._ev(guid=200, amount=-2, price=-50, partner=None, session_id=None),
         ]
         out = events_to_csv(events)
         rows = list(csv.reader(io.StringIO(out)))
-        # column order: timestamp_tick, session_id, island_name, route_id,
-        #               partner_id, partner_kind, item_guid, item_name,
-        #               amount, total_price
         assert rows[0] == [
             "timestamp_tick",
             "session_id",
             "island_name",
             "route_id",
+            "route_name",
             "partner_id",
             "partner_kind",
             "item_guid",
@@ -210,10 +237,12 @@ class TestEventsToCsvAndJson:
             "total_price",
         ]
         assert rows[1][0] == "100"  # timestamp
-        assert rows[1][6] == "100"  # item_guid
+        assert rows[1][4] == "商会ルート"  # route_name
+        assert rows[1][7] == "100"  # item_guid
         # 2 行目 partner=None
-        assert rows[2][4] == ""  # partner_id
-        assert rows[2][5] == ""  # partner_kind
+        assert rows[2][4] == ""  # route_name
+        assert rows[2][5] == ""  # partner_id
+        assert rows[2][6] == ""  # partner_kind
         # timestamp 無し
         assert rows[2][0] == ""
 

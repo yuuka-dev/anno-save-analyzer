@@ -5,6 +5,7 @@ from __future__ import annotations
 from anno_save_analyzer.trade.aggregate import (
     by_item,
     by_route,
+    events_for_item,
     filter_events,
     partners_for_item,
 )
@@ -22,6 +23,7 @@ def _ev(
     partner: TradingPartner | None | object = ...,
     session_id: str | None = None,
     island_name: str | None = None,
+    route_name: str | None = None,
 ) -> TradeEvent:
     item = Item(guid=guid, names={"en": f"Good_{guid}"})
     # partner = sentinel (...) なら kind と route_id から自動生成．
@@ -37,6 +39,7 @@ def _ev(
         timestamp_tick=timestamp,
         session_id=session_id,
         island_name=island_name,
+        route_name=route_name,
     )
 
 
@@ -138,6 +141,43 @@ class TestByRoute:
         assert rows[0].route_id == "r2"
         assert rows[1].route_id == "r1"
 
+    def test_route_name_aggregates_with_latest_tick_winning(self) -> None:
+        """同一 route_id 内で途中 rename された場合，tick が進むタイミングで上書き．"""
+        events = [
+            _ev(1, 1, 1, route_id="7", kind="route", timestamp=100, route_name="旧ルート"),
+            _ev(1, 1, 1, route_id="7", kind="route", timestamp=200, route_name="新ルート"),
+        ]
+        rows = by_route(events)
+        assert rows[0].route_name == "新ルート"
+        assert rows[0].display_route == "新ルート"
+
+    def test_route_name_latest_tick_wins_even_if_events_are_out_of_order(self) -> None:
+        events = [
+            _ev(1, 1, 1, route_id="7", kind="route", timestamp=200, route_name="新ルート"),
+            _ev(1, 1, 1, route_id="7", kind="route", timestamp=100, route_name="旧ルート"),
+        ]
+        rows = by_route(events)
+        assert rows[0].route_name == "新ルート"
+
+    def test_route_name_with_no_tick_does_not_override_ticked_name(self) -> None:
+        events = [
+            _ev(1, 1, 1, route_id="7", kind="route", timestamp=200, route_name="新ルート"),
+            _ev(1, 1, 1, route_id="7", kind="route", timestamp=None, route_name="旧ルート"),
+        ]
+        rows = by_route(events)
+        assert rows[0].route_name == "新ルート"
+
+    def test_display_route_fallback_chain(self) -> None:
+        """route_name > ``#{route_id}`` > ``—``."""
+        events = [
+            _ev(1, 1, 1, route_id="42", kind="route"),
+            _ev(2, 1, 1, route_id=None, kind="unknown", partner=None),
+        ]
+        rows = by_route(events)
+        labels = {r.display_route for r in rows}
+        assert "#42" in labels
+        assert "—" in labels
+
 
 class TestPartnersForItem:
     def test_groups_by_route_and_partner_kind(self) -> None:
@@ -198,10 +238,103 @@ class TestPartnersForItem:
         assert "partner #99" in labels
         assert "—" in labels
 
+    def test_display_partner_uses_route_name_when_present(self) -> None:
+        """route_name があれば ``route <name>`` を優先．"""
+        events = [_ev(100, 1, 10, route_id="42", kind="route", route_name="商会ルート")]
+        rows = partners_for_item(events, 100)
+        assert rows[0].route_name == "商会ルート"
+        assert rows[0].display_partner == "route 商会ルート"
+
     def test_display_name_helper(self) -> None:
         events = [_ev(100, 1, 10, route_id="r")]
         rows = partners_for_item(events, 100)
         assert rows[0].display_name("en") == "Good_100"
+
+
+class TestEventsForItem:
+    def test_returns_matching_guid_only(self) -> None:
+        events = [
+            _ev(100, 1, 10, route_id="7", timestamp=500),
+            _ev(200, 1, 10, route_id="8", timestamp=700),
+            _ev(100, -2, -20, route_id="7", timestamp=600),
+        ]
+        out = events_for_item(events, 100)
+        assert len(out) == 2
+        assert all(e.item.guid == 100 for e in out)
+
+    def test_sorted_descending_by_tick(self) -> None:
+        events = [
+            _ev(100, 1, 10, timestamp=100),
+            _ev(100, 1, 10, timestamp=300),
+            _ev(100, 1, 10, timestamp=200),
+        ]
+        out = events_for_item(events, 100)
+        ticks = [e.timestamp_tick for e in out]
+        assert ticks == [300, 200, 100]
+
+    def test_tick_none_goes_last(self) -> None:
+        events = [
+            _ev(100, 1, 10, timestamp=None),
+            _ev(100, 1, 10, timestamp=200),
+            _ev(100, 1, 10, timestamp=100),
+        ]
+        out = events_for_item(events, 100)
+        assert out[0].timestamp_tick == 200
+        assert out[1].timestamp_tick == 100
+        assert out[-1].timestamp_tick is None
+
+    def test_limit_trims_result(self) -> None:
+        events = [_ev(100, 1, 10, timestamp=i) for i in range(100)]
+        out = events_for_item(events, 100, limit=5)
+        assert len(out) == 5
+        # 最新 5 tick (95..99) が降順で並ぶ
+        assert [e.timestamp_tick for e in out] == [99, 98, 97, 96, 95]
+
+    def test_negative_limit_returns_all(self) -> None:
+        events = [_ev(100, 1, 10, timestamp=i) for i in range(3)]
+        out = events_for_item(events, 100, limit=-1)
+        assert len(out) == 3
+
+    def test_session_and_island_filter(self) -> None:
+        events = [
+            _ev(100, 1, 10, session_id="0", island_name="A", timestamp=1),
+            _ev(100, 1, 10, session_id="0", island_name="B", timestamp=2),
+            _ev(100, 1, 10, session_id="1", island_name="A", timestamp=3),
+        ]
+        out = events_for_item(events, 100, session="0", island="A")
+        assert len(out) == 1
+        assert out[0].timestamp_tick == 1
+
+    def test_missing_guid_returns_empty(self) -> None:
+        events = [_ev(100, 1, 10, timestamp=1)]
+        assert events_for_item(events, 999) == []
+
+    def test_max_age_minutes_cuts_old_events(self) -> None:
+        """``max_age_minutes`` 指定時，最新 tick から指定分を超えた event は落ちる．
+
+        TPM 依存を数値で書かず式で表現．
+        """
+        from anno_save_analyzer.trade.clock import TICKS_PER_MINUTE
+
+        now = 10 * TICKS_PER_MINUTE
+        events = [
+            _ev(100, 1, 10, timestamp=now),  # 0 min ago
+            _ev(100, 1, 10, timestamp=now - TICKS_PER_MINUTE),  # 1 min ago (境界)
+            _ev(100, 1, 10, timestamp=now - int(1.5 * TICKS_PER_MINUTE)),  # 1.5 min ago → drop
+            _ev(100, 1, 10, timestamp=None),  # 時刻不明 → 常に残す
+        ]
+        out = events_for_item(events, 100, max_age_minutes=1.0)
+        ticks = [e.timestamp_tick for e in out]
+        assert now in ticks
+        assert (now - TICKS_PER_MINUTE) in ticks
+        assert (now - int(1.5 * TICKS_PER_MINUTE)) not in ticks
+        assert None in ticks
+
+    def test_max_age_minutes_with_no_timed_events_is_noop(self) -> None:
+        """時刻付き event が皆無なら ``max_age_minutes`` は効かず全件返る．"""
+        events = [_ev(100, 1, 10, timestamp=None), _ev(100, 1, 10, timestamp=None)]
+        out = events_for_item(events, 100, max_age_minutes=5.0)
+        assert len(out) == 2
 
 
 class TestFilterEvents:

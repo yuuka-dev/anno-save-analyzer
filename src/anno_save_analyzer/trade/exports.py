@@ -57,7 +57,8 @@ def routes_to_csv(
 ) -> str:
     """ルート別サマリ + idle route 定義を CSV にエクスポート．
 
-    列: route_id, status, partner_kind, legs, bought, sold, net_gold, event_count
+    列: route_id, route_name, status, partner_kind, legs, bought, sold,
+         net_gold, event_count
     """
     active = set(active_ids)
     legs_by_ship: dict[str, int] = {}
@@ -67,7 +68,17 @@ def routes_to_csv(
             legs_by_ship[str(rd.ship_id)] = len(rd.tasks)
 
     rows: list[list[str]] = [
-        ["route_id", "status", "partner_kind", "legs", "bought", "sold", "net_gold", "event_count"]
+        [
+            "route_id",
+            "route_name",
+            "status",
+            "partner_kind",
+            "legs",
+            "bought",
+            "sold",
+            "net_gold",
+            "event_count",
+        ]
     ]
     seen: set[str] = set()
     for s in summaries:
@@ -76,6 +87,7 @@ def routes_to_csv(
         rows.append(
             [
                 rid,
+                s.route_name or "",
                 "active",
                 s.partner_kind,
                 str(legs),
@@ -88,13 +100,14 @@ def routes_to_csv(
         if rid:
             seen.add(rid)
     # idle = 定義あり / 履歴無し．active_ids に含まれないもののみ出す．
+    # idle 側は route_name を持たない (定義側の attrib は未読)．空文字で出力．
     for rd in idle_list:
         if rd.ship_id is None:
             continue
         rid = str(rd.ship_id)
         if rid in active or rid in seen:
             continue
-        rows.append([rid, "idle", "route", str(len(rd.tasks)), "0", "0", "0", "0"])
+        rows.append([rid, "", "idle", "route", str(len(rd.tasks)), "0", "0", "0", "0"])
         seen.add(rid)
     return _csv_writer(rows)
 
@@ -102,8 +115,8 @@ def routes_to_csv(
 def events_to_csv(events: Iterable[TradeEvent], *, locale: Locale = "en") -> str:
     """個別 TradeEvent を CSV にエクスポート (ledger 全量)．
 
-    列: timestamp_tick, session_id, island_name, route_id, partner_id,
-         partner_kind, item_guid, item_name, amount, total_price
+    列: timestamp_tick, session_id, island_name, route_id, route_name,
+         partner_id, partner_kind, item_guid, item_name, amount, total_price
     """
     rows: list[list[str]] = [
         [
@@ -111,6 +124,7 @@ def events_to_csv(events: Iterable[TradeEvent], *, locale: Locale = "en") -> str
             "session_id",
             "island_name",
             "route_id",
+            "route_name",
             "partner_id",
             "partner_kind",
             "item_guid",
@@ -128,6 +142,7 @@ def events_to_csv(events: Iterable[TradeEvent], *, locale: Locale = "en") -> str
                 ev.session_id or "",
                 ev.island_name or "",
                 ev.route_id or "",
+                ev.route_name or "",
                 partner_id,
                 partner_kind,
                 str(ev.item.guid),
@@ -191,6 +206,7 @@ def events_to_json(events: Iterable[TradeEvent], *, locale: Locale = "en") -> st
                 "session_id": ev.session_id,
                 "island_name": ev.island_name,
                 "route_id": ev.route_id,
+                "route_name": ev.route_name,
                 "partner": ({"id": ev.partner.id, "kind": ev.partner.kind} if ev.partner else None),
                 "item": {
                     "guid": ev.item.guid,

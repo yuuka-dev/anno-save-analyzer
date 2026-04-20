@@ -95,8 +95,9 @@ class TestTuiCommand:
         save = _make_save(tmp_path)
         captured: dict[str, object] = {}
 
-        def fake_init(self, state, *, localizer=None, theme="default"):
+        def fake_init(self, state, *, localizer=None, theme="default", persist_settings=False):
             captured["theme"] = theme
+            captured["persist_settings"] = persist_settings
             # super().__init__ は呼ばないと run() がコケるが run は mock 済なので
             # 最小限の set だけで通す．
             from anno_save_analyzer.tui.i18n import Localizer
@@ -112,3 +113,89 @@ class TestTuiCommand:
             result = runner.invoke(app, ["tui", str(save), "--theme", "ussr"])
         assert result.exit_code == 0
         assert captured["theme"] == "ussr"
+        # CLI 起動時は config.toml への自動書き出しを有効化している
+        assert captured["persist_settings"] is True
+
+    def test_tui_reads_saved_config_for_locale_and_theme(self, tmp_path: Path, monkeypatch) -> None:
+        """``--locale`` / ``--theme`` 無指定なら ``config.toml`` 値が使われる．"""
+        cfg_path = tmp_path / "cfg.toml"
+        cfg_path.write_text(
+            '[ui]\nlocale = "ja"\ntheme = "ussr"\nchart_window = "24h"\n',
+            encoding="utf-8",
+        )
+        monkeypatch.setenv("ANNO_SAVE_ANALYZER_CONFIG", str(cfg_path))
+        save = _make_save(tmp_path)
+
+        captured: dict[str, object] = {}
+
+        def fake_init(self, state, *, localizer=None, theme="default", persist_settings=False):
+            captured["theme"] = theme
+            captured["state_locale"] = state.locale
+            from anno_save_analyzer.tui.i18n import Localizer
+
+            self._state = state
+            self._localizer = localizer or Localizer.load(state.locale)
+            self._theme_name = theme
+
+        with (
+            patch("anno_save_analyzer.tui.TradeApp.__init__", fake_init),
+            patch("anno_save_analyzer.tui.TradeApp.run"),
+        ):
+            result = runner.invoke(app, ["tui", str(save)])
+
+        assert result.exit_code == 0, result.output
+        assert captured["theme"] == "ussr"
+        assert captured["state_locale"] == "ja"
+
+    def test_tui_cli_arg_overrides_config(self, tmp_path: Path, monkeypatch) -> None:
+        """config.toml より CLI ``--locale`` 引数を優先する．"""
+        cfg_path = tmp_path / "cfg.toml"
+        cfg_path.write_text('[ui]\nlocale = "ja"\n', encoding="utf-8")
+        monkeypatch.setenv("ANNO_SAVE_ANALYZER_CONFIG", str(cfg_path))
+        save = _make_save(tmp_path)
+
+        captured: dict[str, object] = {}
+
+        def fake_init(self, state, *, localizer=None, theme="default", persist_settings=False):
+            captured["state_locale"] = state.locale
+            from anno_save_analyzer.tui.i18n import Localizer
+
+            self._state = state
+            self._localizer = localizer or Localizer.load(state.locale)
+            self._theme_name = theme
+
+        with (
+            patch("anno_save_analyzer.tui.TradeApp.__init__", fake_init),
+            patch("anno_save_analyzer.tui.TradeApp.run"),
+        ):
+            result = runner.invoke(app, ["tui", str(save), "--locale", "en"])
+
+        assert result.exit_code == 0
+        assert captured["state_locale"] == "en"
+
+    def test_tui_warns_on_unknown_theme_in_config(self, tmp_path: Path, monkeypatch) -> None:
+        """破損 theme 値は default にフォールバックし warning を出す．"""
+        cfg_path = tmp_path / "cfg.toml"
+        cfg_path.write_text('[ui]\ntheme = "neonpunk"\n', encoding="utf-8")
+        monkeypatch.setenv("ANNO_SAVE_ANALYZER_CONFIG", str(cfg_path))
+        save = _make_save(tmp_path)
+
+        captured: dict[str, object] = {}
+
+        def fake_init(self, state, *, localizer=None, theme="default", persist_settings=False):
+            captured["theme"] = theme
+            from anno_save_analyzer.tui.i18n import Localizer
+
+            self._state = state
+            self._localizer = localizer or Localizer.load(state.locale)
+            self._theme_name = theme
+
+        with (
+            patch("anno_save_analyzer.tui.TradeApp.__init__", fake_init),
+            patch("anno_save_analyzer.tui.TradeApp.run"),
+        ):
+            result = runner.invoke(app, ["tui", str(save)])
+
+        assert result.exit_code == 0, result.output
+        assert captured["theme"] == "default"
+        assert "unknown theme" in result.output

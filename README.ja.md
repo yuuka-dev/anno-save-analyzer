@@ -9,7 +9,7 @@
 
 > **一言で説明**: Anno 1800 / Anno 117: Pax Romana のセーブデータ (`.a7s` / `.a8s`) から貿易履歴を抽出し，Textual TUI / CLI から眺められるようにするツール．
 
-> **現状**: v0.4.0 リリース済 (trade history + 島ごと在庫推移)．PyPI 未配信．Git tag からインストールする．English README: [README.md](README.md).
+> **現状**: v0.4.2 リリース済（ルート名表示・チャート時間窓・直近取引 pane・設定永続化）．PyPI 未配信．Git tag からインストールする．English README: [README.md](README.md).
 
 ## 概要
 
@@ -23,7 +23,7 @@ Anno のセーブはマトリョーシカ構造:
 
 本プロジェクトは各層を Python で native にはがし，生の取引イベントをプレイヤーが欲しい形（集計台帳，取引相手内訳，累積推移グラフ，スパークライン，2 セーブ差分）に落とす．
 
-## 主な機能 (v0.4.0)
+## 主な機能 (v0.4.2)
 
 ### Textual TUI (`anno-save-analyzer tui <save>`)
 
@@ -31,13 +31,20 @@ Anno のセーブはマトリョーシカ構造:
 - **Tree フィルタ**: session / island ノードをクリックすると中央テーブル・Partners・chart・^O エクスポートすべてがその粒度に絞られる
 - **Inventory タブ**: 島ごとの StorageTrends (120 サンプル ring buffer) を latest/peak/mean/slope + sparkline で表示．行選択で時系列 chart
 - **可変レイアウト**: wide (≥120) / mid (80-119) / narrow (<80) で列の出し分け．Partners pane はスクロール対応
-- nano 風ホットキー: `^X` 終了 / `^G` ヘルプ / `^T` 画面切替 / `^L` 言語 / `^O` エクスポート
+- **画面切替**: 起動直後は Overview 画面．`^T` で Overview ⇄ Statistics を往復 (filter / 選択状態は保持)
+- nano 風ホットキー:
+  - `^X` 終了 · `^G` ヘルプ · `^T` 画面切替 · `^L` 言語切替 · `^O` CSV エクスポート
+  - `^R` chart 時間窓 cycle (120 分 → 4 時間 → 12 時間 → 24 時間 → 全期間) · `^P` 直近取引の表示範囲パレット (全期間 / 60 / 120 / 360 分 / 24 時間)
+- **カスタムルート名**: Anno 117 セーブから `route_name` を抽出．書記長がゲーム内で命名したルート名が `route_id` の代わりに表示される
+- **直近取引 pane**: 物資を選ぶと Partners pane 下に最新 50 件が「N 分前 / N 時間前」ラベル付きで並ぶ．row 毎に分 / 時間を自動切替
+- **Chart 時間窓**: `^R` で cycle．デフォルト 120 分で 200 時間級セーブでも直近の動きが見える．chart タイトル末尾に `· 直近 120 分` が常時表示
 - items-table の推移 sparkline 列 (`▁▂▃▄▅▆▇█`)
 - 行選択で Partners pane + plotext 折れ線 chart が同時更新
 - chart x 軸は spread に応じて「分前 / 時間前」を auto 切替
 - en / ja ロケール切替．Anno 117 / 1800 のセッション名も翻訳
 - 起動時にステージ粒度のプログレスゲージ (`[n/5] <stage>`)
 - **USSR テーマ** (`--theme ussr`) — 書記長専用ジョーク枠．title に ☭ 付与
+- **設定永続化**: locale / theme / chart 窓 / 直近取引窓を `~/.config/anno-save-analyzer/config.toml` に保存 (XDG 準拠．Windows は `%APPDATA%`)．CLI 引数指定時はそちら優先．`ANNO_SAVE_ANALYZER_CONFIG` で任意パスに上書き可
 
 ### CLI
 
@@ -73,10 +80,10 @@ Anno のセーブはマトリョーシカ構造:
 
 ```bash
 # 最新タグからインストール
-uv pip install "anno-save-analyzer[tui] @ git+https://github.com/yuuka-dev/anno-save-analyzer@v0.4.1"
+uv pip install "anno-save-analyzer[tui] @ git+https://github.com/yuuka-dev/anno-save-analyzer@v0.4.2"
 
 # CLI ツールとして globally install (venv 管理不要)
-uv tool install "anno-save-analyzer[tui] @ git+https://github.com/yuuka-dev/anno-save-analyzer@v0.4.1"
+uv tool install "anno-save-analyzer[tui] @ git+https://github.com/yuuka-dev/anno-save-analyzer@v0.4.2"
 ```
 
 `[tui]` extra で Textual + textual-plotext が入る．CLI / ライブラリだけなら外して良い．
@@ -92,7 +99,7 @@ uv sync --extra tui    # または: python -m venv .venv && .venv/bin/pip instal
 ### uv なし (plain pip)
 
 ```bash
-pip install "anno-save-analyzer[tui] @ git+https://github.com/yuuka-dev/anno-save-analyzer@v0.4.1"
+pip install "anno-save-analyzer[tui] @ git+https://github.com/yuuka-dev/anno-save-analyzer@v0.4.2"
 ```
 
 > PyPI 配信は v1.0 予定．それまで Git tag が正式配布経路．
@@ -108,9 +115,11 @@ pip install "anno-save-analyzer[tui] @ git+https://github.com/yuuka-dev/anno-sav
 anno-save-analyzer tui sample_anno117.a8s --title anno117 --locale ja
 ```
 
-- `^X` 終了 · `^G` ヘルプ · `^T` 画面切替 · `^L` 言語切替 · `^O` CSV エクスポート
+- `^X` 終了 · `^G` ヘルプ · `^T` 画面切替 (Overview ⇄ Statistics) · `^L` 言語切替 · `^O` CSV エクスポート
+- `^R` chart 時間窓 cycle · `^P` 直近取引の表示範囲パレット
 - 書記長カラー欲しいときは `--theme ussr`（title に ☭ prefix）
 - 起動時は 5 ステージのロードゲージが stderr に流れる
+- locale / theme / 各種窓の選択は `~/.config/anno-save-analyzer/config.toml` に自動保存．次回起動時に復元される
 
 ### CLI で貿易を覗く
 
@@ -144,7 +153,9 @@ anno-save-analyzer tui --help
 | v0.1.0 | RDA V2.2 native parser | ✅ 完了 |
 | v0.2.x | FileDB V3 parser，recursive SessionData，島メタ | ✅ 完了 (0.3.0 に統合) |
 | v0.3.0 | Trade history viewer (Textual TUI + CLI + snapshot diff) | ✅ リリース済 |
-| **v0.4.0** | **島ごと在庫推移 (StorageTrends) + Tree filter + 可変レイアウト** | ✅ **リリース済** |
+| v0.4.0 | 島ごと在庫推移 (StorageTrends) + Tree filter + 可変レイアウト | ✅ リリース済 |
+| v0.4.1 | 在庫 chart x 軸を相対時間表記に | ✅ リリース済 |
+| **v0.4.2** | **ルート名表示 + chart 時間窓 (`^R`) + 直近取引 pane (`^P`) + 設定永続化** | ✅ **リリース済** |
 | v0.4+ | データ量連動 progress gauge ([#26](https://github.com/yuuka-dev/anno-save-analyzer/issues/26))，Anno 1800 parity ([#24](https://github.com/yuuka-dev/anno-save-analyzer/issues/24)) | 計画中 |
 | v0.5 | OR-Tools MILP ルート最適化 | 計画中 |
 | v0.6 | DOM 全域の Pydantic 型化 (Island / Building / Population) | 計画中 |

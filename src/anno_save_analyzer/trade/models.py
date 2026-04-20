@@ -75,6 +75,11 @@ class TradeEvent(BaseModel):
     interpreter 側で除外済みのためここに載るのは全てプレイヤー所有．
     TUI 側の Tree filter (島単位 / セッション単位) の key．
     """
+    route_name: str | None = None
+    """書記長がゲーム内で命名したトレードルート名．``partner_kind='route'`` の
+    ときのみ意味を持つ．表示では ``route_name`` 優先，無ければ ``route_id`` を
+    fallback．
+    """
     source_method: SourceMethod = "history"
 
     model_config = {"frozen": True}
@@ -86,3 +91,18 @@ class TradeEvent(BaseModel):
     @property
     def is_sell(self) -> bool:
         return self.amount < 0
+
+    @property
+    def display_partner(self) -> str:
+        """取引相手の表示ラベル．``route_name > #route_id > partner_id > —`` の fallback．
+
+        Partners pane / 直近取引ビューで `PartnerSummary.display_partner` と同じ
+        粒度で event 単体を表示するために使う．
+        """
+        if self.route_name:
+            return f"route {self.route_name}"
+        if self.route_id is not None:
+            return f"route #{self.route_id}"
+        if self.partner is not None:
+            return f"partner #{self.partner.id}"
+        return "—"
