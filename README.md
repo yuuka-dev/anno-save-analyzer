@@ -2,50 +2,150 @@
 
 [![CI](https://github.com/yuuka-dev/anno-save-analyzer/actions/workflows/ci.yml/badge.svg)](https://github.com/yuuka-dev/anno-save-analyzer/actions/workflows/ci.yml)
 [![codecov](https://codecov.io/gh/yuuka-dev/anno-save-analyzer/branch/main/graph/badge.svg)](https://codecov.io/gh/yuuka-dev/anno-save-analyzer)
+[![release](https://img.shields.io/github/v/release/yuuka-dev/anno-save-analyzer?include_prereleases)](https://github.com/yuuka-dev/anno-save-analyzer/releases/latest)
 [![Python 3.12+](https://img.shields.io/badge/python-3.12%2B-blue)](https://www.python.org/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Status: WIP](https://img.shields.io/badge/status-WIP-orange)](docs/ROADMAP.md)
+[![Status: alpha](https://img.shields.io/badge/status-alpha-orange)](docs/ROADMAP.md)
 
-> **One-liner**: Save file analyzer for *Anno 1800* and *Anno 117: Pax Romana* — decompress `.a7s` / `.a8s` containers, parse FileDB binaries, and visualize supply chains, trade routes, and quest progress.
+> **One-liner**: Save file analyzer for *Anno 1800* and *Anno 117: Pax Romana* — decompress `.a7s` / `.a8s` containers, parse FileDB binaries, and surface trade history through a Textual TUI and a JSON-friendly CLI.
 
-> **Status: Work in Progress.** This project is under active development and APIs may break between commits. See [docs/ROADMAP.md](docs/ROADMAP.md) for detailed milestones. Japanese README: [README.ja.md](README.ja.md).
+> **Status**: v0.3.0 shipped (trade history viewer). Not on PyPI yet; install from Git tag or a local clone. Japanese README: [README.ja.md](README.ja.md).
 
 ## Overview
 
-Anno 1800 saves are matryoshka-style containers:
+Anno saves are matryoshka-style containers:
 
-1. `.a7s` — RDA archive (V2.2 container format used across Anno 1404 / 2070 / 2205 / 1800)
+1. `.a7s` / `.a8s` — RDA archive (V2.2 container, shared across Anno 1404 / 2070 / 2205 / 1800 / 117)
 2. `data.a7s` inside it — zlib-compressed stream
-3. FileDB V1/V2/V3 binary after decompression
-4. `data.xml` — multi-million-line XML tree (approximately 2.2M lines on a real late-game save)
-5. `<SessionData><BinaryData>` — re-embedded binary blobs inside that XML (still being reverse-engineered)
+3. FileDB V3 binary after decompression
+4. `<SessionData><BinaryData>` — re-embedded full FileDB V3 documents, one per game session (Latium, Albion, Old World, …)
+5. Inside each session: `AreaInfo`, `PassiveTrade > History`, `ConstructionAI > TradeRoute`, …
 
-This project peels every layer natively in Python and exposes the data in ways that let players actually use it: supply-chain balance tables, route-efficiency reports, and quest dashboards. A Textual-based TUI ships in v0.6 so the whole toolkit runs in a terminal, no Electron or web stack required.
+This project peels every layer natively in Python and turns the raw trade events into things players actually want: aggregated ledgers, partner breakdowns, cumulative charts, sparklines, and snapshot diffs between saves.
 
-## Current features (v0.1.0)
+## Features (v0.3.0)
 
-- RDA V2.2 container parser, fully native Python
-  - Magic / header / block chain / directory entry / per-file zlib decompression
-  - Context-manager API: `with RDAArchive(path) as rda: ...`
-  - `entries` / `read(name)` / `extract(...)` / `extract_all(...)`
-  - Clean-room reimplementation of [@lysannschlegel/RDAExplorer](https://github.com/lysannschlegel/RDAExplorer) based on format spec only
-- `parser.pipeline.extract_inner_filedb` — one call `a7s` to inner FileDB bytes
-- Test suite: 45 tests, **100% line + branch coverage** enforced in CI via `--cov-fail-under=100`. All branches are covered by synthetic fixtures so CI stays at 100% even when `sample.a7s` is absent; real-save tests auto-skip with no coverage gap
+### Textual TUI (`anno-save-analyzer tui <save>`)
+
+- 3-column layout: sessions/islands tree · items & routes tables · Partners pane + plotext chart
+- nano-flavored hotkeys: `^X` exit / `^G` help / `^T` switch screen / `^L` locale / `^O` export
+- Sparkline column (`▁▂▃▄▅▆▇█`) for cumulative quantity per good
+- Selecting a row updates Partners pane + line chart in sync
+- Chart x-axis auto-switches between minutes / hours ago by spread
+- en / ja locale toggle; Anno 117 / 1800 session names localized
+- Stage-granularity load gauge (`[n/5] <stage>`) on startup
+- **USSR theme** (`--theme ussr`) — joke-tier palette with a ☭ title prefix
+
+### CLI
+
+- `trade list <save>` — dump every TradeEvent as JSON
+- `trade summary <save> --by item|route` — aggregated view
+- `trade diff <before> <after>` — added / removed / changed / unchanged between two saves
+- `tui <save>` — launch the Textual viewer
+
+### Parser
+
+- **RDA V2.2** container parser (clean-room port of [@lysannschlegel/RDAExplorer](https://github.com/lysannschlegel/RDAExplorer)). Handles both `.a7s` and `.a8s`.
+- **FileDB V3** streaming DOM with tag/attrib dictionaries, recursive `SessionData` extraction, AreaManager/island enumeration.
+- **Anno 117 interpreter** for `PassiveTrade > History > {TradeRouteEntries,PassiveTradeEntries}` and `ConstructionAI > TradeRoute > TradeRoutes` (idle route enumeration).
+- NPC-vs-NPC trades filtered out via the `AreaInfo > CityName` gate.
+
+### Data pipeline
+
+- `items_anno117.{en,ja}.yaml` auto-generated from the game's own `config.rda/assets.xml` and `texts_japanese.xml` — 151 Products × 33,146 localized strings. Regenerator at `scripts/generate_items_anno117.py`; run it after a game patch.
+
+### Tests
+
+- 338 tests, **100 % line + branch coverage** enforced by CI (`--cov-fail-under=100`).
+- Python 3.12 and 3.13 both supported.
+
+## Install
+
+### With **uv** (recommended)
+
+[uv](https://github.com/astral-sh/uv) installs a Python interpreter, creates a venv, and resolves dependencies in one step.
+
+```bash
+# Install the latest released version from the GitHub tag
+uv pip install "anno-save-analyzer[tui] @ git+https://github.com/yuuka-dev/anno-save-analyzer@v0.3.0"
+
+# Or install as a standalone CLI tool (no venv management)
+uv tool install "anno-save-analyzer[tui] @ git+https://github.com/yuuka-dev/anno-save-analyzer@v0.3.0"
+```
+
+The `[tui]` extra pulls in Textual and textual-plotext. Omit it if you only need the CLI / library.
+
+### Local clone (development)
+
+```bash
+git clone https://github.com/yuuka-dev/anno-save-analyzer.git
+cd anno-save-analyzer
+uv sync --extra tui        # or: python -m venv .venv && .venv/bin/pip install -e '.[tui]'
+```
+
+### Without uv (plain pip)
+
+```bash
+pip install "anno-save-analyzer[tui] @ git+https://github.com/yuuka-dev/anno-save-analyzer@v0.3.0"
+```
+
+> PyPI publication is planned for v1.0. Until then, Git tags are the supported distribution channel.
+
+## Quick start
+
+Everything runs under the `anno-save-analyzer` command. ``--title`` selects the
+game (`anno117` / `anno1800`); `--locale` controls UI names (`en` / `ja`).
+
+### Launch the TUI
+
+```bash
+anno-save-analyzer tui sample_anno117.a8s --title anno117 --locale ja
+```
+
+- `^X` exit · `^G` help · `^T` switch screen · `^L` toggle locale · `^O` export CSVs
+- Add `--theme ussr` for the 書記長 palette (☭ title prefix)
+- On load, a 5-stage gauge streams to stderr so you can see what's happening
+
+### Inspect trades from the CLI
+
+```bash
+# Every TradeEvent as JSON
+anno-save-analyzer trade list sample_anno117.a8s --title anno117
+
+# Per-item / per-route aggregates
+anno-save-analyzer trade summary sample_anno117.a8s --title anno117 --by item
+anno-save-analyzer trade summary sample_anno117.a8s --title anno117 --by route
+
+# Diff two saves (added / removed / changed / unchanged)
+anno-save-analyzer trade diff before.a8s after.a8s --title anno117 --locale ja
+anno-save-analyzer trade diff before.a8s after.a8s --by route --show-unchanged
+```
+
+All sub-commands emit JSON to stdout, so pipe them into `jq`, DuckDB, or your
+favourite notebook.
+
+### Get help
+
+```bash
+anno-save-analyzer --help
+anno-save-analyzer trade --help
+anno-save-analyzer tui --help
+```
 
 ## Roadmap
 
 | Version | Scope | Status |
 |---|---|---|
-| v0.1.0 | RDA V2.2 native parser | done |
-| v0.2 | FileDB V1/V2/V3 parser, route data models | next |
-| v0.3 | `SessionData` / `BinaryData` decoder (the hard part) | planned |
-| v0.4 | Per-island supply-chain balance sheet | planned |
+| v0.1.0 | RDA V2.2 native parser | ✅ done |
+| v0.2.x | FileDB V3 parser, recursive SessionData, island metadata | ✅ done (rolled into 0.3.0) |
+| **v0.3.0** | **Trade history viewer: Textual TUI + CLI + snapshot diff** | ✅ **released** |
+| v0.4 | StorageTrends (per-island inventory time series) TUI integration ([#23](https://github.com/yuuka-dev/anno-save-analyzer/issues/23)) | 🚧 next |
+| v0.4+ | Data-volume progress gauge ([#26](https://github.com/yuuka-dev/anno-save-analyzer/issues/26)), Anno 1800 parity ([#24](https://github.com/yuuka-dev/anno-save-analyzer/issues/24)) | planned |
 | v0.5 | OR-Tools MILP route optimizer | planned |
-| v0.6 | **Textual** TUI dashboard | planned |
-| v1.0 | Public stable release, PyPI packaging | planned |
-| _Future_ | Anno 117 (`.a8s`) support | version TBD |
+| v0.6 | Typed Pydantic models across the DOM (Island / Building / Population) | planned |
+| v1.0 | PyPI publish, English docs, stable API | planned |
 
-See [docs/ROADMAP.md](docs/ROADMAP.md) (English) / [docs/ROADMAP.ja.md](docs/ROADMAP.ja.md) (Japanese) for the detailed plan and [GitHub Milestones](https://github.com/yuuka-dev/anno-save-analyzer/milestones) for tracking.
+See [docs/ROADMAP.md](docs/ROADMAP.md) (English) / [docs/ROADMAP.ja.md](docs/ROADMAP.ja.md) (Japanese) for detailed milestones.
 
 ## Tech stack
 
@@ -53,72 +153,48 @@ See [docs/ROADMAP.md](docs/ROADMAP.md) (English) / [docs/ROADMAP.ja.md](docs/ROA
 |---|---|
 | Language | Python 3.12+ |
 | Package manager | uv (recommended), pip compatible |
+| CLI framework | typer |
 | XML parser | lxml (`huge_tree=True`, `recover=True`) |
 | Data models | pydantic v2 |
 | Aggregation | pandas |
-| TUI (v0.6+) | [Textual](https://github.com/Textualize/Textual) |
-| Optimization (optional) | OR-Tools |
+| TUI | [Textual](https://github.com/Textualize/Textual) + [textual-plotext](https://github.com/Textualize/textual-plotext) |
+| Optimization (optional, v0.5) | OR-Tools |
+| Notebook (optional) | JupyterLab (for `notebooks/island_inventory.ipynb`) |
 | CI | GitHub Actions, pytest-cov, Codecov |
 | Lint / format | ruff |
 
 ## Architecture
 
 ```text
-sample.a7s  (RDA V2.2 container)
-    └─ data.a7s  (zlib-compressed)
-        └─ FileDB binary  (V1/V2/V3, Blue Byte proprietary)
-            └─ data.xml  (multi-million-line XML tree)
-                └─ <SessionData><BinaryData>  (still under reverse engineering)
+sample_anno117.a8s  (RDA V2.2 container)
+└─ data.a7s  (zlib stream inside RDA)
+   └─ outer FileDB V3
+      ├─ <SessionData><BinaryData>  (one per game session, recursively another FileDB V3)
+      │  ├─ AreaInfo > <1> > AreaEconomy > StorageTrends  (inventory time series — v0.4)
+      │  ├─ AreaInfo > <1> > PassiveTrade > History > TradeRouteEntries / PassiveTradeEntries > …
+      │  └─ ConstructionAI > TradeRoute > TradeRoutes > <1>  (idle route definitions)
+      └─ meta / header / gamesetup.a7s  (handled by RDAArchive)
 ```
 
-See [docs/rda_format_spec.md](docs/rda_format_spec.md) for the full RDA V2.2 format write-up.
+See [docs/rda_format_spec.md](docs/rda_format_spec.md) and [docs/filedb_format_investigation.md](docs/filedb_format_investigation.md) for the write-ups.
 
-## Getting started
-
-### Requirements
-
-- Python 3.12 or newer
-- `uv` (recommended) or `pip`
-- A real Anno 1800 save file (`.a7s`) for end-to-end verification (unit tests ship with synthetic fixtures and do not require one)
-
-### Install
+## Testing / development
 
 ```bash
-git clone https://github.com/yuuka-dev/anno-save-analyzer.git
-cd anno-save-analyzer
-uv sync          # or: python -m venv .venv && .venv/bin/pip install -e .
+uv run pytest --cov=anno_save_analyzer --cov-branch --cov-fail-under=100
+uv run ruff check src tests
+uv run ruff format --check src tests
 ```
 
-### Quick start
-
-```python
-import zlib
-from anno_save_analyzer.parser.rda import RDAArchive
-
-with RDAArchive("Autosave 182.a7s") as rda:
-    for e in rda.entries:
-        print(e.filename, e.uncompressed_size)
-
-    data_bytes = rda.read("data.a7s")
-    filedb_bytes = zlib.decompress(data_bytes)
-    # filedb_bytes is now a FileDB V2 binary (~165 MB for a late-game save)
-```
-
-### Run tests
-
-```bash
-uv run pytest --cov=anno_save_analyzer --cov-report=term-missing
-```
-
-Tests that require a real save are auto-skipped if none is present. To run them, place a save as `sample.a7s` at the repo root, or set the `SAMPLE_A7S` environment variable.
+Tests that need a real save are auto-skipped if none is present. Drop a save as `sample.a7s` or `sample_anno117.a8s` at the repo root, or set `SAMPLE_A7S` / `SAMPLE_A8S`.
 
 ## Contributing
 
-Pull requests are welcome. See [CONTRIBUTING.md](CONTRIBUTING.md) for the branch strategy, commit conventions, Copilot-review policy, and coverage expectations. In short:
+Pull requests welcome. See [CONTRIBUTING.md](CONTRIBUTING.md) for the branch strategy, commit conventions (English-subject + optional Japanese body block), Copilot review policy, and 100 % coverage expectation. In short:
 
-- Feature work goes on `feature/*` branches, merges into `dev`; releases promote `dev` → `main`.
-- Every PR requests GitHub Copilot code review and must pass CI with coverage not below base.
-- New parser logic must cite a format reference (upstream code, spec doc, or new `docs/` entry).
+- Feature work on `feature/*` → `dev` → (release branch) → `main`.
+- Every PR requests Copilot review and must keep CI green with coverage at 100 %.
+- Parser additions should cite a format reference in `docs/`.
 
 ## Disclaimer
 
@@ -126,9 +202,9 @@ This project is **not affiliated** with Ubisoft, Blue Byte, or the Anno franchis
 
 ## Acknowledgements
 
-- Based on the reverse-engineering work of [@lysannschlegel's RDAExplorer](https://github.com/lysannschlegel/RDAExplorer).
-- FileDB format research draws on [anno-mods/FileDBReader](https://github.com/anno-mods/FileDBReader).
-- Prior art / inspiration: [Anno1800SavegameVisualizer](https://github.com/NiHoel/Anno1800SavegameVisualizer), [AnnoSavegameViewer](https://github.com/Veraatversus/AnnoSavegameViewer), [anno1800-save-game-explorer](https://github.com/RobertLeePrice/anno1800-save-game-explorer).
+- RDA V2.2 format: [@lysannschlegel/RDAExplorer](https://github.com/lysannschlegel/RDAExplorer).
+- FileDB format: [anno-mods/FileDBReader](https://github.com/anno-mods/FileDBReader).
+- Prior art: [Anno1800SavegameVisualizer](https://github.com/NiHoel/Anno1800SavegameVisualizer), [AnnoSavegameViewer](https://github.com/Veraatversus/AnnoSavegameViewer), [anno1800-save-game-explorer](https://github.com/RobertLeePrice/anno1800-save-game-explorer).
 
 ## License
 
