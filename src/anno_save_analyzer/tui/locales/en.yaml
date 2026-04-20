@@ -58,7 +58,6 @@ statistics.chart.xlabel.minutes_ago: "minutes (0 = latest)"
 statistics.chart.xlabel.hours_ago: "hours (0 = latest)"
 statistics.chart.idle_suffix: "{status}, {legs} legs"
 statistics.chart.no_inventory_samples: "{title} — no inventory samples"
-statistics.chart.sample_index: "sample index"
 
 partners.heading: "Partners"
 partners.empty: "Pick a good in the table to see partners."
