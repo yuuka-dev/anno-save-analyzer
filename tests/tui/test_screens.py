@@ -877,6 +877,8 @@ class TestStatisticsScreen:
 
     async def test_recent_window_palette_opens_on_ctrl_p(self, tui_state) -> None:
         """``^P`` で ``RecentWindowPalette`` が push される．"""
+        from textual.widgets import OptionList
+
         from anno_save_analyzer.tui.screens.statistics import RecentWindowPalette
 
         app = TradeApp(tui_state)
@@ -887,6 +889,23 @@ class TestStatisticsScreen:
             await pilot.press("ctrl+p")
             await pilot.pause()
             assert isinstance(pilot.app.screen, RecentWindowPalette)
+            option_list = pilot.app.screen.query_one(OptionList)
+            labels = [str(option.prompt) for option in option_list.options]
+            assert any("Last 24 h" in label for label in labels)
+            assert not any("1440 h" in label for label in labels)
+
+    async def test_recent_window_binding_localizes_on_locale_switch(self, tui_state) -> None:
+        app = TradeApp(tui_state)
+        async with app.run_test() as pilot:
+            await pilot.pause()
+            await pilot.press("ctrl+t")
+            await pilot.pause()
+            screen = pilot.app.screen
+            assert next(b.description for b in screen.BINDINGS if b.key == "ctrl+p") == "History window"
+            await pilot.press("ctrl+l")
+            await pilot.pause()
+            screen = pilot.app.screen
+            assert next(b.description for b in screen.BINDINGS if b.key == "ctrl+p") == "履歴窓"
 
     async def test_partners_pane_recent_row_marks_untimed_events(self, tui_state) -> None:
         """``timestamp_tick=None`` の event は "—" マーク (時刻不明) で末尾に並ぶ．"""
@@ -895,11 +914,12 @@ class TestStatisticsScreen:
         from textual.widgets import Static
 
         from anno_save_analyzer.trade import Item, TradeEvent
+        from anno_save_analyzer.tui.i18n import Localizer
 
         item = Item(guid=8888, names={"en": "Ghost"})
         untimed = TradeEvent(item=item, amount=1, total_price=1)
         new_state = dataclasses.replace(tui_state, events=(*tui_state.events, untimed))
-        app = TradeApp(new_state)
+        app = TradeApp(new_state, localizer=Localizer.load("ja"))
         async with app.run_test() as pilot:
             await pilot.pause()
             await pilot.press("ctrl+t")
@@ -908,10 +928,10 @@ class TestStatisticsScreen:
             screen._update_partners_pane(8888)
             pane = screen.query_one("#partners-pane", Static)
             rendered = str(pane.render())
-            assert "Recent trades" in rendered
-            # "min ago" は付かず，unknown marker が出る
-            assert "min ago" not in rendered
-            assert "—" in rendered
+            assert "直近取引" in rendered
+            # "分前" は付かず，unknown marker locale 文言が出る
+            assert "分前" not in rendered
+            assert "時刻不明" in rendered
 
     async def test_route_detail_plots_cumulative_gold_for_active_route(self, tui_state) -> None:
         """履歴のある route_id を routes-table で選ぶと chart に累積 gold が描画される．"""

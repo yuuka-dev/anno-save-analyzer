@@ -61,7 +61,7 @@ _RECENT_WINDOW_OPTIONS: tuple[tuple[str, float | None], ...] = (
     ("partners.recent_window.minutes", 60.0),
     ("partners.recent_window.minutes", 120.0),
     ("partners.recent_window.minutes", 360.0),
-    ("partners.recent_window.hours", 24.0),
+    ("partners.recent_window.hours", 1440.0),
 )
 
 
@@ -69,7 +69,8 @@ class RecentWindowPalette(ModalScreen[float | None]):
     """``^P`` で開く直近取引の時間窓選択モーダル．
 
     ``dismiss`` の返り値 = 選択された ``max_age_minutes`` (``None`` なら全期間)．
-    Esc でキャンセル = そもそも ``dismiss`` を呼ばずに閉じる．
+    Esc では現在値 (``self._current``) で ``dismiss`` して閉じる．
+    そのため呼び出し側では実質的に no-op として扱える．
     """
 
     DEFAULT_CSS = """
@@ -104,7 +105,7 @@ class RecentWindowPalette(ModalScreen[float | None]):
             if value is None:
                 label = t(key)
             elif key.endswith(".hours"):
-                label = t(key, value=value)
+                label = t(key, value=value / 60.0)
             else:
                 label = t(key, value=value)
             if value == self._current or (value is None and self._current is None):
@@ -131,9 +132,7 @@ class RecentWindowPalette(ModalScreen[float | None]):
 class TradeStatisticsScreen(Screen):
     """3 カラム統計画面．右端は Partners pane (上) + 時系列 Chart (下) を縦分割．"""
 
-    BINDINGS = [
-        Binding("ctrl+p", "recent_window", "History window"),
-    ]
+    BINDINGS = [Binding("ctrl+p", "recent_window", "History window")]
 
     DEFAULT_CSS = """
     TradeStatisticsScreen Horizontal {
@@ -184,6 +183,7 @@ class TradeStatisticsScreen(Screen):
         super().__init__(name="statistics")
         self._state = state
         self._localizer = localizer
+        self._apply_localized_bindings()
         self._filter = TradeFilter()
         self._filtered_events_cache: list[TradeEvent] | None = None
         self._filtered_events_cache_key: tuple[str | None, str | None] | None = None
@@ -224,6 +224,13 @@ class TradeStatisticsScreen(Screen):
         に委譲する．
         """
         self._localizer = localizer
+        self._apply_localized_bindings()
+
+    def _apply_localized_bindings(self) -> None:
+        self.BINDINGS = [
+            Binding("ctrl+p", "recent_window", self._localizer.t("binding.recent_window")),
+        ]
+        self.refresh_bindings()
 
     def action_recent_window(self) -> None:
         """``^P``: 直近取引の時間窓を選ぶパレットを開く．"""
