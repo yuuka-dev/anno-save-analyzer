@@ -93,30 +93,43 @@ pip install "anno-save-analyzer[tui] @ git+https://github.com/yuuka-dev/anno-sav
 
 ## Quick start
 
-### Explore a save in the TUI
+Everything runs under the `anno-save-analyzer` command. ``--title`` selects the
+game (`anno117` / `anno1800`); `--locale` controls UI names (`en` / `ja`).
+
+### Launch the TUI
 
 ```bash
 anno-save-analyzer tui sample_anno117.a8s --title anno117 --locale ja
 ```
 
-Add `--theme ussr` if you want the 書記長 palette. `^X` to exit, `^O` to dump three CSVs (items / routes / events) next to your current directory.
+- `^X` exit · `^G` help · `^T` switch screen · `^L` toggle locale · `^O` export CSVs
+- Add `--theme ussr` for the 書記長 palette (☭ title prefix)
+- On load, a 5-stage gauge streams to stderr so you can see what's happening
 
-### Diff two saves from the CLI
+### Inspect trades from the CLI
 
 ```bash
+# Every TradeEvent as JSON
+anno-save-analyzer trade list sample_anno117.a8s --title anno117
+
+# Per-item / per-route aggregates
+anno-save-analyzer trade summary sample_anno117.a8s --title anno117 --by item
+anno-save-analyzer trade summary sample_anno117.a8s --title anno117 --by route
+
+# Diff two saves (added / removed / changed / unchanged)
 anno-save-analyzer trade diff before.a8s after.a8s --title anno117 --locale ja
+anno-save-analyzer trade diff before.a8s after.a8s --by route --show-unchanged
 ```
 
-JSON output with `status` ∈ {`added`, `removed`, `changed`, `unchanged`}. Add `--by route` for route-level deltas, `--show-unchanged` to include unchanged rows.
+All sub-commands emit JSON to stdout, so pipe them into `jq`, DuckDB, or your
+favourite notebook.
 
-### Library use
+### Get help
 
-```python
-from anno_save_analyzer.trade import GameTitle, ItemDictionary, extract
-
-items = ItemDictionary.load(GameTitle.ANNO_117, locales=("en", "ja"))
-for event in extract("sample_anno117.a8s", title=GameTitle.ANNO_117, items=items):
-    print(event.item.display_name("ja"), event.amount, event.total_price)
+```bash
+anno-save-analyzer --help
+anno-save-analyzer trade --help
+anno-save-analyzer tui --help
 ```
 
 ## Roadmap

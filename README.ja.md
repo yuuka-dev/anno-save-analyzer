@@ -93,30 +93,42 @@ pip install "anno-save-analyzer[tui] @ git+https://github.com/yuuka-dev/anno-sav
 
 ## 使い方
 
-### TUI でセーブを覗く
+すべて `anno-save-analyzer` コマンド配下．`--title` でゲーム (``anno117`` / ``anno1800``)，
+`--locale` で UI 表記 (``en`` / ``ja``) を選ぶ．
+
+### TUI を起動
 
 ```bash
 anno-save-analyzer tui sample_anno117.a8s --title anno117 --locale ja
 ```
 
-書記長カラー欲しいときは `--theme ussr` 追加．`^X` で終了，`^O` で items / routes / events 3 枚の CSV を現在ディレクトリに書き出し．
+- `^X` 終了 · `^G` ヘルプ · `^T` 画面切替 · `^L` 言語切替 · `^O` CSV エクスポート
+- 書記長カラー欲しいときは `--theme ussr`（title に ☭ prefix）
+- 起動時は 5 ステージのロードゲージが stderr に流れる
 
-### 2 セーブ間差分を CLI で
+### CLI で貿易を覗く
 
 ```bash
+# 全 TradeEvent を JSON
+anno-save-analyzer trade list sample_anno117.a8s --title anno117
+
+# 物資別 / ルート別集計
+anno-save-analyzer trade summary sample_anno117.a8s --title anno117 --by item
+anno-save-analyzer trade summary sample_anno117.a8s --title anno117 --by route
+
+# 2 セーブ間差分（added / removed / changed / unchanged）
 anno-save-analyzer trade diff before.a8s after.a8s --title anno117 --locale ja
+anno-save-analyzer trade diff before.a8s after.a8s --by route --show-unchanged
 ```
 
-`status` ∈ {`added`, `removed`, `changed`, `unchanged`} の JSON．`--by route` でルート軸，`--show-unchanged` で未変動行も含む．
+全サブコマンド stdout に JSON を吐くので `jq` / DuckDB / ノートブックにそのまま流せる．
 
-### ライブラリとして
+### ヘルプ
 
-```python
-from anno_save_analyzer.trade import GameTitle, ItemDictionary, extract
-
-items = ItemDictionary.load(GameTitle.ANNO_117, locales=("en", "ja"))
-for event in extract("sample_anno117.a8s", title=GameTitle.ANNO_117, items=items):
-    print(event.item.display_name("ja"), event.amount, event.total_price)
+```bash
+anno-save-analyzer --help
+anno-save-analyzer trade --help
+anno-save-analyzer tui --help
 ```
 
 ## ロードマップ
