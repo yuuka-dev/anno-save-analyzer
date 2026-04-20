@@ -290,13 +290,12 @@ class TestFilteredRenderingAndExport:
         csvs = sorted(tmp_path.glob("fake_*_island-*_*.csv"))
         assert len(csvs) == 3
         for path in csvs:
-            name = path.name
-            assert "/" not in name
-            assert "\\" not in name
-            assert ":" not in name
-            assert "*" not in name
-            assert "?" not in name
-            assert ".." not in name
+            assert "/" not in path.name
+            assert "\\" not in path.name
+            assert ":" not in path.name
+            assert "*" not in path.name
+            assert "?" not in path.name
+            assert ".." not in path.name
 
     async def test_export_full_when_overview_active(self, tui_state, tmp_path, monkeypatch) -> None:
         """Overview 画面で ^O すると filter 関係なく全量，suffix なし．"""
