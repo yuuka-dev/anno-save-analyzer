@@ -57,6 +57,27 @@ class TestTradeEvent:
         assert ev.timestamp_tick is None
         assert ev.source_method == "history"
 
+    def test_display_partner_prefers_route_name(self) -> None:
+        item = Item(guid=1, names={})
+        ev = TradeEvent(item=item, amount=1, total_price=1, route_id="7", route_name="商会ルート")
+        assert ev.display_partner == "route 商会ルート"
+
+    def test_display_partner_falls_back_to_route_id(self) -> None:
+        item = Item(guid=1, names={})
+        ev = TradeEvent(item=item, amount=1, total_price=1, route_id="7")
+        assert ev.display_partner == "route #7"
+
+    def test_display_partner_falls_back_to_partner_id(self) -> None:
+        item = Item(guid=1, names={})
+        partner = TradingPartner(id="99", display_name="npc", kind="passive")
+        ev = TradeEvent(item=item, amount=1, total_price=1, partner=partner)
+        assert ev.display_partner == "partner #99"
+
+    def test_display_partner_dash_when_nothing_known(self) -> None:
+        item = Item(guid=1, names={})
+        ev = TradeEvent(item=item, amount=1, total_price=1)
+        assert ev.display_partner == "—"
+
 
 class TestTradingPartner:
     def test_construction(self) -> None:

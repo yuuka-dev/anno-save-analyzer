@@ -207,6 +207,30 @@ def by_route(
     return summaries
 
 
+def events_for_item(
+    events: Iterable[TradeEvent],
+    item_guid: int,
+    *,
+    session: str | None = None,
+    island: str | None = None,
+    limit: int = 50,
+) -> list[TradeEvent]:
+    """指定 item の TradeEvent を ``timestamp_tick`` 降順で最大 ``limit`` 件返す．
+
+    「この物資を最近いつ取引したか」を Partners pane 下に並べる用途．集計を行わず
+    個別 event を素通しで渡す．``timestamp_tick=None`` の event は末尾に寄せる．
+    ``session`` / ``island`` 指定で事前フィルタ．``limit`` に負値を渡すと上限なし．
+    """
+    if session is not None or island is not None:
+        events = filter_events(events, session=session, island=island)
+    filtered = [ev for ev in events if ev.item.guid == item_guid]
+    # tick=None を末尾へ → (is_none, -tick) で降順．
+    filtered.sort(key=lambda e: (e.timestamp_tick is None, -(e.timestamp_tick or 0)))
+    if limit < 0:
+        return filtered
+    return filtered[:limit]
+
+
 def partners_for_item(
     events: Iterable[TradeEvent],
     item_guid: int,

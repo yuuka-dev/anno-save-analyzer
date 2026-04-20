@@ -19,13 +19,19 @@ from textual.widgets import (
 )
 from textual_plotext import PlotextPlot
 
-from anno_save_analyzer.trade import by_item, by_route, partners_for_item
+from anno_save_analyzer.trade import (
+    by_item,
+    by_route,
+    events_for_item,
+    partners_for_item,
+)
 from anno_save_analyzer.trade.aggregate import (
     ItemSummary,
     PartnerSummary,
     RouteSummary,
     filter_events,
 )
+from anno_save_analyzer.trade.clock import TICKS_PER_MINUTE, latest_tick
 from anno_save_analyzer.trade.models import TradeEvent
 
 from ..i18n import Localizer
@@ -633,4 +639,58 @@ class TradeStatisticsScreen(Screen):
                 f"{t('statistics.col.net_gold')}: {r.net_gold:+,}  "
                 f"{t('statistics.col.events')}: {r.event_count:,}"
             )
+        lines.append("")
+        lines.extend(self._format_recent_trades(item_guid))
         return "\n".join(lines)
+
+    def _format_recent_trades(self, item_guid: int, *, limit: int = 50) -> list[str]:
+        """直近取引セクションの行を生成．tick 降順 / tick=None は末尾 "時刻不明"．
+
+        相対時間は「最新イベント tick」を基準とし，spread が 120 分超なら時間単位
+        に切り替え．``events_for_item`` から返る並びを信頼し，本関数は整形のみ．
+        """
+        t = self._localizer.t
+        recent = events_for_item(
+            self._state.events,
+            item_guid,
+            session=self._filter.session,
+            island=self._filter.island,
+            limit=limit,
+        )
+        header = f"[b]{t('partners.recent_heading')}[/b]"
+        if not recent:
+            return [header, f"[dim]{t('partners.recent_empty')}[/dim]"]
+        ticks = [ev.timestamp_tick for ev in recent if ev.timestamp_tick is not None]
+        now_tick = latest_tick(ticks)
+        # spread 判定: 時刻付きが 1 件しか無い / 全部同じ tick なら spread=0 → 分表示．
+        minutes_values = [
+            (now_tick - ev.timestamp_tick) / TICKS_PER_MINUTE
+            for ev in recent
+            if ev.timestamp_tick is not None and now_tick is not None
+        ]
+        use_hours = bool(minutes_values) and (max(minutes_values) - min(minutes_values)) > 120.0
+        lines: list[str] = [header]
+        for ev in recent:
+            lines.append(self._format_recent_trade_row(ev, now_tick=now_tick, use_hours=use_hours))
+        return lines
+
+    def _format_recent_trade_row(
+        self, ev: TradeEvent, *, now_tick: int | None, use_hours: bool
+    ) -> str:
+        t = self._localizer.t
+        if ev.timestamp_tick is None or now_tick is None:
+            time_label = t("partners.recent_row.unknown")
+        else:
+            minutes = (now_tick - ev.timestamp_tick) / TICKS_PER_MINUTE
+            if use_hours:
+                time_label = t("partners.recent_row.hours_ago", value=minutes / 60.0)
+            else:
+                time_label = t("partners.recent_row.minutes_ago", value=minutes)
+        island = ev.island_name or "—"
+        qty_color = "green" if ev.amount > 0 else ("red" if ev.amount < 0 else "dim")
+        gold_color = "green" if ev.total_price > 0 else ("red" if ev.total_price < 0 else "dim")
+        return (
+            f"[dim]{time_label}[/dim]  {island}  {ev.display_partner}  "
+            f"[{qty_color}]{ev.amount:+,}[/{qty_color}]  "
+            f"[{gold_color}]{ev.total_price:+,}[/{gold_color}]"
+        )

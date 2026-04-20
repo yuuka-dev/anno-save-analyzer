@@ -713,6 +713,96 @@ class TestStatisticsScreen:
             # en fallback 名が表示される
             assert "Good_999999" in rendered
 
+    async def test_partners_pane_shows_recent_trades_section(self, tui_state) -> None:
+        """物資を選ぶと Partners pane 下に "直近取引 / Recent trades" セクションが出る．"""
+        import dataclasses
+
+        from textual.widgets import Static
+
+        from anno_save_analyzer.trade import Item, TradeEvent, TradingPartner
+
+        # 時刻付き event を注入して min ago 表記を検証可能に．
+        item = Item(guid=4242, names={"en": "Bricks"})
+        partner = TradingPartner(id="route:9", display_name="r9", kind="route")
+        events = (
+            TradeEvent(
+                item=item,
+                amount=5,
+                total_price=50,
+                partner=partner,
+                route_id="9",
+                route_name="商会ルート",
+                timestamp_tick=1_000_000,
+                island_name="プレイヤー島",
+            ),
+            TradeEvent(
+                item=item,
+                amount=-2,
+                total_price=-20,
+                partner=partner,
+                route_id="9",
+                route_name="商会ルート",
+                timestamp_tick=999_400,  # 1 分前 (TICKS_PER_MINUTE=600)
+                island_name="プレイヤー島",
+            ),
+        )
+        new_state = dataclasses.replace(tui_state, events=(*tui_state.events, *events))
+        app = TradeApp(new_state)
+        async with app.run_test() as pilot:
+            await pilot.pause()
+            await pilot.press("ctrl+t")
+            await pilot.pause()
+            screen = pilot.app.screen
+            screen._update_partners_pane(4242)
+            pane = screen.query_one("#partners-pane", Static)
+            rendered = str(pane.render())
+            assert "Recent trades" in rendered
+            # 最新 event は 0 min ago，もう 1 件が 1 min ago で出る
+            assert "min ago" in rendered
+            # route_name 優先で表示
+            assert "商会ルート" in rendered
+
+    async def test_partners_pane_recent_section_hidden_for_unknown_item(self, tui_state) -> None:
+        """fixture に events を持たない guid を直接渡した場合，partners empty メッセージのみ．"""
+        from textual.widgets import Static
+
+        app = TradeApp(tui_state)
+        async with app.run_test() as pilot:
+            await pilot.pause()
+            await pilot.press("ctrl+t")
+            await pilot.pause()
+            screen = pilot.app.screen
+            screen._update_partners_pane(999_999)
+            pane = screen.query_one("#partners-pane", Static)
+            rendered = str(pane.render())
+            # partners empty branch が先に返る → Recent trades は出ない
+            assert "Recent trades" not in rendered
+
+    async def test_partners_pane_recent_row_marks_untimed_events(self, tui_state) -> None:
+        """``timestamp_tick=None`` の event は "—" マーク (時刻不明) で末尾に並ぶ．"""
+        import dataclasses
+
+        from textual.widgets import Static
+
+        from anno_save_analyzer.trade import Item, TradeEvent
+
+        item = Item(guid=8888, names={"en": "Ghost"})
+        untimed = TradeEvent(item=item, amount=1, total_price=1)
+        new_state = dataclasses.replace(tui_state, events=(*tui_state.events, untimed))
+        app = TradeApp(new_state)
+        async with app.run_test() as pilot:
+            await pilot.pause()
+            await pilot.press("ctrl+t")
+            await pilot.pause()
+            screen = pilot.app.screen
+            screen._update_partners_pane(8888)
+            pane = screen.query_one("#partners-pane", Static)
+            rendered = str(pane.render())
+            assert "Recent trades" in rendered
+            # "min ago" は付かず，unknown marker が出る
+            assert "min ago" not in rendered
+            assert "—" in rendered
+
     async def test_route_detail_plots_cumulative_gold_for_active_route(self, tui_state) -> None:
         """履歴のある route_id を routes-table で選ぶと chart に累積 gold が描画される．"""
         from anno_save_analyzer.trade import Item, TradeEvent, TradingPartner

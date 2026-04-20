@@ -91,3 +91,18 @@ class TradeEvent(BaseModel):
     @property
     def is_sell(self) -> bool:
         return self.amount < 0
+
+    @property
+    def display_partner(self) -> str:
+        """取引相手の表示ラベル．``route_name > #route_id > partner_id > —`` の fallback．
+
+        Partners pane / 直近取引ビューで `PartnerSummary.display_partner` と同じ
+        粒度で event 単体を表示するために使う．
+        """
+        if self.route_name:
+            return f"route {self.route_name}"
+        if self.route_id is not None:
+            return f"route #{self.route_id}"
+        if self.partner is not None:
+            return f"partner #{self.partner.id}"
+        return "—"
