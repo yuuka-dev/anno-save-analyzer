@@ -83,10 +83,10 @@ class TestTradeAppLifecycle:
             await pilot.pause()
             await pilot.press("ctrl+o")
             await pilot.pause()
-        # fake.bin basename に基づく 3 ファイル
+        # fake.bin basename に基づく 4 ファイル (items / routes / events / inventory)
         stems = sorted(p.name for p in tmp_path.glob("fake_*.csv"))
         kinds = {s.split("_")[1] for s in stems}
-        assert kinds == {"items", "routes", "events"}
+        assert kinds == {"items", "routes", "events", "inventory"}
         # items CSV に header 行があることを verify
         items_csv = next(p for p in tmp_path.glob("fake_items_*.csv"))
         content = items_csv.read_text(encoding="utf-8").splitlines()
@@ -141,3 +141,24 @@ class TestFromSaveClassmethod:
         app = TradeApp.from_save(tui_state.save_path, locale="ja")
         assert app._state.locale == "ja"
         assert app._localizer.code == "ja"
+
+
+def test_sanitize_filename_component_fallback_for_empty_or_whitespace() -> None:
+    """``_sanitize_filename_component`` が空文字になる入力で unknown-<digest> を返す．
+
+    coverage 対象: app.py lines 40-41 の ``digest = ...`` /
+    ``return f"unknown-{digest}"`` fallback path．``strip(" .")`` の後に空になる
+    入力 (空文字 / space+dot のみ) で踏む．unsafe 文字は ``-`` に置換されて
+    strip で消えないので，unsafe-only では fallback に落ちないことにも注意．
+    """
+    from anno_save_analyzer.tui.app import _sanitize_filename_component
+
+    empty = _sanitize_filename_component("")
+    assert empty.startswith("unknown-")
+    assert len(empty) == len("unknown-") + 8
+
+    space_dot = _sanitize_filename_component("  .. ")
+    assert space_dot.startswith("unknown-")
+
+    # 決定性
+    assert _sanitize_filename_component("") == empty

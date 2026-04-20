@@ -400,6 +400,71 @@ class TestNpcIslandFiltering:
         assert len(triples) == 2
 
 
+class TestIslandNameAttachment:
+    """#29 Phase 1: AreaInfo entry の CityName が ExtractionContext.island_name に載る．"""
+
+    def test_island_name_populated_on_raw_triples(self) -> None:
+        from .conftest import make_inner_filedb, wrap_as_outer
+
+        inner = make_inner_filedb({"route": [(7, 100, 5, 0), (7, 200, -3, 0)]})
+        outer = wrap_as_outer([inner])
+        section = parse_tag_section(outer, detect_version(outer))
+        triples = list(Anno117Interpreter().find_traded_goods(outer, section))
+        # fixture の CityName は "プレイヤー島" 固定
+        assert {t.context.island_name for t in triples} == {"プレイヤー島"}
+
+    def test_zero_width_space_and_padding_stripped(self) -> None:
+        """CityName に U+200B が混ざる実セーブケース → strip される．"""
+        import struct
+
+        from tests.parser.filedb.conftest import minimal_v3
+
+        tags = {
+            2: "PassiveTrade",
+            3: "History",
+            4: "TradeRouteEntries",
+            5: "TradedGoods",
+            6: "AreaInfo",
+        }
+        attribs = {
+            0x8001: "RouteID",
+            0x8002: "GoodGuid",
+            0x8003: "GoodAmount",
+            0x8004: "TotalPrice",
+            0x8005: "CityName",
+        }
+        events = [
+            ("T", 6),  # AreaInfo
+            ("T", 1),  # entry
+            ("A", 0x8005, "\u200bスターリングラード".encode("utf-16-le")),
+            ("T", 2),
+            ("T", 3),
+            ("T", 4),
+            ("T", 1),  # outer <1>
+            ("T", 1),  # inner <1>
+            ("A", 0x8001, struct.pack("<i", 42)),
+            ("T", 5),
+            ("T", 1),
+            ("A", 0x8002, struct.pack("<i", 100)),
+            ("A", 0x8003, struct.pack("<i", 1)),
+            ("X",),
+            ("X",),  # close TradedGoods
+            ("X",),  # inner <1>
+            ("X",),  # outer <1>
+            ("X",),  # TradeRouteEntries
+            ("X",),  # History
+            ("X",),  # PassiveTrade
+            ("X",),  # AreaInfo > <1>
+            ("X",),  # AreaInfo
+        ]
+        inner = minimal_v3(tags=tags, attribs=attribs, events=events)
+        outer = wrap_as_outer([inner])
+        section = parse_tag_section(outer, detect_version(outer))
+        triples = list(Anno117Interpreter().find_traded_goods(outer, section))
+        assert len(triples) == 1
+        assert triples[0].context.island_name == "スターリングラード"
+
+
 class TestRootLevelAttribsAndTerminators:
     """外側 FileDB の root レベルに attrib / 余分 terminator がある DOM を扱える．"""
 

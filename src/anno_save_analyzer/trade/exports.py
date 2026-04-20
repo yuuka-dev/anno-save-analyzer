@@ -12,8 +12,10 @@ import json
 from collections.abc import Iterable
 
 from .aggregate import ItemSummary, RouteSummary
+from .items import ItemDictionary
 from .models import Locale, TradeEvent
 from .routes import TradeRouteDef
+from .storage import IslandStorageTrend
 
 
 def _csv_writer(rows: list[list[str]]) -> str:
@@ -100,13 +102,14 @@ def routes_to_csv(
 def events_to_csv(events: Iterable[TradeEvent], *, locale: Locale = "en") -> str:
     """個別 TradeEvent を CSV にエクスポート (ledger 全量)．
 
-    列: timestamp_tick, session_id, route_id, partner_id, partner_kind,
-         item_guid, item_name, amount, total_price
+    列: timestamp_tick, session_id, island_name, route_id, partner_id,
+         partner_kind, item_guid, item_name, amount, total_price
     """
     rows: list[list[str]] = [
         [
             "timestamp_tick",
             "session_id",
+            "island_name",
             "route_id",
             "partner_id",
             "partner_kind",
@@ -123,6 +126,7 @@ def events_to_csv(events: Iterable[TradeEvent], *, locale: Locale = "en") -> str
             [
                 "" if ev.timestamp_tick is None else str(ev.timestamp_tick),
                 ev.session_id or "",
+                ev.island_name or "",
                 ev.route_id or "",
                 partner_id,
                 partner_kind,
@@ -130,6 +134,48 @@ def events_to_csv(events: Iterable[TradeEvent], *, locale: Locale = "en") -> str
                 ev.item.display_name(locale),
                 str(ev.amount),
                 str(ev.total_price),
+            ]
+        )
+    return _csv_writer(rows)
+
+
+def inventory_to_csv(
+    trends: Iterable[IslandStorageTrend],
+    *,
+    items: ItemDictionary,
+    locale: Locale = "en",
+) -> str:
+    """島 × 物資の在庫時系列 (StorageTrends) を CSV にエクスポート．
+
+    列: island_name, product_guid, product_name, latest, peak, mean, slope,
+         last_point_tick, samples (120 値を ``|`` 区切り)
+    """
+    rows: list[list[str]] = [
+        [
+            "island_name",
+            "product_guid",
+            "product_name",
+            "latest",
+            "peak",
+            "mean",
+            "slope",
+            "last_point_tick",
+            "samples",
+        ]
+    ]
+    for tr in trends:
+        name = items[tr.product_guid].display_name(locale)
+        rows.append(
+            [
+                tr.island_name,
+                str(tr.product_guid),
+                name,
+                str(tr.latest),
+                str(tr.peak),
+                f"{tr.points.mean:.2f}",
+                f"{tr.points.slope:.4f}",
+                "" if tr.last_point_tick is None else str(tr.last_point_tick),
+                "|".join(str(v) for v in tr.points.samples),
             ]
         )
     return _csv_writer(rows)
@@ -143,6 +189,7 @@ def events_to_json(events: Iterable[TradeEvent], *, locale: Locale = "en") -> st
             {
                 "timestamp_tick": ev.timestamp_tick,
                 "session_id": ev.session_id,
+                "island_name": ev.island_name,
                 "route_id": ev.route_id,
                 "partner": ({"id": ev.partner.id, "kind": ev.partner.kind} if ev.partner else None),
                 "item": {

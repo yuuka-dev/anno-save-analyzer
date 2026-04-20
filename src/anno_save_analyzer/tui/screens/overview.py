@@ -19,6 +19,15 @@ class OverviewScreen(Screen):
         self._state = state
         self._localizer = localizer
 
+    def set_localizer(self, localizer: Localizer) -> None:
+        """``TradeApp.switch_locale`` から呼ばれる公開 setter．
+
+        ``_localizer`` は private 属性だが App が locale 切替で書き換える
+        必要があるので，直書きせずこの setter 経由にする．実装は差し替え
+        のみで，再描画はコール側の ``refresh(recompose=True)`` に任せる．
+        """
+        self._localizer = localizer
+
     def compose(self) -> ComposeResult:
         yield Header()
         yield VerticalScroll(self._render_body())

@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "anno-save-analyzer"
-version = "0.3.0"
+version = "0.4.0"
 description = "Anno 1800 / 117 セーブデータ解析ツール"
 readme = "README.md"
 requires-python = ">=3.12"
@@ -60,7 +60,14 @@ omit = ["tests/*"]
 show_missing = true
 skip_covered = false
 precision = 1
-fail_under = 100
+# ポートフォリオ OSS として 100% は過剰．以下の根拠で 90% を採用:
+# 1. safety-critical ではない (読み取り専用解析ツール，人命 / 金融リスク無し)
+# 2. 業界相場 (Google / FastAPI / Django 系) は 80-90%
+# 3. AI review agent (Copilot / Cursor) の修正サイクルで 100% 再達成の摩擦が高く
+#    dogfood スピードを落とす
+# 4. 純関数層 (parser / trade.aggregate / trade.diff / trade.exports 等) は
+#    依然実質 100% を維持 — UI / async layer の pragma 戦いを緩和するのが目的
+fail_under = 90
 exclude_lines = [
     "pragma: no cover",
     "raise NotImplementedError",

@@ -13,6 +13,8 @@ def _ev(
     *,
     route_id: str | None = None,
     kind: str = "route",
+    session_id: str | None = None,
+    island_name: str | None = None,
 ) -> TradeEvent:
     return TradeEvent(
         item=Item(guid=guid, names={"en": f"Good_{guid}"}),
@@ -20,6 +22,8 @@ def _ev(
         total_price=price,
         partner=TradingPartner(id=route_id or "anon", display_name="x", kind=kind),
         route_id=route_id,
+        session_id=session_id,
+        island_name=island_name,
     )
 
 
@@ -123,3 +127,30 @@ class TestDiffByRoute:
 
     def test_empty_returns_empty(self) -> None:
         assert diff_by_route([], []) == []
+
+
+class TestDiffFilterArgs:
+    def test_diff_by_item_filters_both_sides(self) -> None:
+        before = [
+            _ev(1, 1, 10, route_id="A", island_name="X"),
+            _ev(1, 1, 10, route_id="A", island_name="Y"),
+        ]
+        after = [
+            _ev(1, 3, 30, route_id="A", island_name="X"),
+            _ev(1, 1, 10, route_id="A", island_name="Y"),
+        ]
+        # 島 X だけ見ると Δ buy=+2，Y は unchanged
+        rows = diff_by_item(before, after, island="X")
+        assert len(rows) == 1
+        assert rows[0].bought_delta == 2
+        assert rows[0].status == "changed"
+
+    def test_diff_by_route_filters_by_session(self) -> None:
+        before = [_ev(1, 1, 10, route_id="A", session_id="0")]
+        after = [
+            _ev(1, 3, 30, route_id="A", session_id="0"),
+            _ev(1, 1, 10, route_id="A", session_id="1"),  # 別 session は無視
+        ]
+        rows = diff_by_route(before, after, session="0")
+        assert len(rows) == 1
+        assert rows[0].bought_delta == 2

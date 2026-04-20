@@ -21,10 +21,12 @@ from anno_save_analyzer.parser.filedb import (
 from anno_save_analyzer.parser.pipeline import extract_inner_filedb
 from anno_save_analyzer.trade import (
     GameTitle,
+    IslandStorageTrend,
     ItemDictionary,
     TradeRouteDef,
     by_item,
     by_route,
+    list_storage_trends,
     list_trade_routes,
 )
 from anno_save_analyzer.trade.aggregate import ItemSummary, RouteSummary
@@ -69,6 +71,9 @@ class TuiState:
     # 履歴に現れない idle route も含まれる．Statistics 画面で active/idle 両方
     # を列挙するために使う．
     routes_by_session: dict[str, tuple[TradeRouteDef, ...]] = field(default_factory=dict)
+    # island_name (CityName) → 在庫時系列 (物資別) のリスト．
+    # Inventory tab の入力．同名島が複数 session にある場合は上書きせず連結する．
+    storage_by_island: dict[str, tuple[IslandStorageTrend, ...]] = field(default_factory=dict)
 
 
 def build_overview(
@@ -102,6 +107,33 @@ def build_overview(
     )
 
 
+def _decompress_outer(save_path: Path) -> tuple[bytes, list[bytes]]:
+    """outer FileDB を 1 度だけ解凍し inner session payloads も抽出．
+
+    Cursor レビュー指摘 #1 対応: ``load_state`` の責務を機能単位に分解し，
+    outer 解凍ロジックを単体でテスト / 差し替え可能にする．
+    """
+    outer_filedb = load_outer_filedb(save_path)
+    version = detect_version(outer_filedb)
+    section = parse_tag_section(outer_filedb, version)
+    inner_payloads = extract_sessions(outer_filedb, version=version, tag_section=section)
+    return outer_filedb, inner_payloads
+
+
+def _build_aggregates_and_overview(
+    save_path: Path, title: GameTitle, events: list[TradeEvent]
+) -> tuple[list[ItemSummary], list[RouteSummary], OverviewSnapshot, tuple[str, ...]]:
+    """events から集計 (item / route)，Overview，session locale keys を作る．"""
+    item_rows = by_item(events)
+    route_rows = by_route(events)
+    overview = build_overview(save_path, title, events, item_rows, route_rows)
+    locale_keys = tuple(
+        session_locale_key(title, int(sid)) if sid.isdigit() else "session.unknown"
+        for sid in overview.session_ids
+    )
+    return item_rows, route_rows, overview, locale_keys
+
+
 def load_state(
     save_path: Path,
     *,
@@ -116,8 +148,8 @@ def load_state(
     (CLI 側でプログレスバーを描画する用)．``items`` を渡せば辞書ロードを
     スキップできる．
 
-    outer FileDB の解凍は 1 回だけ行い，extract / islands / routes で共有する．
-    これをやらないと RDA + zlib 展開が 3 回走って体感ロードが重くなる．
+    オーケストレーション本体．outer 解凍や集計は private helper に委譲し，
+    この関数はステージの連結とステート組み立てだけに責任を持つ．
     """
     if progress is None:
 
@@ -130,26 +162,20 @@ def load_state(
         items = ItemDictionary.load(title, locales=locales)
 
     progress("extracting outer FileDB")
-    outer_filedb = load_outer_filedb(save_path)
-    version = detect_version(outer_filedb)
-    section = parse_tag_section(outer_filedb, version)
-    inner_payloads = extract_sessions(outer_filedb, version=version, tag_section=section)
+    outer_filedb, inner_payloads = _decompress_outer(save_path)
 
     progress("walking trade events")
     events = list(extract_from_outer(outer_filedb, title=title, items=items))
 
     progress("aggregating by item and route")
-    item_rows = by_item(events)
-    route_rows = by_route(events)
-    overview = build_overview(save_path, title, events, item_rows, route_rows)
-    locale_keys = tuple(
-        session_locale_key(title, int(sid)) if sid.isdigit() else "session.unknown"
-        for sid in overview.session_ids
+    item_rows, route_rows, overview, locale_keys = _build_aggregates_and_overview(
+        save_path, title, events
     )
 
     progress("enumerating islands and routes")
     islands_by_session = _collect_islands_by_session(inner_payloads, overview.session_ids)
     routes_by_session = _collect_routes_by_session(inner_payloads, overview.session_ids)
+    storage_by_island = _collect_storage_by_island(inner_payloads)
 
     return TuiState(
         save_path=save_path,
@@ -164,6 +190,7 @@ def load_state(
         session_locale_keys=locale_keys,
         islands_by_session=islands_by_session,
         routes_by_session=routes_by_session,
+        storage_by_island=storage_by_island,
     )
 
 
@@ -212,3 +239,21 @@ def _collect_routes_by_session(
         else ()
         for sid in session_ids
     }
+
+
+def _collect_storage_by_island(
+    inner_payloads: list[bytes],
+) -> dict[str, tuple[IslandStorageTrend, ...]]:
+    """プリロード済 inner payloads 横断で島別 StorageTrends を集める．
+
+    島名 (CityName) をキーに全 session 分を集約する実装であり，同名が別
+    session に存在する場合は後勝ちで上書きせず，対応する trends を同じ
+    island 名の配列へ連結する．
+    """
+    aggregated: dict[str, list[IslandStorageTrend]] = {}
+    for inner in inner_payloads:
+        if not inner:
+            continue
+        for t in list_storage_trends(inner):
+            aggregated.setdefault(t.island_name, []).append(t)
+    return {name: tuple(items) for name, items in aggregated.items()}

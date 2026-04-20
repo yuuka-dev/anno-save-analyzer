@@ -70,6 +70,11 @@ class TradeEvent(BaseModel):
     partner: TradingPartner | None = None
     route_id: str | None = None
     session_id: str | None = None
+    island_name: str | None = None
+    """この取引が帰属するプレイヤー保有島の ``CityName``．NPC 同士の取引は
+    interpreter 側で除外済みのためここに載るのは全てプレイヤー所有．
+    TUI 側の Tree filter (島単位 / セッション単位) の key．
+    """
     source_method: SourceMethod = "history"
 
     model_config = {"frozen": True}

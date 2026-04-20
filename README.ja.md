@@ -2,128 +2,217 @@
 
 [![CI](https://github.com/yuuka-dev/anno-save-analyzer/actions/workflows/ci.yml/badge.svg)](https://github.com/yuuka-dev/anno-save-analyzer/actions/workflows/ci.yml)
 [![codecov](https://codecov.io/gh/yuuka-dev/anno-save-analyzer/branch/main/graph/badge.svg)](https://codecov.io/gh/yuuka-dev/anno-save-analyzer)
+[![release](https://img.shields.io/github/v/release/yuuka-dev/anno-save-analyzer?include_prereleases)](https://github.com/yuuka-dev/anno-save-analyzer/releases/latest)
 [![Python 3.12+](https://img.shields.io/badge/python-3.12%2B-blue)](https://www.python.org/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Status: WIP](https://img.shields.io/badge/status-WIP-orange)](docs/ROADMAP.ja.md)
+[![Status: alpha](https://img.shields.io/badge/status-alpha-orange)](docs/ROADMAP.ja.md)
 
-> **一言で説明**: Anno 1800 / 117: Pax Romana のセーブデータ (`.a7s` / `.a8s`) を解析し，サプライチェーン最適化・可視化・統計ダッシュボードを提供するツール．
+> **一言で説明**: Anno 1800 / Anno 117: Pax Romana のセーブデータ (`.a7s` / `.a8s`) から貿易履歴を抽出し，Textual TUI / CLI から眺められるようにするツール．
 
-> **開発中 (Work in Progress)**: 本プロジェクトは現在活発に開発中であり，コミット間で API が変更されることがあります．詳細なマイルストーンは [docs/ROADMAP.ja.md](docs/ROADMAP.ja.md) を参照．English README: [README.md](README.md).
+> **現状**: v0.4.0 リリース済 (trade history + 島ごと在庫推移)．PyPI 未配信．Git tag からインストールする．English README: [README.md](README.md).
 
 ## 概要
 
-### なぜ作ったのか
+Anno のセーブはマトリョーシカ構造:
 
-Anno 1800 のサプライチェーン最適化を手作業でやるのが辛くなったため，セーブデータを直接読んで島ごとの収支・ルート効率・クエスト進捗を可視化する専用ツールとして起ち上げた．既存の [Anno1800SavegameVisualizer](https://github.com/NiHoel/Anno1800SavegameVisualizer) などは .NET 前提でローカル環境との相性が悪く，Python + WSL2 で完結する独自実装を選んだ．UI 層は v0.6 で Textual（pure-Python TUI）に載せる予定なので，最終的にもターミナルで完結する．
+1. `.a7s` / `.a8s` — RDA V2.2 アーカイブ (Anno 1404 / 2070 / 2205 / 1800 / 117 共通)
+2. 内部の `data.a7s` — zlib 圧縮ストリーム
+3. 解凍後: FileDB V3 バイナリ
+4. `<SessionData><BinaryData>` — さらに内側に丸ごと埋まっている FileDB V3 ドキュメント (ラティウム / アルビオン / 旧世界 / …)
+5. 内側: `AreaInfo` / `PassiveTrade > History` / `ConstructionAI > TradeRoute` 等
 
-## 主な機能（v0.1.0 時点）
+本プロジェクトは各層を Python で native にはがし，生の取引イベントをプレイヤーが欲しい形（集計台帳，取引相手内訳，累積推移グラフ，スパークライン，2 セーブ差分）に落とす．
 
-- `.a7s` RDA V2.2 コンテナの Python ネイティブ parser
-  - magic / header / block chain / directory entry / per-file zlib 解凍に対応
-  - context manager API: `with RDAArchive(path) as rda: ...`
-  - `entries` / `read(name)` / `extract(...)` / `extract_all(...)`
-  - [lysannschlegel/RDAExplorer](https://github.com/lysannschlegel/RDAExplorer) を仕様のみ参考にした clean-room 実装
-- `parser.pipeline.extract_inner_filedb` — `.a7s` から内部 FileDB バイナリを 1 コールで取り出し
-- テスト: 45 件，line + branch カバレッジ **100%**（CI で `--cov-fail-under=100` により強制）．全ブランチが合成フィクスチャで網羅されてるため，`sample.a7s` 無しの CI でも 100% を維持．実セーブ必須テストは存在時のみ追加で走る
+## 主な機能 (v0.4.0)
+
+### Textual TUI (`anno-save-analyzer tui <save>`)
+
+- 3 カラム構成: セッション > 島 Tree / items / routes / **inventory** DataTable / Partners pane + 時系列 chart
+- **Tree フィルタ**: session / island ノードをクリックすると中央テーブル・Partners・chart・^O エクスポートすべてがその粒度に絞られる
+- **Inventory タブ**: 島ごとの StorageTrends (120 サンプル ring buffer) を latest/peak/mean/slope + sparkline で表示．行選択で時系列 chart
+- **可変レイアウト**: wide (≥120) / mid (80-119) / narrow (<80) で列の出し分け．Partners pane はスクロール対応
+- nano 風ホットキー: `^X` 終了 / `^G` ヘルプ / `^T` 画面切替 / `^L` 言語 / `^O` エクスポート
+- items-table の推移 sparkline 列 (`▁▂▃▄▅▆▇█`)
+- 行選択で Partners pane + plotext 折れ線 chart が同時更新
+- chart x 軸は spread に応じて「分前 / 時間前」を auto 切替
+- en / ja ロケール切替．Anno 117 / 1800 のセッション名も翻訳
+- 起動時にステージ粒度のプログレスゲージ (`[n/5] <stage>`)
+- **USSR テーマ** (`--theme ussr`) — 書記長専用ジョーク枠．title に ☭ 付与
+
+### CLI
+
+- `trade list <save>` — 全 TradeEvent を JSON で吐く (`--island` / `--session` フィルタ対応)
+- `trade summary <save> --by item|route` — 集計 (同フィルタ対応)
+- `trade diff <before> <after>` — 2 セーブ間 added / removed / changed / unchanged
+- `tui <save>` — TUI 起動
+
+### Parser
+
+- **RDA V2.2** コンテナ parser ([@lysannschlegel/RDAExplorer](https://github.com/lysannschlegel/RDAExplorer) の clean-room port)．`.a7s` / `.a8s` 両対応．
+- **FileDB V3** streaming DOM + tag/attrib 辞書，SessionData 再帰抽出，AreaManager / 島列挙．
+- **Anno 117 interpreter** for `PassiveTrade > History > {TradeRouteEntries,PassiveTradeEntries}` と `ConstructionAI > TradeRoute > TradeRoutes` (idle route 含む)．
+- NPC 同士の取引は `AreaInfo > CityName` ゲートで除外．
+
+### データパイプライン
+
+- `items_anno117.{en,ja}.yaml` をゲーム本体の `config.rda/assets.xml` + `texts_japanese.xml` から自動生成 (151 Products × 33,146 翻訳行)．ゲームアップデート時は `scripts/generate_items_anno117.py` で再生成．
+
+### テスト
+
+- 400+ tests，**branch coverage 下限 90%** を CI で強制 (``pyproject.toml`` の
+  ``fail_under = 90``)．純関数層 (``parser/*`` / ``trade.aggregate`` /
+  ``trade.diff`` / ``trade.exports`` 等) は実質 100% を維持．90% 下限は
+  async Textual UI の ``pragma: no cover`` 戦いを緩和するための余白．
+- Python 3.12 / 3.13 両対応．
+
+## インストール
+
+### **uv** 経由 (推奨)
+
+[uv](https://github.com/astral-sh/uv) を使うと Python 本体の用意 + venv + 依存解決が 1 コマンドで終わる．
+
+```bash
+# 最新タグからインストール
+uv pip install "anno-save-analyzer[tui] @ git+https://github.com/yuuka-dev/anno-save-analyzer@v0.4.0"
+
+# CLI ツールとして globally install (venv 管理不要)
+uv tool install "anno-save-analyzer[tui] @ git+https://github.com/yuuka-dev/anno-save-analyzer@v0.4.0"
+```
+
+`[tui]` extra で Textual + textual-plotext が入る．CLI / ライブラリだけなら外して良い．
+
+### ローカル clone (開発)
+
+```bash
+git clone https://github.com/yuuka-dev/anno-save-analyzer.git
+cd anno-save-analyzer
+uv sync --extra tui    # または: python -m venv .venv && .venv/bin/pip install -e '.[tui]'
+```
+
+### uv なし (plain pip)
+
+```bash
+pip install "anno-save-analyzer[tui] @ git+https://github.com/yuuka-dev/anno-save-analyzer@v0.4.0"
+```
+
+> PyPI 配信は v1.0 予定．それまで Git tag が正式配布経路．
+
+## 使い方
+
+すべて `anno-save-analyzer` コマンド配下．`--title` でゲーム (``anno117`` / ``anno1800``)，
+`--locale` で UI 表記 (``en`` / ``ja``) を選ぶ．
+
+### TUI を起動
+
+```bash
+anno-save-analyzer tui sample_anno117.a8s --title anno117 --locale ja
+```
+
+- `^X` 終了 · `^G` ヘルプ · `^T` 画面切替 · `^L` 言語切替 · `^O` CSV エクスポート
+- 書記長カラー欲しいときは `--theme ussr`（title に ☭ prefix）
+- 起動時は 5 ステージのロードゲージが stderr に流れる
+
+### CLI で貿易を覗く
+
+```bash
+# 全 TradeEvent を JSON
+anno-save-analyzer trade list sample_anno117.a8s --title anno117
+
+# 物資別 / ルート別集計
+anno-save-analyzer trade summary sample_anno117.a8s --title anno117 --by item
+anno-save-analyzer trade summary sample_anno117.a8s --title anno117 --by route
+
+# 2 セーブ間差分（added / removed / changed / unchanged）
+anno-save-analyzer trade diff before.a8s after.a8s --title anno117 --locale ja
+anno-save-analyzer trade diff before.a8s after.a8s --by route --show-unchanged
+```
+
+全サブコマンド stdout に JSON を吐くので `jq` / DuckDB / ノートブックにそのまま流せる．
+
+### ヘルプ
+
+```bash
+anno-save-analyzer --help
+anno-save-analyzer trade --help
+anno-save-analyzer tui --help
+```
 
 ## ロードマップ
 
-| バージョン | スコープ | ステータス |
+| 版 | スコープ | 状態 |
 |---|---|---|
-| v0.1.0 | RDA V2.2 native parser | 完了 |
-| v0.2 | FileDB V1/V2/V3 parser, ルートデータのモデル化 | 次 |
-| v0.3 | `SessionData` / `BinaryData` 解読（本丸） | 未着手 |
-| v0.4 | 島ごとサプライチェーン balance 表 | 未着手 |
-| v0.5 | OR-Tools MILP ルート最適化 | 未着手 |
-| v0.6 | **Textual** TUI ダッシュボード | 未着手 |
-| v1.0 | 公開安定版（PyPI 配信） | 未着手 |
-| _Future_ | Anno 117 (`.a8s`) 対応 | バージョン未定 |
+| v0.1.0 | RDA V2.2 native parser | ✅ 完了 |
+| v0.2.x | FileDB V3 parser，recursive SessionData，島メタ | ✅ 完了 (0.3.0 に統合) |
+| v0.3.0 | Trade history viewer (Textual TUI + CLI + snapshot diff) | ✅ リリース済 |
+| **v0.4.0** | **島ごと在庫推移 (StorageTrends) + Tree filter + 可変レイアウト** | ✅ **リリース済** |
+| v0.4+ | データ量連動 progress gauge ([#26](https://github.com/yuuka-dev/anno-save-analyzer/issues/26))，Anno 1800 parity ([#24](https://github.com/yuuka-dev/anno-save-analyzer/issues/24)) | 計画中 |
+| v0.5 | OR-Tools MILP ルート最適化 | 計画中 |
+| v0.6 | DOM 全域の Pydantic 型化 (Island / Building / Population) | 計画中 |
+| v1.0 | PyPI 配信，英語ドキュメント完備，API 安定化 | 計画中 |
 
-詳細は [docs/ROADMAP.ja.md](docs/ROADMAP.ja.md) / [docs/ROADMAP.md](docs/ROADMAP.md)（英語）．進捗は [GitHub Milestones](https://github.com/yuuka-dev/anno-save-analyzer/milestones) で追跡．
+詳細は [docs/ROADMAP.ja.md](docs/ROADMAP.ja.md) / [docs/ROADMAP.md](docs/ROADMAP.md) と [GitHub Milestones](https://github.com/yuuka-dev/anno-save-analyzer/milestones)．
 
 ## 技術スタック
 
-| カテゴリ | 技術 |
+| カテゴリ | 採用 |
 |---|---|
 | 言語 | Python 3.12+ |
-| パッケージ管理 | uv（推奨），pip 互換 |
+| パッケージ管理 | uv (推奨), pip 互換 |
+| CLI フレームワーク | typer |
 | XML パーサ | lxml (`huge_tree=True`, `recover=True`) |
 | データモデル | pydantic v2 |
 | 集計 | pandas |
-| TUI（v0.6 以降） | [Textual](https://github.com/Textualize/Textual) |
-| 最適化（optional） | OR-Tools |
+| TUI | [Textual](https://github.com/Textualize/Textual) + [textual-plotext](https://github.com/Textualize/textual-plotext) |
+| 最適化 (任意, v0.5) | OR-Tools |
+| Notebook (任意) | JupyterLab (`notebooks/island_inventory.ipynb` 用) |
 | CI | GitHub Actions, pytest-cov, Codecov |
 | Lint / format | ruff |
 
 ## アーキテクチャ
 
 ```text
-sample.a7s  (RDA V2.2 container)
-    └─ data.a7s  (zlib compressed)
-        └─ FileDB binary  (V1/V2/V3, Blue Byte 独自形式)
-            └─ data.xml  (219万行超の XML ツリー)
-                └─ <SessionData><BinaryData>  (未解読)
+sample_anno117.a8s  (RDA V2.2 コンテナ)
+└─ data.a7s  (内部の zlib ストリーム)
+   └─ outer FileDB V3
+      ├─ <SessionData><BinaryData>  (セッション単位．再帰的 FileDB V3)
+      │  ├─ AreaInfo > <1> > AreaEconomy > StorageTrends  (在庫時系列 — v0.4)
+      │  ├─ AreaInfo > <1> > PassiveTrade > History > TradeRouteEntries / PassiveTradeEntries > …
+      │  └─ ConstructionAI > TradeRoute > TradeRoutes > <1>  (idle 含む route 定義)
+      └─ meta / header / gamesetup.a7s  (RDAArchive 層)
 ```
 
-RDA V2.2 フォーマットの詳細は [docs/rda_format_spec.md](docs/rda_format_spec.md) を参照．
+詳細は [docs/rda_format_spec.md](docs/rda_format_spec.md) / [docs/filedb_format_investigation.md](docs/filedb_format_investigation.md) を参照．
 
-## はじめ方
-
-### 前提条件
-
-- Python 3.12 以上
-- `uv`（推奨）または `pip`
-- エンドツーエンド動作確認用の実セーブ（`.a7s`）．ユニットテストは合成フィクスチャで動くため実セーブ無しで通る
-
-### インストール
+## テスト / 開発
 
 ```bash
-git clone https://github.com/yuuka-dev/anno-save-analyzer.git
-cd anno-save-analyzer
-uv sync          # または: python -m venv .venv && .venv/bin/pip install -e .
+uv run pytest --cov=anno_save_analyzer --cov-branch --cov-config=pyproject.toml
+uv run ruff check src tests
+uv run ruff format --check src tests
 ```
 
-### クイックスタート
+``fail_under`` は ``pyproject.toml`` から読まれる (現状 90%)．
 
-```python
-import zlib
-from anno_save_analyzer.parser.rda import RDAArchive
+実セーブ要のテストは save が無ければ auto-skip．`sample.a7s` / `sample_anno117.a8s` を repo root に置くか，`SAMPLE_A7S` / `SAMPLE_A8S` を指定．
 
-with RDAArchive("Autosave 182.a7s") as rda:
-    for e in rda.entries:
-        print(e.filename, e.uncompressed_size)
+## コントリビューション
 
-    data_bytes = rda.read("data.a7s")
-    filedb_bytes = zlib.decompress(data_bytes)
-    # filedb_bytes は FileDB V2 バイナリ（大体の終盤セーブで 165MB 前後）
-```
+PR 歓迎．[CONTRIBUTING.md](CONTRIBUTING.md) にブランチ戦略・コミットメッセージ規約（英語 subject + 任意の日本語本文）・Copilot レビュー方針・100% カバレッジ維持を記載．要点:
 
-### テスト実行
-
-```bash
-uv run pytest --cov=anno_save_analyzer --cov-report=term-missing
-```
-
-実セーブが必要なテストは未配置時に自動 skip される．走らせたい場合は repo root に `sample.a7s` を置くか，環境変数 `SAMPLE_A7S` でパスを指定する．
-
-## 開発への参加
-
-PR 歓迎．ブランチ戦略・コミット規約・Copilot レビュー方針・カバレッジ基準は [CONTRIBUTING.md](CONTRIBUTING.md)（英語）を参照．要点：
-
-- 機能開発は `feature/*` ブランチで実施，`dev` にマージ．main へは `dev` 経由でリリース．
-- 全 PR で GitHub Copilot をレビュアーに追加し，CI を通過しカバレッジが base 以下に落ちないこと．
-- parser ロジックを追加する場合はフォーマット参照（上流コード / 仕様書 / 新しい `docs/` エントリ）を必ず引用．
+- Feature 作業は `feature/*` → `dev` → `release/*` → `main`．
+- 全 PR は Copilot レビューを通し，CI 緑 + カバレッジ 100% を維持．
+- パーサ追加時は format reference を `docs/` に書くこと．
 
 ## 免責事項
 
-本プロジェクトは Ubisoft / Blue Byte / Anno シリーズと**一切関係のない**非公式ツールです．読み取り専用の解析ツールであり，セーブ編集や改造は行いません．*Anno*，*Anno 1800*，*Anno 117: Pax Romana*，*Ubisoft*，*Blue Byte* は各社の商標です．
+本プロジェクトは Ubisoft / Blue Byte / Anno フランチャイズとは**一切無関係**の third-party 読み取り専用解析ツールです．*Anno*, *Anno 1800*, *Anno 117: Pax Romana*, *Ubisoft*, *Blue Byte* は各社の商標です．
 
 ## 謝辞
 
-- Based on the reverse-engineering work of [@lysannschlegel's RDAExplorer](https://github.com/lysannschlegel/RDAExplorer).
-- FileDB フォーマット調査は [anno-mods/FileDBReader](https://github.com/anno-mods/FileDBReader) を参考．
-- 先行事例 / インスピレーション: [Anno1800SavegameVisualizer](https://github.com/NiHoel/Anno1800SavegameVisualizer), [AnnoSavegameViewer](https://github.com/Veraatversus/AnnoSavegameViewer), [anno1800-save-game-explorer](https://github.com/RobertLeePrice/anno1800-save-game-explorer).
+- RDA V2.2 フォーマット: [@lysannschlegel/RDAExplorer](https://github.com/lysannschlegel/RDAExplorer)
+- FileDB フォーマット: [anno-mods/FileDBReader](https://github.com/anno-mods/FileDBReader)
+- 先行実装: [Anno1800SavegameVisualizer](https://github.com/NiHoel/Anno1800SavegameVisualizer), [AnnoSavegameViewer](https://github.com/Veraatversus/AnnoSavegameViewer), [anno1800-save-game-explorer](https://github.com/RobertLeePrice/anno1800-save-game-explorer)
 
 ## ライセンス
 
-MIT License．詳細は [LICENSE](LICENSE)（今後追加）を参照．
+MIT — [LICENSE](LICENSE) 参照（ファイル追加予定）．

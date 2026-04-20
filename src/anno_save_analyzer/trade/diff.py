@@ -68,10 +68,16 @@ def _classify(before_count: int, after_count: int, nonzero_delta: bool) -> str:
 def diff_by_item(
     before: Iterable[TradeEvent],
     after: Iterable[TradeEvent],
+    *,
+    session: str | None = None,
+    island: str | None = None,
 ) -> list[ItemDelta]:
-    """物資別に before / after を集計し delta を算出．event_count 降順 → guid 昇順で返す．"""
-    b_summaries = {s.item.guid: s for s in by_item(before)}
-    a_summaries = {s.item.guid: s for s in by_item(after)}
+    """物資別に before / after を集計し delta を算出．event_count 降順 → guid 昇順で返す．
+
+    ``session`` / ``island`` 指定で両サイドを filter してから diff する．
+    """
+    b_summaries = {s.item.guid: s for s in by_item(before, session=session, island=island)}
+    a_summaries = {s.item.guid: s for s in by_item(after, session=session, island=island)}
     guids = sorted(set(b_summaries) | set(a_summaries))
     deltas: list[ItemDelta] = []
     for guid in guids:
@@ -107,10 +113,20 @@ def diff_by_item(
 def diff_by_route(
     before: Iterable[TradeEvent],
     after: Iterable[TradeEvent],
+    *,
+    session: str | None = None,
+    island: str | None = None,
 ) -> list[RouteDelta]:
-    """ルート × partner_kind 別の delta．キーは ``(route_id, partner_kind)``．"""
-    b_summaries = {(s.route_id, s.partner_kind): s for s in by_route(before)}
-    a_summaries = {(s.route_id, s.partner_kind): s for s in by_route(after)}
+    """ルート × partner_kind 別の delta．キーは ``(route_id, partner_kind)``．
+
+    ``session`` / ``island`` 指定で両サイドを filter してから diff する．
+    """
+    b_summaries = {
+        (s.route_id, s.partner_kind): s for s in by_route(before, session=session, island=island)
+    }
+    a_summaries = {
+        (s.route_id, s.partner_kind): s for s in by_route(after, session=session, island=island)
+    }
     keys = sorted(set(b_summaries) | set(a_summaries), key=lambda k: (k[0] or "", k[1]))
     deltas: list[RouteDelta] = []
     for key in keys:

@@ -2,8 +2,11 @@
 
 from __future__ import annotations
 
+from dataclasses import dataclass
+
+from textual import events
 from textual.app import ComposeResult
-from textual.containers import Horizontal, Vertical
+from textual.containers import Horizontal, Vertical, VerticalScroll
 from textual.screen import Screen
 from textual.widgets import (
     DataTable,
@@ -16,12 +19,30 @@ from textual.widgets import (
 )
 from textual_plotext import PlotextPlot
 
-from anno_save_analyzer.trade import partners_for_item
-from anno_save_analyzer.trade.aggregate import ItemSummary, PartnerSummary, RouteSummary
+from anno_save_analyzer.trade import by_item, by_route, partners_for_item
+from anno_save_analyzer.trade.aggregate import (
+    ItemSummary,
+    PartnerSummary,
+    RouteSummary,
+    filter_events,
+)
+from anno_save_analyzer.trade.models import TradeEvent
 
 from ..i18n import Localizer
 from ..sparkline import sparkline
 from ..state import TuiState
+
+
+@dataclass(frozen=True)
+class TradeFilter:
+    """Tree 選択から派生する集計フィルタ．両方 None なら全体．"""
+
+    session: str | None = None
+    island: str | None = None
+
+    @property
+    def is_all(self) -> bool:
+        return self.session is None and self.island is None
 
 
 class TradeStatisticsScreen(Screen):
@@ -39,10 +60,13 @@ class TradeStatisticsScreen(Screen):
         width: 1fr;
         border: solid $secondary;
     }
+    TradeStatisticsScreen DataTable {
+        height: 1fr;
+    }
     TradeStatisticsScreen #right-column {
         width: 42;
     }
-    TradeStatisticsScreen #partners-pane {
+    TradeStatisticsScreen #partners-scroll {
         height: 40%;
         border: solid $secondary;
     }
@@ -50,16 +74,74 @@ class TradeStatisticsScreen(Screen):
         height: 60%;
         border: solid $secondary;
     }
+    /* Responsive: mid (80-119 cols) では右カラムを縮めて sparkline 列は維持 */
+    TradeStatisticsScreen.mid #right-column {
+        width: 32;
+    }
+    /* Responsive: narrow (<80 cols) では Tree を縮め右カラムを完全 hide．
+       Partners / Chart は ^T で Overview 往復の方が素直なので非表示で十分． */
+    TradeStatisticsScreen.narrow Tree {
+        width: 16;
+    }
+    TradeStatisticsScreen.narrow #right-column {
+        display: none;
+    }
     """
+
+    # 幅の境界値 (terminal cols)．上端は含まない閉区間．
+    # wide: >= 120 / mid: 80-119 / narrow: < 80
+    _MID_BREAKPOINT = 120
+    _NARROW_BREAKPOINT = 80
 
     def __init__(self, state: TuiState, localizer: Localizer) -> None:
         super().__init__(name="statistics")
         self._state = state
         self._localizer = localizer
+        self._filter = TradeFilter()
+        self._filtered_events_cache: list[TradeEvent] | None = None
+        self._filtered_events_cache_key: tuple[str | None, str | None] | None = None
+        self._layout_class: str | None = None
+
+    def _classify_width(self, width: int) -> str:
+        """terminal 幅から layout class を選ぶ (wide / mid / narrow)．"""
+        if width < self._NARROW_BREAKPOINT:
+            return "narrow"
+        if width < self._MID_BREAKPOINT:
+            return "mid"
+        return "wide"
+
+    def _apply_layout_class(self, width: int) -> bool:
+        """幅から layout class を決定し，screen に付け替える．
+
+        変わったら True を返す．compose 直後と resize 時に呼ぶ．
+        wide / mid / narrow の 3 択はいずれも明示的に class 付与 (CSS の
+        ``TradeStatisticsScreen.narrow ...`` のような選択子と対応させるため)．
+        """
+        new_cls = self._classify_width(width)
+        if new_cls == self._layout_class:
+            return False
+        for cls in ("wide", "mid", "narrow"):
+            self.remove_class(cls)
+        self.add_class(new_cls)
+        self._layout_class = new_cls
+        return True
+
+    def set_localizer(self, localizer: Localizer) -> None:
+        """``TradeApp.switch_locale`` から呼ばれる公開 setter．
+
+        ``_localizer`` の直書き回避．再描画はコール側の ``refresh(recompose=True)``
+        に委譲する．
+        """
+        self._localizer = localizer
 
     def compose(self) -> ComposeResult:
+        # Trend 列 / 右カラム hide 等の layout 判定は compose の早い段階で固める．
+        # ``app.size`` は compose 呼出時に有効．on_mount で recompose する実装
+        # にすると Header.mount_title タイミングと衝突するため採らない．
+        self._apply_layout_class(self.app.size.width)
         t = self._localizer.t
         yield Header()
+        yield Static(self._filter_label(), id="filter-banner")
         with Horizontal():
             yield self._render_tree()
             with TabbedContent(id="stats-tabs"):
@@ -67,45 +149,112 @@ class TradeStatisticsScreen(Screen):
                     yield self._render_items_table()
                 with TabPane(t("statistics.tab.routes"), id="routes-tab"):
                     yield self._render_routes_table()
+                with TabPane(t("statistics.tab.inventory"), id="inventory-tab"):
+                    yield self._render_inventory_table()
             with Vertical(id="right-column"):
-                yield Static(
-                    f"[b]{t('partners.heading')}[/b]\n\n{t('partners.empty')}",
-                    id="partners-pane",
-                )
+                # Partners pane は本文が長くなり得るので VerticalScroll 経由．
+                # narrow layout 時はこの Vertical ごと display:none で隠れる．
+                with VerticalScroll(id="partners-scroll"):
+                    yield Static(
+                        f"[b]{t('partners.heading')}[/b]\n\n{t('partners.empty')}",
+                        id="partners-pane",
+                    )
                 yield PlotextPlot(id="chart-pane")
         yield Footer()
 
+    def on_resize(self, event: events.Resize) -> None:
+        """terminal 幅変更で layout class を切替 (width のみ見る)．"""
+        if self._apply_layout_class(event.size.width):
+            # class が変わった場合のみ再 compose．Trend 列の出し分け等も拾うため．
+            self.refresh(recompose=True)
+
     def _render_tree(self) -> Tree:
         t = self._localizer.t
-        tree = Tree(t("statistics.tree_root"), id="sessions-tree")
+        # root の data=None は「All = フィルタ解除」を意味する
+        tree = Tree[TradeFilter | None](t("statistics.tree_root"), id="sessions-tree")
+        tree.root.data = None
         tree.root.expand()
         keys = self._state.session_locale_keys or tuple(
             "session.unknown" for _ in self._state.session_ids
         )
         islands_by_sid = self._state.islands_by_session
         for sid, key in zip(self._state.session_ids, keys, strict=False):
-            session_node = tree.root.add(t(key, index=sid), expand=True)
+            session_node = tree.root.add(
+                t(key, index=sid),
+                expand=True,
+                data=TradeFilter(session=sid),
+            )
             for island in islands_by_sid.get(sid, ()):
-                session_node.add_leaf(island.city_name)
+                session_node.add_leaf(
+                    island.city_name,
+                    data=TradeFilter(session=sid, island=island.city_name),
+                )
         return tree
+
+    def _filter_label(self) -> str:
+        """Footer 上の帯に出す現 filter 説明．``All`` 時は空気に近い表示．"""
+        t = self._localizer.t
+        if self._filter.is_all:
+            return t("statistics.filter.all")
+        if self._filter.island is not None:
+            return t("statistics.filter.island", name=self._filter.island)
+        # session のみ
+        sid = self._filter.session or ""
+        locale_key = next(
+            (
+                k
+                for s, k in zip(
+                    self._state.session_ids, self._state.session_locale_keys, strict=False
+                )
+                if s == sid
+            ),
+            "session.unknown",
+        )
+        return t("statistics.filter.session", name=t(locale_key, index=sid))
+
+    def _filtered_events(self) -> list:
+        """現在の ``self._filter`` を適用した events．"""
+        key = (self._filter.session, self._filter.island)
+        if self._filtered_events_cache_key == key and self._filtered_events_cache is not None:
+            return self._filtered_events_cache
+        self._filtered_events_cache = filter_events(
+            self._state.events, session=self._filter.session, island=self._filter.island
+        )
+        self._filtered_events_cache_key = key
+        return self._filtered_events_cache
+
+    def _current_item_summaries(self) -> tuple[ItemSummary, ...]:
+        """TuiState の pre-computed と同値．``_filter.is_all`` なら cache 再利用．"""
+        if self._filter.is_all:
+            return self._state.item_summaries
+        return tuple(by_item(self._filtered_events()))
+
+    def _current_route_summaries(self) -> tuple[RouteSummary, ...]:
+        if self._filter.is_all:
+            return self._state.route_summaries
+        return tuple(by_route(self._filtered_events()))
 
     def _render_items_table(self) -> DataTable:
         table = DataTable(id="items-table")
         table.cursor_type = "row"
         t = self._localizer.t
-        table.add_columns(
+        # narrow layout (<80 cols) 時は Trend sparkline 列を省略．文字幅節約．
+        include_trend = self._layout_class != "narrow"
+        columns: list[str] = [
             t("statistics.col.good"),
             t("statistics.col.bought"),
             t("statistics.col.sold"),
             t("statistics.col.net_qty"),
             t("statistics.col.net_gold"),
             t("statistics.col.events"),
-            t("statistics.col.trend"),
-        )
-        # 各物資の累積数量 sparkline を先に算出．1 物資 = 1 sparkline string．
-        trends = self._build_item_trends()
-        for s in self._state.item_summaries:
-            row = (*self._format_item_row(s), trends.get(s.item.guid, ""))
+        ]
+        if include_trend:
+            columns.append(t("statistics.col.trend"))
+        table.add_columns(*columns)
+        trends = self._build_item_trends() if include_trend else {}
+        for s in self._current_item_summaries():
+            base = self._format_item_row(s)
+            row = (*base, trends.get(s.item.guid, "")) if include_trend else base
             table.add_row(*row, key=str(s.item.guid))
         return table
 
@@ -113,9 +262,11 @@ class TradeStatisticsScreen(Screen):
         """item GUID → 累積数量 sparkline 文字列 (width=12)．
 
         timestamp を持つイベントのみ対象に，時刻昇順で累積を取る．
+        現在の filter が有効なら pre-filter．
         """
+        events = self._filtered_events() if not self._filter.is_all else self._state.events
         series: dict[int, list[tuple[int, int]]] = {}
-        for ev in self._state.events:
+        for ev in events:
             if ev.timestamp_tick is None:
                 continue
             series.setdefault(ev.item.guid, []).append((ev.timestamp_tick, ev.amount))
@@ -143,22 +294,33 @@ class TradeStatisticsScreen(Screen):
             t("statistics.col.net_gold"),
             t("statistics.col.events"),
         )
-        active_ids: set[str] = {
-            s.route_id for s in self._state.route_summaries if s.route_id is not None
-        }
+        route_summaries = self._current_route_summaries()
+        active_ids: set[str] = {s.route_id for s in route_summaries if s.route_id is not None}
         legs_by_ship: dict[str, int] = {}
-        for routes in self._state.routes_by_session.values():
-            for rd in routes:
+        # idle routes は session filter 効くが island filter は不明 (route 定義には
+        # island 情報が載らない)．filter 時は history 既知の route 以外 hide する．
+        sessions_in_scope = (
+            (self._filter.session,)
+            if self._filter.session is not None
+            else tuple(self._state.routes_by_session)
+        )
+        for sid in sessions_in_scope:
+            for rd in self._state.routes_by_session.get(sid, ()):
                 if rd.ship_id is not None:
                     legs_by_ship[str(rd.ship_id)] = len(rd.tasks)
 
         # active routes (履歴あり) を先に，次に idle (定義あり / 履歴無し)
         # row_key = route_id (str) で後段の highlight event から参照できるようにする．
-        for s in self._state.route_summaries:
+        for s in route_summaries:
             legs = legs_by_ship.get(s.route_id or "", 0) if s.route_id else 0
             row_key = s.route_id if s.route_id is not None else None
             table.add_row(*self._format_route_row(s, legs, active=True), key=row_key)
-        for routes in self._state.routes_by_session.values():
+        # island filter 時は idle route 情報源 (route 定義) に island が無いので
+        # 全部 hide．session filter だけの場合は当該 session のみ出す．
+        if self._filter.island is not None:
+            return table
+        for sid in sessions_in_scope:
+            routes = self._state.routes_by_session.get(sid, ())
             for rd in routes:
                 if rd.ship_id is None:
                     continue
@@ -177,6 +339,57 @@ class TradeStatisticsScreen(Screen):
             f"{s.net_qty:+,}",
             f"{s.net_gold:+,}",
             f"{s.event_count:,}",
+        )
+
+    def _current_inventory_rows(self):
+        """現在の ``_filter`` に対応する ``IslandStorageTrend`` の一覧を返す．
+
+        island filter → その島のみ / session filter → 当該 session の島 /
+        filter 無し → 全島を連結．返り値は ``(島, trend)`` の組ではなく，
+        各行が島名を内包した ``IslandStorageTrend`` のフラットなリスト．
+        ``IslandStorageTrend`` は session 情報を持たないので，session filter は
+        ``islands_by_session`` からその session の島名集合を引いて交差を取る．
+        """
+        storage = self._state.storage_by_island
+        if self._filter.island is not None:
+            names = {self._filter.island}
+        elif self._filter.session is not None:
+            islands = self._state.islands_by_session.get(self._filter.session, ())
+            names = {i.city_name for i in islands}
+        else:
+            names = set(storage)
+        rows: list = []
+        for name in sorted(names):
+            rows.extend(storage.get(name, ()))
+        return rows
+
+    def _render_inventory_table(self) -> DataTable:
+        table = DataTable(id="inventory-table")
+        table.cursor_type = "row"
+        t = self._localizer.t
+        table.add_columns(
+            t("statistics.col.island"),
+            t("statistics.col.good"),
+            t("statistics.col.latest"),
+            t("statistics.col.peak"),
+            t("statistics.col.mean"),
+            t("statistics.col.slope"),
+            t("statistics.col.trend"),
+        )
+        for tr in self._current_inventory_rows():
+            table.add_row(*self._format_inventory_row(tr), key=(tr.island_name, tr.product_guid))
+        return table
+
+    def _format_inventory_row(self, tr) -> tuple[str, ...]:
+        item = self._state.items[tr.product_guid]
+        return (
+            tr.island_name,
+            item.display_name(self._localizer.code),
+            f"{tr.latest:,}",
+            f"{tr.peak:,}",
+            f"{tr.points.mean:,.0f}",
+            f"{tr.points.slope:+.2f}",
+            sparkline(tr.points.samples, width=12),
         )
 
     def _format_route_row(self, s: RouteSummary, legs: int, *, active: bool) -> tuple[str, ...]:
@@ -207,11 +420,30 @@ class TradeStatisticsScreen(Screen):
             "0",
         )
 
+    def on_tree_node_selected(self, event: Tree.NodeSelected) -> None:
+        """Tree のノード選択で ``self._filter`` を更新し，画面を作り直す．
+
+        - root: data=None → filter reset (All)
+        - session node: data=TradeFilter(session=sid)
+        - island leaf: data=TradeFilter(session=sid, island=city)
+        """
+        data = event.node.data
+        new_filter: TradeFilter = data if isinstance(data, TradeFilter) else TradeFilter()
+        if new_filter == self._filter:
+            return
+        self._filter = new_filter
+        self._filtered_events_cache = None
+        self._filtered_events_cache_key = None
+        self.refresh(recompose=True)
+
     def on_data_table_row_highlighted(self, event: DataTable.RowHighlighted) -> None:
-        """items / routes テーブル双方の行 highlight で右 pane を更新．"""
+        """items / routes / inventory テーブルの行 highlight で右 pane を更新．"""
         table_id = event.data_table.id
         row_key = event.row_key.value if event.row_key is not None else None
-        if not row_key:
+        if row_key is None or row_key == "":
+            return
+        if table_id == "inventory-table":
+            self._update_inventory_chart(row_key)
             return
         if table_id == "items-table":
             try:
@@ -223,19 +455,21 @@ class TradeStatisticsScreen(Screen):
             self._update_route_detail(row_key)
 
     def _update_partners_pane(self, item_guid: int) -> None:
-        rows = partners_for_item(self._state.events, item_guid)
+        rows = partners_for_item(
+            self._state.events,
+            item_guid,
+            session=self._filter.session,
+            island=self._filter.island,
+        )
         self.query_one("#partners-pane", Static).update(self._format_partners_pane(rows, item_guid))
         self._update_chart_pane(item_guid)
 
     def _update_chart_pane(self, item_guid: int) -> None:
         """選択物資の取引を (timestamp_tick, 累積数量) の折れ線で描画．"""
         t = self._localizer.t
+        scoped = self._filtered_events() if not self._filter.is_all else self._state.events
         events = sorted(
-            (
-                e
-                for e in self._state.events
-                if e.item.guid == item_guid and e.timestamp_tick is not None
-            ),
+            (e for e in scoped if e.item.guid == item_guid and e.timestamp_tick is not None),
             key=lambda e: e.timestamp_tick or 0,
         )
         item = self._state.items[item_guid]
@@ -254,12 +488,9 @@ class TradeStatisticsScreen(Screen):
 
     def _update_route_detail(self, route_id: str) -> None:
         """選択ルートの累積 net gold 時系列を chart pane に描画．"""
+        scoped = self._filtered_events() if not self._filter.is_all else self._state.events
         events = sorted(
-            (
-                e
-                for e in self._state.events
-                if e.route_id == route_id and e.timestamp_tick is not None
-            ),
+            (e for e in scoped if e.route_id == route_id and e.timestamp_tick is not None),
             key=lambda e: e.timestamp_tick or 0,
         )
         t = self._localizer.t
@@ -282,6 +513,42 @@ class TradeStatisticsScreen(Screen):
             ylabel=t("statistics.chart.ylabel.cumulative_gold"),
             unit_key=unit_key,
         )
+
+    def _update_inventory_chart(self, row_key: tuple[str, int] | object) -> None:
+        """inventory-table 選択時に Points 時系列を chart pane に描画．
+
+        row_key は ``(island_name, product_guid)`` の tuple を受け取る．
+        """
+        t = self._localizer.t
+        if not (
+            isinstance(row_key, tuple)
+            and len(row_key) == 2
+            and isinstance(row_key[0], str)
+            and isinstance(row_key[1], int)
+        ):
+            return
+        island, guid = row_key
+        trend = next(
+            (tr for tr in self._state.storage_by_island.get(island, ()) if tr.product_guid == guid),
+            None,
+        )
+        if trend is None:
+            return
+        item = self._state.items[guid]
+        title = f"{island} · {item.display_name(self._localizer.code)}"
+        samples = list(trend.points.samples)
+        if not samples:
+            self._render_empty_chart(t("statistics.chart.no_inventory_samples", title=title))
+            return
+        x_values = list(range(len(samples)))
+        chart = self.query_one("#chart-pane", PlotextPlot)
+        chart.plt.clear_data()
+        chart.plt.clear_figure()
+        chart.plt.plot(x_values, samples, marker="hd")
+        chart.plt.title(title)
+        chart.plt.xlabel(t("statistics.chart.sample_index"))
+        chart.plt.ylabel(t("statistics.col.latest"))
+        chart.refresh()
 
     def _find_idle_route_tasks(self, route_id: str) -> tuple:
         """routes_by_session から ship_id 一致の TradeRouteDef を探し tasks を返す．"""
