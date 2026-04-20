@@ -2,11 +2,13 @@
 
 from __future__ import annotations
 
+import datetime as _dt
 from pathlib import Path
 
 from textual.app import App
 from textual.binding import Binding
 
+from anno_save_analyzer.trade import events_to_csv, items_to_csv, routes_to_csv
 from anno_save_analyzer.trade.models import GameTitle
 
 from .i18n import Localizer
@@ -27,6 +29,7 @@ class TradeApp(App[None]):
         Binding("ctrl+g", "show_help", "Help"),
         Binding("ctrl+t", "switch_main_screen", "Switch screen"),
         Binding("ctrl+l", "toggle_locale", "Locale"),
+        Binding("ctrl+o", "export", "Export", priority=True),
     ]
 
     def __init__(
@@ -82,6 +85,48 @@ class TradeApp(App[None]):
     def action_show_help(self) -> None:  # pragma: no cover - manual interaction only
         self.notify(self._localizer.t("binding.help"))
 
+    def action_export(self) -> None:
+        """nano 風 ^O: 現在画面の内容を CSV にエクスポート．
+
+        - Overview: items + routes + ledger 3 枚同時書き出し
+        - Statistics: 現在画面時と同じく 3 枚同時 (タブ切替しても全量出す方が作業が楽)
+
+        書き出し先は現在 working directory．ファイル名は
+        ``<save_basename>_<kind>_<YYYYMMDD_HHMMSS>.csv``．
+        """
+        paths = self._write_exports()
+        label = ", ".join(p.name for p in paths)
+        self.notify(f"exported: {label}")
+
+    def _write_exports(self) -> list[Path]:
+        stamp = _dt.datetime.now().strftime("%Y%m%d_%H%M%S")
+        basename = self._state.save_path.stem or "anno_save"
+        out_dir = Path.cwd()
+        locale = self._localizer.code
+        idle_routes = [rd for routes in self._state.routes_by_session.values() for rd in routes]
+        active_ids = {s.route_id for s in self._state.route_summaries if s.route_id is not None}
+        targets = [
+            (
+                f"{basename}_items_{stamp}.csv",
+                items_to_csv(self._state.item_summaries, locale=locale),
+            ),
+            (
+                f"{basename}_routes_{stamp}.csv",
+                routes_to_csv(
+                    self._state.route_summaries,
+                    idle_routes=idle_routes,
+                    active_ids=active_ids,
+                ),
+            ),
+            (f"{basename}_events_{stamp}.csv", events_to_csv(self._state.events, locale=locale)),
+        ]
+        written: list[Path] = []
+        for name, content in targets:
+            path = out_dir / name
+            path.write_text(content, encoding="utf-8")
+            written.append(path)
+        return written
+
     def _apply_localized_bindings(self) -> None:
         self.BINDINGS = [
             Binding("ctrl+x", "quit", self._localizer.t("binding.exit"), priority=True),
@@ -92,5 +137,6 @@ class TradeApp(App[None]):
                 f"{self._localizer.t('binding.overview')}/{self._localizer.t('binding.statistics')}",
             ),
             Binding("ctrl+l", "toggle_locale", self._localizer.t("binding.locale")),
+            Binding("ctrl+o", "export", self._localizer.t("binding.export"), priority=True),
         ]
         self.refresh_bindings()

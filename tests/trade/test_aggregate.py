@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from anno_save_analyzer.trade.aggregate import by_item, by_route
+from anno_save_analyzer.trade.aggregate import by_item, by_route, partners_for_item
 from anno_save_analyzer.trade.models import Item, TradeEvent, TradingPartner
 
 
@@ -128,3 +128,68 @@ class TestByRoute:
         # r2 が count=2 で先頭，r1 が count=1
         assert rows[0].route_id == "r2"
         assert rows[1].route_id == "r1"
+
+
+class TestPartnersForItem:
+    def test_groups_by_route_and_partner_kind(self) -> None:
+        events = [
+            _ev(100, 3, 30, route_id="42", kind="route"),
+            _ev(100, -1, -10, route_id="42", kind="route"),
+            _ev(100, 5, 50, route_id="66", kind="route"),
+            _ev(200, 7, 70, route_id="42", kind="route"),  # 別 item → 無視
+        ]
+        rows = partners_for_item(events, 100)
+        assert {r.route_id for r in rows} == {"42", "66"}
+        r42 = next(r for r in rows if r.route_id == "42")
+        assert r42.bought == 3
+        assert r42.sold == 1
+        assert r42.net_gold == 20
+        assert r42.event_count == 2
+
+    def test_returns_empty_when_guid_absent(self) -> None:
+        events = [_ev(100, 1, 10, route_id="x")]
+        assert partners_for_item(events, 999) == []
+
+    def test_zero_amount_does_not_count_toward_buy_or_sell(self) -> None:
+        events = [_ev(100, 0, 0, route_id="r")]
+        rows = partners_for_item(events, 100)
+        assert rows[0].bought == 0 and rows[0].sold == 0
+        assert rows[0].event_count == 1
+
+    def test_sort_by_event_count_then_abs_gold(self) -> None:
+        events = [
+            _ev(100, 1, 10, route_id="a"),  # 1 event
+            _ev(100, 1, 10, route_id="b"),  # 2 events
+            _ev(100, -1, -100, route_id="b"),
+        ]
+        rows = partners_for_item(events, 100)
+        assert rows[0].route_id == "b"
+        assert rows[1].route_id == "a"
+
+    def test_missing_partner_classified_unknown(self) -> None:
+        events = [_ev(100, 1, 10, route_id=None, partner=None)]
+        rows = partners_for_item(events, 100)
+        assert rows[0].partner_kind == "unknown"
+        assert rows[0].partner_id is None
+        assert rows[0].route_id is None
+
+    def test_display_partner_prefers_route_over_partner_id(self) -> None:
+        ev_with_route = _ev(100, 1, 10, route_id="42", kind="route")
+        ev_passive = _ev(
+            100,
+            1,
+            10,
+            route_id=None,
+            partner=TradingPartner(id="99", display_name="npc", kind="passive"),
+        )
+        ev_nothing = _ev(100, 1, 10, route_id=None, partner=None)
+        rows = partners_for_item([ev_with_route, ev_passive, ev_nothing], 100)
+        labels = {r.display_partner for r in rows}
+        assert "route #42" in labels
+        assert "partner #99" in labels
+        assert "—" in labels
+
+    def test_display_name_helper(self) -> None:
+        events = [_ev(100, 1, 10, route_id="r")]
+        rows = partners_for_item(events, 100)
+        assert rows[0].display_name("en") == "Good_100"

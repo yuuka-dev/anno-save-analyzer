@@ -10,19 +10,24 @@ from anno_save_analyzer.trade import GameTitle, ItemDictionary
 
 
 class TestItemDictionaryShipped:
+    """同梱 items_anno117.*.yaml は config.rda/assets.xml から auto-generate されてる．
+
+    GUID はゲーム本体の Standard/GUID に一致し，同じ GUID は game version 更新でも
+    基本固定．テストでは Wood (2077) と Sardines (2088) で happy path を確認．
+    """
+
     def test_loads_packaged_anno117_yaml(self) -> None:
         d = ItemDictionary.load(GameTitle.ANNO_117)
-        assert len(d) >= 20
-        wood = d[2088]
+        assert len(d) >= 150  # 151 Products from config.rda
+        wood = d[2077]
         assert wood.display_name("en") == "Wood"
-        assert wood.category == "raw"
+        sardines = d[2088]
+        assert sardines.display_name("en") == "Sardines"
 
     def test_merges_japanese_locale(self) -> None:
         d = ItemDictionary.load(GameTitle.ANNO_117, locales=["en", "ja"])
-        wood = d[2088]
-        assert wood.display_name("ja") == "木材"
-        # category は en から継承されてる
-        assert wood.category == "raw"
+        assert d[2077].display_name("ja") == "木材"
+        assert d[2088].display_name("ja") == "イワシ"
 
     def test_unknown_guid_creates_fallback_entry(self) -> None:
         d = ItemDictionary.load(GameTitle.ANNO_117)
@@ -32,17 +37,17 @@ class TestItemDictionaryShipped:
 
     def test_membership_and_len(self) -> None:
         d = ItemDictionary.load(GameTitle.ANNO_117)
-        assert 2088 in d
+        assert 2077 in d
         prev_len = len(d)
         # __getitem__ で auto-add（fallback）するので len が増える
         _ = d[42_424_242]
         assert len(d) == prev_len + 1
         # iter は entries を返す
-        assert any(item.guid == 2088 for item in d._items.values())
+        assert any(item.guid == 2077 for item in d._items.values())
 
     def test_string_title_accepted(self) -> None:
         d = ItemDictionary.load("anno117")
-        assert 2088 in d
+        assert 2077 in d
 
 
 class TestItemDictionaryDataDirOverride:

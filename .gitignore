@@ -74,3 +74,10 @@ logs/
 # refs/RDAExplorer は GPL-v3．本プロジェクト (MIT) との license 混在を避けるため
 # ローカル read-only 参照のみ扱いとし，commit しない．
 refs/
+
+# ---- Notebook ----
+# notebook 実行時の CSV/parquet 出力はセーブ由来 (書記長の個人資産)．
+# .ipynb 自体は commit するが出力アーティファクトは除外．
+notebooks/out/
+notebooks/.ipynb_checkpoints/
+*.ipynb_checkpoints/

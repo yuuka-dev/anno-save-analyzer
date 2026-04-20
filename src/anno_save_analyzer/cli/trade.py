@@ -1,4 +1,4 @@
-"""``trade`` sub-command (list / summary)．"""
+"""``trade`` sub-command (list / summary / diff)．"""
 
 from __future__ import annotations
 
@@ -15,6 +15,8 @@ from anno_save_analyzer.trade import (
     ItemDictionary,
     by_item,
     by_route,
+    diff_by_item,
+    diff_by_route,
     extract,
 )
 from anno_save_analyzer.trade.models import TradeEvent
@@ -157,5 +159,69 @@ def summary(
                 "last_seen_tick": s.last_seen_tick,
             }
             for s in route_rows
+        ]
+    )
+
+
+@trade_app.command("diff")
+def diff(
+    before: Annotated[Path, typer.Argument(help="Earlier save file.")],
+    after: Annotated[Path, typer.Argument(help="Later save file.")],
+    by: Annotated[SummaryAxis, typer.Option("--by", help="Aggregation axis.")] = SummaryAxis.ITEM,
+    title: Annotated[
+        GameTitleArg, typer.Option("--title", help="Game title.")
+    ] = GameTitleArg.ANNO_117,
+    locale: Annotated[str, typer.Option("--locale", help="Display locale.")] = "en",
+    fmt: Annotated[
+        OutputFormat, typer.Option("--format", help="Output format.")
+    ] = OutputFormat.JSON,
+    show_unchanged: Annotated[
+        bool,
+        typer.Option(
+            "--show-unchanged/--hide-unchanged",
+            help="Include rows whose values did not change.",
+        ),
+    ] = False,
+) -> None:
+    """Diff trade activity between BEFORE and AFTER save files."""
+    _ensure_format_supported(fmt)
+    title_v = title.to_title()
+    before_events = list(_events(before, title_v, locale))
+    after_events = list(_events(after, title_v, locale))
+    if by is SummaryAxis.ITEM:
+        rows = diff_by_item(before_events, after_events)
+        if not show_unchanged:
+            rows = [r for r in rows if r.status != "unchanged"]
+        _emit_json(
+            [
+                {
+                    "guid": d.item.guid,
+                    "name": d.display_name(locale),
+                    "status": d.status,
+                    "bought_delta": d.bought_delta,
+                    "sold_delta": d.sold_delta,
+                    "net_qty_delta": d.net_qty_delta,
+                    "net_gold_delta": d.net_gold_delta,
+                    "event_count_delta": d.event_count_delta,
+                }
+                for d in rows
+            ]
+        )
+        return
+    route_rows = diff_by_route(before_events, after_events)
+    if not show_unchanged:
+        route_rows = [r for r in route_rows if r.status != "unchanged"]
+    _emit_json(
+        [
+            {
+                "route_id": d.route_id,
+                "partner_kind": d.partner_kind,
+                "status": d.status,
+                "bought_delta": d.bought_delta,
+                "sold_delta": d.sold_delta,
+                "net_gold_delta": d.net_gold_delta,
+                "event_count_delta": d.event_count_delta,
+            }
+            for d in route_rows
         ]
     )

@@ -26,12 +26,20 @@ PASSIVE = "PassiveTradeEntries"
 
 def make_inner_filedb(
     triples_by_kind: dict[Literal["route", "passive"], list[tuple[int, int, int, int]]],
+    *,
+    include_npc_island: bool = False,
 ) -> bytes:
     """内側 FileDB V3 を組み立てる．
 
-    triples_by_kind の値は ``[(trader, good_guid, amount, total_price), ...]`` のリスト．
-    `trader` は外側 ``<1>`` ラッパに ``Trader`` attrib として乗せる route_id /
-    partner_id．
+    ``triples_by_kind`` の値は ``[(trader, good_guid, amount, total_price), ...]`` のリスト．
+    生成される DOM は ``GameSessionManager > AreaInfo > <1> > PassiveTrade > History
+    > {TradeRouteEntries|PassiveTradeEntries} > <1> > <1> > TradedGoods > <1>``
+    の階層を持ち，``AreaInfo > <1>`` 直下に ``CityName`` attrib を置くことで
+    プレイヤー保有島として扱われる．
+
+    ``include_npc_island=True`` の場合，さらに ``CityName`` を持たない 2 つ目の
+    AreaInfo entry を追加し，その中にも同じ TradedGoods 構造を入れる．
+    interpreter は NPC 島の TradedGoods を skip すべき．
     """
     # tag id 割り当て
     tags: dict[int, str] = {
@@ -40,6 +48,7 @@ def make_inner_filedb(
         4: ROUTE,
         5: PASSIVE,
         6: "TradedGoods",
+        7: "AreaInfo",
         # 匿名コレクション要素（内部 <1>）は id=1 だが辞書に登録しない
     }
     attribs: dict[int, str] = {
@@ -47,40 +56,59 @@ def make_inner_filedb(
         0x8002: "GoodGuid",
         0x8003: "GoodAmount",
         0x8004: "TotalPrice",
+        0x8005: "CityName",
+        0x8006: "RouteID",
     }
 
+    def _trade_subtree() -> list[Event]:
+        sub: list[Event] = []
+        sub.append(("T", 2))  # PassiveTrade
+        sub.append(("T", 3))  # History
+        for kind in ("route", "passive"):
+            if kind not in triples_by_kind:
+                continue
+            sub.append(("T", 4 if kind == "route" else 5))
+            traders: dict[int, list[tuple[int, int, int, int]]] = {}
+            for entry in triples_by_kind[kind]:
+                traders.setdefault(entry[0], []).append(entry)
+            for _trader, group in traders.items():
+                sub.append(("T", 1))  # 外側 <1>
+                for trader_, good, amount, price in group:
+                    sub.append(("T", 1))  # 内側 <1>
+                    # route は RouteID (0x8006) / passive は Trader (0x8001) を使う．
+                    # 実セーブの inner entry 構造に合わせる (interpreter の文脈分岐で必要)．
+                    ident_attrib = 0x8006 if kind == "route" else 0x8001
+                    sub.append(("A", ident_attrib, struct.pack("<i", trader_)))
+                    sub.append(("T", 6))  # TradedGoods
+                    sub.append(("T", 1))  # depth=1 wrapper
+                    sub.append(("A", 0x8002, struct.pack("<i", good)))
+                    sub.append(("A", 0x8003, struct.pack("<i", amount)))
+                    sub.append(("A", 0x8004, struct.pack("<i", price)))
+                    sub.append(("X",))  # close depth=1 wrapper
+                    sub.append(("X",))  # close TradedGoods
+                    sub.append(("X",))  # close inner <1> (entry)
+                sub.append(("X",))  # close outer <1>
+            sub.append(("X",))  # close TradeRouteEntries / PassiveTradeEntries
+        sub.append(("X",))  # close History
+        sub.append(("X",))  # close PassiveTrade
+        return sub
+
     events: list[Event] = []
-    events.append(("T", 2))  # PassiveTrade
-    events.append(("T", 3))  # History
-    for kind in ("route", "passive"):
-        if kind not in triples_by_kind:
-            continue
-        events.append(("T", 4 if kind == "route" else 5))  # TradeRouteEntries / PassiveTradeEntries
-        # 各 trader ごとに外側 <1> を 1 個作る．trader を attrib に持たせる．
-        # シンプルに 1 trader = 1 outer <1> = N inner <1> (= N triples)
-        triples_for_kind = triples_by_kind[kind]
-        # group by trader id
-        traders: dict[int, list[tuple[int, int, int, int]]] = {}
-        for entry in triples_for_kind:
-            traders.setdefault(entry[0], []).append(entry)
-        for _trader, group in traders.items():
-            events.append(("T", 1))  # 外側 <1>
-            for trader_, good, amount, price in group:
-                events.append(("T", 1))  # 内側 <1>
-                events.append(("A", 0x8001, struct.pack("<i", trader_)))  # Trader
-                events.append(("T", 6))  # TradedGoods
-                # TradedGoods 直下にもう一段の <1> ラッパに GoodGuid/Amount/Price
-                events.append(("T", 1))
-                events.append(("A", 0x8002, struct.pack("<i", good)))
-                events.append(("A", 0x8003, struct.pack("<i", amount)))
-                events.append(("A", 0x8004, struct.pack("<i", price)))
-                events.append(("X",))  # close inner <1> within TradedGoods
-                events.append(("X",))  # close TradedGoods
-                events.append(("X",))  # close inner <1> (entry)
-            events.append(("X",))  # close outer <1>
-        events.append(("X",))  # close TradeRouteEntries / PassiveTradeEntries
-    events.append(("X",))  # close History
-    events.append(("X",))  # close PassiveTrade
+    events.append(("T", 7))  # AreaInfo
+
+    # プレイヤー保有島の entry
+    events.append(("T", 1))  # AreaInfo > <1>
+    events.append(("A", 0x8005, "プレイヤー島".encode("utf-16-le")))  # CityName
+    events.extend(_trade_subtree())
+    events.append(("X",))  # close AreaInfo > <1>
+
+    if include_npc_island:
+        # NPC 島の entry．CityName 無し，同じ trade 構造．フィルタで除外されるはず．
+        events.append(("T", 1))  # AreaInfo > <1>
+        events.extend(_trade_subtree())
+        events.append(("X",))  # close NPC entry
+
+    events.append(("X",))  # close AreaInfo
 
     return minimal_v3(tags=tags, attribs=attribs, events=events)
 
