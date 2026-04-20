@@ -141,3 +141,24 @@ class TestFromSaveClassmethod:
         app = TradeApp.from_save(tui_state.save_path, locale="ja")
         assert app._state.locale == "ja"
         assert app._localizer.code == "ja"
+
+
+def test_sanitize_filename_component_fallback_for_empty_or_whitespace() -> None:
+    """``_sanitize_filename_component`` が空文字になる入力で unknown-<digest> を返す．
+
+    coverage 対象: app.py lines 40-41 の ``digest = ...`` /
+    ``return f"unknown-{digest}"`` fallback path．``strip(" .")`` の後に空になる
+    入力 (空文字 / space+dot のみ) で踏む．unsafe 文字は ``-`` に置換されて
+    strip で消えないので，unsafe-only では fallback に落ちないことにも注意．
+    """
+    from anno_save_analyzer.tui.app import _sanitize_filename_component
+
+    empty = _sanitize_filename_component("")
+    assert empty.startswith("unknown-")
+    assert len(empty) == len("unknown-") + 8
+
+    space_dot = _sanitize_filename_component("  .. ")
+    assert space_dot.startswith("unknown-")
+
+    # 決定性
+    assert _sanitize_filename_component("") == empty

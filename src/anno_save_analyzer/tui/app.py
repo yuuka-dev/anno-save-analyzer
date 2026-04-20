@@ -170,15 +170,15 @@ class TradeApp(App[None]):
         )
         # idle route (history 無し) は全量/全 session export では全件含める。
         # session-only filter 時は当該 session の idle route を含め、
-        # island filter 時のみ CSV から除外する。
+        # island filter 時のみ CSV から除外する．``filt.is_all`` で session/island
+        # 共に None の case は先頭 branch で拾うため else 不要．
         if filt is None or filt.is_all:
             idle_routes = [rd for routes in self._state.routes_by_session.values() for rd in routes]
         elif filt.island:
             idle_routes = []
-        elif filt.session:
-            idle_routes = list(self._state.routes_by_session.get(filt.session, []))
         else:
-            idle_routes = [rd for routes in self._state.routes_by_session.values() for rd in routes]
+            # filt.session is not None here (is_all が False で island も無いので session ある)
+            idle_routes = list(self._state.routes_by_session.get(filt.session or "", []))
         active_ids = {s.route_id for s in route_rows if s.route_id is not None}
 
         suffix_parts: list[str] = []
