@@ -102,6 +102,33 @@ def build_overview(
     )
 
 
+def _decompress_outer(save_path: Path) -> tuple[bytes, list[bytes]]:
+    """outer FileDB を 1 度だけ解凍し inner session payloads も抽出．
+
+    Cursor レビュー指摘 #1 対応: ``load_state`` の責務を機能単位に分解し，
+    outer 解凍ロジックを単体でテスト / 差し替え可能にする．
+    """
+    outer_filedb = load_outer_filedb(save_path)
+    version = detect_version(outer_filedb)
+    section = parse_tag_section(outer_filedb, version)
+    inner_payloads = extract_sessions(outer_filedb, version=version, tag_section=section)
+    return outer_filedb, inner_payloads
+
+
+def _build_aggregates_and_overview(
+    save_path: Path, title: GameTitle, events: list[TradeEvent]
+) -> tuple[list[ItemSummary], list[RouteSummary], OverviewSnapshot, tuple[str, ...]]:
+    """events から集計 (item / route)，Overview，session locale keys を作る．"""
+    item_rows = by_item(events)
+    route_rows = by_route(events)
+    overview = build_overview(save_path, title, events, item_rows, route_rows)
+    locale_keys = tuple(
+        session_locale_key(title, int(sid)) if sid.isdigit() else "session.unknown"
+        for sid in overview.session_ids
+    )
+    return item_rows, route_rows, overview, locale_keys
+
+
 def load_state(
     save_path: Path,
     *,
@@ -116,8 +143,8 @@ def load_state(
     (CLI 側でプログレスバーを描画する用)．``items`` を渡せば辞書ロードを
     スキップできる．
 
-    outer FileDB の解凍は 1 回だけ行い，extract / islands / routes で共有する．
-    これをやらないと RDA + zlib 展開が 3 回走って体感ロードが重くなる．
+    オーケストレーション本体．outer 解凍や集計は private helper に委譲し，
+    この関数はステージの連結とステート組み立てだけに責任を持つ．
     """
     if progress is None:
 
@@ -130,21 +157,14 @@ def load_state(
         items = ItemDictionary.load(title, locales=locales)
 
     progress("extracting outer FileDB")
-    outer_filedb = load_outer_filedb(save_path)
-    version = detect_version(outer_filedb)
-    section = parse_tag_section(outer_filedb, version)
-    inner_payloads = extract_sessions(outer_filedb, version=version, tag_section=section)
+    outer_filedb, inner_payloads = _decompress_outer(save_path)
 
     progress("walking trade events")
     events = list(extract_from_outer(outer_filedb, title=title, items=items))
 
     progress("aggregating by item and route")
-    item_rows = by_item(events)
-    route_rows = by_route(events)
-    overview = build_overview(save_path, title, events, item_rows, route_rows)
-    locale_keys = tuple(
-        session_locale_key(title, int(sid)) if sid.isdigit() else "session.unknown"
-        for sid in overview.session_ids
+    item_rows, route_rows, overview, locale_keys = _build_aggregates_and_overview(
+        save_path, title, events
     )
 
     progress("enumerating islands and routes")

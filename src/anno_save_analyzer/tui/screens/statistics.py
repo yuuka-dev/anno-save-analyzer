@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from dataclasses import dataclass
+
 from textual.app import ComposeResult
 from textual.containers import Horizontal, Vertical
 from textual.screen import Screen
@@ -16,12 +18,30 @@ from textual.widgets import (
 )
 from textual_plotext import PlotextPlot
 
-from anno_save_analyzer.trade import partners_for_item
-from anno_save_analyzer.trade.aggregate import ItemSummary, PartnerSummary, RouteSummary
+from anno_save_analyzer.trade import by_item, by_route, partners_for_item
+from anno_save_analyzer.trade.aggregate import (
+    ItemSummary,
+    PartnerSummary,
+    RouteSummary,
+    filter_events,
+)
+from anno_save_analyzer.trade.models import TradeEvent
 
 from ..i18n import Localizer
 from ..sparkline import sparkline
 from ..state import TuiState
+
+
+@dataclass(frozen=True)
+class TradeFilter:
+    """Tree 選択から派生する集計フィルタ．両方 None なら全体．"""
+
+    session: str | None = None
+    island: str | None = None
+
+    @property
+    def is_all(self) -> bool:
+        return self.session is None and self.island is None
 
 
 class TradeStatisticsScreen(Screen):
@@ -56,6 +76,9 @@ class TradeStatisticsScreen(Screen):
         super().__init__(name="statistics")
         self._state = state
         self._localizer = localizer
+        self._filter = TradeFilter()
+        self._filtered_events_cache: list[TradeEvent] | None = None
+        self._filtered_events_cache_key: tuple[str | None, str | None] | None = None
 
     def set_localizer(self, localizer: Localizer) -> None:
         """``TradeApp.switch_locale`` から呼ばれる公開 setter．
@@ -68,6 +91,7 @@ class TradeStatisticsScreen(Screen):
     def compose(self) -> ComposeResult:
         t = self._localizer.t
         yield Header()
+        yield Static(self._filter_label(), id="filter-banner")
         with Horizontal():
             yield self._render_tree()
             with TabbedContent(id="stats-tabs"):
@@ -85,17 +109,69 @@ class TradeStatisticsScreen(Screen):
 
     def _render_tree(self) -> Tree:
         t = self._localizer.t
-        tree = Tree(t("statistics.tree_root"), id="sessions-tree")
+        # root の data=None は「All = フィルタ解除」を意味する
+        tree = Tree[TradeFilter | None](t("statistics.tree_root"), id="sessions-tree")
+        tree.root.data = None
         tree.root.expand()
         keys = self._state.session_locale_keys or tuple(
             "session.unknown" for _ in self._state.session_ids
         )
         islands_by_sid = self._state.islands_by_session
         for sid, key in zip(self._state.session_ids, keys, strict=False):
-            session_node = tree.root.add(t(key, index=sid), expand=True)
+            session_node = tree.root.add(
+                t(key, index=sid),
+                expand=True,
+                data=TradeFilter(session=sid),
+            )
             for island in islands_by_sid.get(sid, ()):
-                session_node.add_leaf(island.city_name)
+                session_node.add_leaf(
+                    island.city_name,
+                    data=TradeFilter(session=sid, island=island.city_name),
+                )
         return tree
+
+    def _filter_label(self) -> str:
+        """Footer 上の帯に出す現 filter 説明．``All`` 時は空気に近い表示．"""
+        t = self._localizer.t
+        if self._filter.is_all:
+            return t("statistics.filter.all")
+        if self._filter.island is not None:
+            return t("statistics.filter.island", name=self._filter.island)
+        # session のみ
+        sid = self._filter.session or ""
+        locale_key = next(
+            (
+                k
+                for s, k in zip(
+                    self._state.session_ids, self._state.session_locale_keys, strict=False
+                )
+                if s == sid
+            ),
+            "session.unknown",
+        )
+        return t("statistics.filter.session", name=t(locale_key, index=sid))
+
+    def _filtered_events(self) -> list:
+        """現在の ``self._filter`` を適用した events．"""
+        key = (self._filter.session, self._filter.island)
+        if self._filtered_events_cache_key == key and self._filtered_events_cache is not None:
+            return self._filtered_events_cache
+        self._filtered_events_cache = filter_events(
+            self._state.events, session=self._filter.session, island=self._filter.island
+        )
+        self._filtered_events_cache_key = key
+        return self._filtered_events_cache
+
+    def _current_item_summaries(self) -> tuple[ItemSummary, ...]:
+        """TuiState の pre-computed と同値．``_filter.is_all`` なら cache 再利用．"""
+        if self._filter.is_all:
+            return self._state.item_summaries
+        return tuple(by_item(self._filtered_events()))
+
+    def _current_route_summaries(self) -> tuple[RouteSummary, ...]:
+        if self._filter.is_all:
+            return self._state.route_summaries
+        return tuple(by_route(self._filtered_events()))
 
     def _render_items_table(self) -> DataTable:
         table = DataTable(id="items-table")
@@ -112,7 +188,7 @@ class TradeStatisticsScreen(Screen):
         )
         # 各物資の累積数量 sparkline を先に算出．1 物資 = 1 sparkline string．
         trends = self._build_item_trends()
-        for s in self._state.item_summaries:
+        for s in self._current_item_summaries():
             row = (*self._format_item_row(s), trends.get(s.item.guid, ""))
             table.add_row(*row, key=str(s.item.guid))
         return table
@@ -121,9 +197,11 @@ class TradeStatisticsScreen(Screen):
         """item GUID → 累積数量 sparkline 文字列 (width=12)．
 
         timestamp を持つイベントのみ対象に，時刻昇順で累積を取る．
+        現在の filter が有効なら pre-filter．
         """
+        events = self._filtered_events() if not self._filter.is_all else self._state.events
         series: dict[int, list[tuple[int, int]]] = {}
-        for ev in self._state.events:
+        for ev in events:
             if ev.timestamp_tick is None:
                 continue
             series.setdefault(ev.item.guid, []).append((ev.timestamp_tick, ev.amount))
@@ -151,22 +229,33 @@ class TradeStatisticsScreen(Screen):
             t("statistics.col.net_gold"),
             t("statistics.col.events"),
         )
-        active_ids: set[str] = {
-            s.route_id for s in self._state.route_summaries if s.route_id is not None
-        }
+        route_summaries = self._current_route_summaries()
+        active_ids: set[str] = {s.route_id for s in route_summaries if s.route_id is not None}
         legs_by_ship: dict[str, int] = {}
-        for routes in self._state.routes_by_session.values():
-            for rd in routes:
+        # idle routes は session filter 効くが island filter は不明 (route 定義には
+        # island 情報が載らない)．filter 時は history 既知の route 以外 hide する．
+        sessions_in_scope = (
+            (self._filter.session,)
+            if self._filter.session is not None
+            else tuple(self._state.routes_by_session)
+        )
+        for sid in sessions_in_scope:
+            for rd in self._state.routes_by_session.get(sid, ()):
                 if rd.ship_id is not None:
                     legs_by_ship[str(rd.ship_id)] = len(rd.tasks)
 
         # active routes (履歴あり) を先に，次に idle (定義あり / 履歴無し)
         # row_key = route_id (str) で後段の highlight event から参照できるようにする．
-        for s in self._state.route_summaries:
+        for s in route_summaries:
             legs = legs_by_ship.get(s.route_id or "", 0) if s.route_id else 0
             row_key = s.route_id if s.route_id is not None else None
             table.add_row(*self._format_route_row(s, legs, active=True), key=row_key)
-        for routes in self._state.routes_by_session.values():
+        # island filter 時は idle route 情報源 (route 定義) に island が無いので
+        # 全部 hide．session filter だけの場合は当該 session のみ出す．
+        if self._filter.island is not None:
+            return table
+        for sid in sessions_in_scope:
+            routes = self._state.routes_by_session.get(sid, ())
             for rd in routes:
                 if rd.ship_id is None:
                     continue
@@ -215,6 +304,22 @@ class TradeStatisticsScreen(Screen):
             "0",
         )
 
+    def on_tree_node_selected(self, event: Tree.NodeSelected) -> None:
+        """Tree のノード選択で ``self._filter`` を更新し，画面を作り直す．
+
+        - root: data=None → filter reset (All)
+        - session node: data=TradeFilter(session=sid)
+        - island leaf: data=TradeFilter(session=sid, island=city)
+        """
+        data = event.node.data
+        new_filter: TradeFilter = data if isinstance(data, TradeFilter) else TradeFilter()
+        if new_filter == self._filter:
+            return
+        self._filter = new_filter
+        self._filtered_events_cache = None
+        self._filtered_events_cache_key = None
+        self.refresh(recompose=True)
+
     def on_data_table_row_highlighted(self, event: DataTable.RowHighlighted) -> None:
         """items / routes テーブル双方の行 highlight で右 pane を更新．"""
         table_id = event.data_table.id
@@ -231,19 +336,21 @@ class TradeStatisticsScreen(Screen):
             self._update_route_detail(row_key)
 
     def _update_partners_pane(self, item_guid: int) -> None:
-        rows = partners_for_item(self._state.events, item_guid)
+        rows = partners_for_item(
+            self._state.events,
+            item_guid,
+            session=self._filter.session,
+            island=self._filter.island,
+        )
         self.query_one("#partners-pane", Static).update(self._format_partners_pane(rows, item_guid))
         self._update_chart_pane(item_guid)
 
     def _update_chart_pane(self, item_guid: int) -> None:
         """選択物資の取引を (timestamp_tick, 累積数量) の折れ線で描画．"""
         t = self._localizer.t
+        scoped = self._filtered_events() if not self._filter.is_all else self._state.events
         events = sorted(
-            (
-                e
-                for e in self._state.events
-                if e.item.guid == item_guid and e.timestamp_tick is not None
-            ),
+            (e for e in scoped if e.item.guid == item_guid and e.timestamp_tick is not None),
             key=lambda e: e.timestamp_tick or 0,
         )
         item = self._state.items[item_guid]
@@ -262,12 +369,9 @@ class TradeStatisticsScreen(Screen):
 
     def _update_route_detail(self, route_id: str) -> None:
         """選択ルートの累積 net gold 時系列を chart pane に描画．"""
+        scoped = self._filtered_events() if not self._filter.is_all else self._state.events
         events = sorted(
-            (
-                e
-                for e in self._state.events
-                if e.route_id == route_id and e.timestamp_tick is not None
-            ),
+            (e for e in scoped if e.route_id == route_id and e.timestamp_tick is not None),
             key=lambda e: e.timestamp_tick or 0,
         )
         t = self._localizer.t
