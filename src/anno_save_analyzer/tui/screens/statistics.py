@@ -262,6 +262,15 @@ class TradeStatisticsScreen(Screen):
         self._notify_recent_window(value)
         if self._last_selected_item_guid is not None:
             self._update_partners_pane(self._last_selected_item_guid)
+        self._request_persist()
+
+    def _request_persist(self) -> None:
+        """app に ``persist_user_settings`` があれば呼ぶ．unit test / 単体起動でも
+        crash しないよう ``getattr`` で柔らかく参照．
+        """
+        persist = getattr(self.app, "persist_user_settings", None)
+        if persist is not None:
+            persist()
 
     def _notify_recent_window(self, value: float | None) -> None:
         t = self._localizer.t
@@ -278,6 +287,7 @@ class TradeStatisticsScreen(Screen):
         t = self._localizer.t
         self.app.notify(t("chart.window.notice", label=t(self._chart_window.locale_key)))
         self._redraw_active_chart_window()
+        self._request_persist()
 
     def _redraw_active_chart_window(self) -> None:
         """現在アクティブな tab に対応する chart だけ再描画する．"""
