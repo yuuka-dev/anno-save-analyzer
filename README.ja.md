@@ -9,7 +9,7 @@
 
 > **一言で説明**: Anno 1800 / Anno 117: Pax Romana のセーブデータ (`.a7s` / `.a8s`) から貿易履歴を抽出し，Textual TUI / CLI から眺められるようにするツール．
 
-> **現状**: v0.3.0 リリース済 (trade history viewer)．PyPI 未配信．Git tag からインストールする．English README: [README.md](README.md).
+> **現状**: v0.4.0 リリース済 (trade history + 島ごと在庫推移)．PyPI 未配信．Git tag からインストールする．English README: [README.md](README.md).
 
 ## 概要
 
@@ -23,11 +23,14 @@ Anno のセーブはマトリョーシカ構造:
 
 本プロジェクトは各層を Python で native にはがし，生の取引イベントをプレイヤーが欲しい形（集計台帳，取引相手内訳，累積推移グラフ，スパークライン，2 セーブ差分）に落とす．
 
-## 主な機能 (v0.3.0)
+## 主な機能 (v0.4.0)
 
 ### Textual TUI (`anno-save-analyzer tui <save>`)
 
-- 3 カラム構成: セッション > 島 Tree / items & routes DataTable / Partners pane + 時系列 chart
+- 3 カラム構成: セッション > 島 Tree / items / routes / **inventory** DataTable / Partners pane + 時系列 chart
+- **Tree フィルタ**: session / island ノードをクリックすると中央テーブル・Partners・chart・^O エクスポートすべてがその粒度に絞られる
+- **Inventory タブ**: 島ごとの StorageTrends (120 サンプル ring buffer) を latest/peak/mean/slope + sparkline で表示．行選択で時系列 chart
+- **可変レイアウト**: wide (≥120) / mid (80-119) / narrow (<80) で列の出し分け．Partners pane はスクロール対応
 - nano 風ホットキー: `^X` 終了 / `^G` ヘルプ / `^T` 画面切替 / `^L` 言語 / `^O` エクスポート
 - items-table の推移 sparkline 列 (`▁▂▃▄▅▆▇█`)
 - 行選択で Partners pane + plotext 折れ線 chart が同時更新
@@ -38,8 +41,8 @@ Anno のセーブはマトリョーシカ構造:
 
 ### CLI
 
-- `trade list <save>` — 全 TradeEvent を JSON で吐く
-- `trade summary <save> --by item|route` — 集計
+- `trade list <save>` — 全 TradeEvent を JSON で吐く (`--island` / `--session` フィルタ対応)
+- `trade summary <save> --by item|route` — 集計 (同フィルタ対応)
 - `trade diff <before> <after>` — 2 セーブ間 added / removed / changed / unchanged
 - `tui <save>` — TUI 起動
 
@@ -56,7 +59,7 @@ Anno のセーブはマトリョーシカ構造:
 
 ### テスト
 
-- 370+ tests，**branch coverage 下限 90%** を CI で強制 (``pyproject.toml`` の
+- 400+ tests，**branch coverage 下限 90%** を CI で強制 (``pyproject.toml`` の
   ``fail_under = 90``)．純関数層 (``parser/*`` / ``trade.aggregate`` /
   ``trade.diff`` / ``trade.exports`` 等) は実質 100% を維持．90% 下限は
   async Textual UI の ``pragma: no cover`` 戦いを緩和するための余白．
@@ -70,10 +73,10 @@ Anno のセーブはマトリョーシカ構造:
 
 ```bash
 # 最新タグからインストール
-uv pip install "anno-save-analyzer[tui] @ git+https://github.com/yuuka-dev/anno-save-analyzer@v0.3.0"
+uv pip install "anno-save-analyzer[tui] @ git+https://github.com/yuuka-dev/anno-save-analyzer@v0.4.0"
 
 # CLI ツールとして globally install (venv 管理不要)
-uv tool install "anno-save-analyzer[tui] @ git+https://github.com/yuuka-dev/anno-save-analyzer@v0.3.0"
+uv tool install "anno-save-analyzer[tui] @ git+https://github.com/yuuka-dev/anno-save-analyzer@v0.4.0"
 ```
 
 `[tui]` extra で Textual + textual-plotext が入る．CLI / ライブラリだけなら外して良い．
@@ -89,7 +92,7 @@ uv sync --extra tui    # または: python -m venv .venv && .venv/bin/pip instal
 ### uv なし (plain pip)
 
 ```bash
-pip install "anno-save-analyzer[tui] @ git+https://github.com/yuuka-dev/anno-save-analyzer@v0.3.0"
+pip install "anno-save-analyzer[tui] @ git+https://github.com/yuuka-dev/anno-save-analyzer@v0.4.0"
 ```
 
 > PyPI 配信は v1.0 予定．それまで Git tag が正式配布経路．
@@ -140,8 +143,8 @@ anno-save-analyzer tui --help
 |---|---|---|
 | v0.1.0 | RDA V2.2 native parser | ✅ 完了 |
 | v0.2.x | FileDB V3 parser，recursive SessionData，島メタ | ✅ 完了 (0.3.0 に統合) |
-| **v0.3.0** | **Trade history viewer (Textual TUI + CLI + snapshot diff)** | ✅ **リリース済** |
-| v0.4 | StorageTrends (島ごとの在庫時系列) TUI 統合 ([#23](https://github.com/yuuka-dev/anno-save-analyzer/issues/23)) | 🚧 次 |
+| v0.3.0 | Trade history viewer (Textual TUI + CLI + snapshot diff) | ✅ リリース済 |
+| **v0.4.0** | **島ごと在庫推移 (StorageTrends) + Tree filter + 可変レイアウト** | ✅ **リリース済** |
 | v0.4+ | データ量連動 progress gauge ([#26](https://github.com/yuuka-dev/anno-save-analyzer/issues/26))，Anno 1800 parity ([#24](https://github.com/yuuka-dev/anno-save-analyzer/issues/24)) | 計画中 |
 | v0.5 | OR-Tools MILP ルート最適化 | 計画中 |
 | v0.6 | DOM 全域の Pydantic 型化 (Island / Building / Population) | 計画中 |

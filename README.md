@@ -9,7 +9,7 @@
 
 > **One-liner**: Save file analyzer for *Anno 1800* and *Anno 117: Pax Romana* — decompress `.a7s` / `.a8s` containers, parse FileDB binaries, and surface trade history through a Textual TUI and a JSON-friendly CLI.
 
-> **Status**: v0.3.0 shipped (trade history viewer). Not on PyPI yet; install from Git tag or a local clone. Japanese README: [README.ja.md](README.ja.md).
+> **Status**: v0.4.0 shipped (trade history + per-island inventory). Not on PyPI yet; install from Git tag or a local clone. Japanese README: [README.ja.md](README.ja.md).
 
 ## Overview
 
@@ -23,11 +23,14 @@ Anno saves are matryoshka-style containers:
 
 This project peels every layer natively in Python and turns the raw trade events into things players actually want: aggregated ledgers, partner breakdowns, cumulative charts, sparklines, and snapshot diffs between saves.
 
-## Features (v0.3.0)
+## Features (v0.4.0)
 
 ### Textual TUI (`anno-save-analyzer tui <save>`)
 
-- 3-column layout: sessions/islands tree · items & routes tables · Partners pane + plotext chart
+- 3-column layout: sessions/islands tree · items / routes / **inventory** tables · Partners pane + plotext chart
+- **Tree filter**: click a session / island node to scope every pane (items / routes / Partners / chart / CSV export) to that subset
+- **Inventory tab**: per-island StorageTrends (120-sample ring buffer) with latest/peak/mean/slope + sparkline; row highlight plots the series
+- **Responsive**: wide (≥120) / mid (80-119) / narrow (<80) breakpoints auto-switch column visibility; Partners pane is a scrollable container
 - nano-flavored hotkeys: `^X` exit / `^G` help / `^T` switch screen / `^L` locale / `^O` export
 - Sparkline column (`▁▂▃▄▅▆▇█`) for cumulative quantity per good
 - Selecting a row updates Partners pane + line chart in sync
@@ -38,8 +41,8 @@ This project peels every layer natively in Python and turns the raw trade events
 
 ### CLI
 
-- `trade list <save>` — dump every TradeEvent as JSON
-- `trade summary <save> --by item|route` — aggregated view
+- `trade list <save>` — dump every TradeEvent as JSON (`--island` / `--session` filters)
+- `trade summary <save> --by item|route` — aggregated view (same filters)
 - `trade diff <before> <after>` — added / removed / changed / unchanged between two saves
 - `tui <save>` — launch the Textual viewer
 
@@ -56,7 +59,7 @@ This project peels every layer natively in Python and turns the raw trade events
 
 ### Tests
 
-- 370+ tests, **90 % branch coverage floor** enforced by CI (`fail_under = 90` in `pyproject.toml`).
+- 400+ tests, **90 % branch coverage floor** enforced by CI (`fail_under = 90` in `pyproject.toml`).
   Pure-function layers (`parser/*`, `trade.aggregate`, `trade.diff`, `trade.exports`) are kept effectively at 100 %; the 90 % floor absorbs `pragma: no cover` friction on async Textual UI code.
 - Python 3.12 and 3.13 both supported.
 
@@ -68,10 +71,10 @@ This project peels every layer natively in Python and turns the raw trade events
 
 ```bash
 # Install the latest released version from the GitHub tag
-uv pip install "anno-save-analyzer[tui] @ git+https://github.com/yuuka-dev/anno-save-analyzer@v0.3.0"
+uv pip install "anno-save-analyzer[tui] @ git+https://github.com/yuuka-dev/anno-save-analyzer@v0.4.0"
 
 # Or install as a standalone CLI tool (no venv management)
-uv tool install "anno-save-analyzer[tui] @ git+https://github.com/yuuka-dev/anno-save-analyzer@v0.3.0"
+uv tool install "anno-save-analyzer[tui] @ git+https://github.com/yuuka-dev/anno-save-analyzer@v0.4.0"
 ```
 
 The `[tui]` extra pulls in Textual and textual-plotext. Omit it if you only need the CLI / library.
@@ -87,7 +90,7 @@ uv sync --extra tui        # or: python -m venv .venv && .venv/bin/pip install -
 ### Without uv (plain pip)
 
 ```bash
-pip install "anno-save-analyzer[tui] @ git+https://github.com/yuuka-dev/anno-save-analyzer@v0.3.0"
+pip install "anno-save-analyzer[tui] @ git+https://github.com/yuuka-dev/anno-save-analyzer@v0.4.0"
 ```
 
 > PyPI publication is planned for v1.0. Until then, Git tags are the supported distribution channel.
@@ -139,8 +142,8 @@ anno-save-analyzer tui --help
 |---|---|---|
 | v0.1.0 | RDA V2.2 native parser | ✅ done |
 | v0.2.x | FileDB V3 parser, recursive SessionData, island metadata | ✅ done (rolled into 0.3.0) |
-| **v0.3.0** | **Trade history viewer: Textual TUI + CLI + snapshot diff** | ✅ **released** |
-| v0.4 | StorageTrends (per-island inventory time series) TUI integration ([#23](https://github.com/yuuka-dev/anno-save-analyzer/issues/23)) | 🚧 next |
+| v0.3.0 | Trade history viewer: Textual TUI + CLI + snapshot diff | ✅ released |
+| **v0.4.0** | **Per-island inventory (StorageTrends) + Tree filter + responsive layout** | ✅ **released** |
 | v0.4+ | Data-volume progress gauge ([#26](https://github.com/yuuka-dev/anno-save-analyzer/issues/26)), Anno 1800 parity ([#24](https://github.com/yuuka-dev/anno-save-analyzer/issues/24)) | planned |
 | v0.5 | OR-Tools MILP route optimizer | planned |
 | v0.6 | Typed Pydantic models across the DOM (Island / Building / Population) | planned |
