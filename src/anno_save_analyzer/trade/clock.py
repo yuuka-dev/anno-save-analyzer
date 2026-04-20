@@ -17,9 +17,10 @@ TICKS_PER_MINUTE = 600
 
 # ``StorageTrends > Points`` の 1 サンプル = 何 tick か．暫定値 = 1 分 (600)．
 # 公式ドキュメントは無く，Anno 内部の「在庫推移グラフ」の UI 観察とサンプル数
-# (capacity=120 固定) から 「120 samples = 2 hours」 と仮置きしている．書記長の
-# dogfood で違和感があれば調整する．clock モジュールに隔離して ad-hoc 値を
-# コード上からも見分けやすくする．
+# (capacity=120 固定) から「約 2 時間分の観測点」と仮置きしている．なお 1 分刻み
+# なら 120 サンプルの最古-最新の端点間スパンは 119 分．書記長の dogfood で
+# 違和感があれば調整する．clock モジュールに隔離して ad-hoc 値をコード上からも
+# 見分けやすくする．
 SAMPLE_INTERVAL_TICKS = TICKS_PER_MINUTE  # 1 sample = 1 minute 仮定
 
 
@@ -46,8 +47,9 @@ def inventory_sample_minutes(
 ) -> list[float]:
     """StorageTrends の N サンプルを「何分前」相対値に展開．
 
-    最新サンプル (``samples[-1]``) を 0，最古を ``-(n-1) * step / ticks_per_min``
-    として左に並べる．chart の x 軸は昇順なので最古が左端．
+    最新サンプル (``samples[-1]``) を 0，最古を
+    ``-(n_samples - 1) * step_ticks / TICKS_PER_MINUTE`` として左に並べる．
+    chart の x 軸は昇順なので最古が左端．
     """
     return [(i - (n_samples - 1)) * step_ticks / TICKS_PER_MINUTE for i in range(n_samples)]
 
