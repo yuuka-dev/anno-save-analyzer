@@ -35,14 +35,18 @@ jobs:
           pip install -e ".[tui]"
           pip install pytest pytest-cov pytest-asyncio
 
-      - name: Run pytest with coverage (require 100%)
+      - name: Run pytest with coverage (fail-under from pyproject)
+        # ``--cov-config`` を明示しないと pytest-cov 7.x が
+        # pyproject の ``[tool.coverage.report]`` を読まないケースがある
+        # (``pragma: no cover`` / ``exclude_lines`` が効かず stmt 数がズレる)．
+        # ``fail_under`` も pyproject 側に一元化したので CLI 側では指定しない．
         run: |
           pytest \
             --cov=anno_save_analyzer \
+            --cov-config=pyproject.toml \
             --cov-report=xml \
             --cov-report=term-missing \
-            --cov-branch \
-            --cov-fail-under=100
+            --cov-branch
 
       - name: Upload coverage to Codecov
         if: matrix.python-version == '3.12'

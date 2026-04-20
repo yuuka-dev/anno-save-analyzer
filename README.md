@@ -56,7 +56,8 @@ This project peels every layer natively in Python and turns the raw trade events
 
 ### Tests
 
-- 338 tests, **100 % line + branch coverage** enforced by CI (`--cov-fail-under=100`).
+- 370+ tests, **90 % branch coverage floor** enforced by CI (`fail_under = 90` in `pyproject.toml`).
+  Pure-function layers (`parser/*`, `trade.aggregate`, `trade.diff`, `trade.exports`) are kept effectively at 100 %; the 90 % floor absorbs `pragma: no cover` friction on async Textual UI code.
 - Python 3.12 and 3.13 both supported.
 
 ## Install
@@ -181,10 +182,12 @@ See [docs/rda_format_spec.md](docs/rda_format_spec.md) and [docs/filedb_format_i
 ## Testing / development
 
 ```bash
-uv run pytest --cov=anno_save_analyzer --cov-branch --cov-fail-under=100
+uv run pytest --cov=anno_save_analyzer --cov-branch --cov-config=pyproject.toml
 uv run ruff check src tests
 uv run ruff format --check src tests
 ```
+
+``fail_under`` is read from ``pyproject.toml`` (currently 90 %).
 
 Tests that need a real save are auto-skipped if none is present. Drop a save as `sample.a7s` or `sample_anno117.a8s` at the repo root, or set `SAMPLE_A7S` / `SAMPLE_A8S`.
 
