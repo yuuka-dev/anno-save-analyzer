@@ -10,6 +10,7 @@ from .aggregate import (
     RouteSummary,
     by_item,
     by_route,
+    events_for_item,
     partners_for_item,
 )
 from .diff import ItemDelta, RouteDelta, diff_by_item, diff_by_route
@@ -61,6 +62,7 @@ __all__ = [
     "by_route",
     "diff_by_item",
     "diff_by_route",
+    "events_for_item",
     "events_to_csv",
     "events_to_json",
     "extract",

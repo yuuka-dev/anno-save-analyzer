@@ -6,26 +6,35 @@ from dataclasses import dataclass
 
 from textual import events
 from textual.app import ComposeResult
+from textual.binding import Binding
 from textual.containers import Horizontal, Vertical, VerticalScroll
-from textual.screen import Screen
+from textual.screen import ModalScreen, Screen
 from textual.widgets import (
     DataTable,
     Footer,
     Header,
+    OptionList,
     Static,
     TabbedContent,
     TabPane,
     Tree,
 )
+from textual.widgets.option_list import Option
 from textual_plotext import PlotextPlot
 
-from anno_save_analyzer.trade import by_item, by_route, partners_for_item
+from anno_save_analyzer.trade import (
+    by_item,
+    by_route,
+    events_for_item,
+    partners_for_item,
+)
 from anno_save_analyzer.trade.aggregate import (
     ItemSummary,
     PartnerSummary,
     RouteSummary,
     filter_events,
 )
+from anno_save_analyzer.trade.clock import TICKS_PER_MINUTE, latest_tick
 from anno_save_analyzer.trade.models import TradeEvent
 
 from ..i18n import Localizer
@@ -45,8 +54,85 @@ class TradeFilter:
         return self.session is None and self.island is None
 
 
+# ``^P`` パレットに並ぶ選択肢．(locale key, value) のペア．
+# value=None は「全期間」．分単位の数値はそのまま ``max_age_minutes`` に流し込む．
+_RECENT_WINDOW_OPTIONS: tuple[tuple[str, float | None], ...] = (
+    ("partners.recent_window.all", None),
+    ("partners.recent_window.minutes", 60.0),
+    ("partners.recent_window.minutes", 120.0),
+    ("partners.recent_window.minutes", 360.0),
+    ("partners.recent_window.hours", 1440.0),
+)
+
+
+class RecentWindowPalette(ModalScreen[float | None]):
+    """``^P`` で開く直近取引の時間窓選択モーダル．
+
+    ``dismiss`` の返り値 = 選択された ``max_age_minutes`` (``None`` なら全期間)．
+    Esc では現在値 (``self._current``) で ``dismiss`` して閉じる．
+    そのため呼び出し側では実質的に no-op として扱える．
+    """
+
+    DEFAULT_CSS = """
+    RecentWindowPalette {
+        align: center middle;
+    }
+    RecentWindowPalette > Vertical {
+        width: 50;
+        height: auto;
+        border: solid $secondary;
+        background: $surface;
+        padding: 1 2;
+    }
+    RecentWindowPalette OptionList {
+        height: auto;
+    }
+    """
+
+    BINDINGS = [
+        Binding("escape", "dismiss_palette", show=False),
+    ]
+
+    def __init__(self, localizer: Localizer, current: float | None) -> None:
+        super().__init__()
+        self._localizer = localizer
+        self._current = current
+
+    def compose(self) -> ComposeResult:
+        t = self._localizer.t
+        options: list[Option] = []
+        for key, value in _RECENT_WINDOW_OPTIONS:
+            if value is None:
+                label = t(key)
+            elif key.endswith(".hours"):
+                label = t(key, value=value / 60.0)
+            else:
+                label = t(key, value=value)
+            if value == self._current or (value is None and self._current is None):
+                label = f"[b]• {label}[/b]"
+            else:
+                label = f"  {label}"
+            options.append(Option(label))
+        with Vertical():
+            yield Static(f"[b]{t('partners.recent_window_title')}[/b]")
+            yield Static(f"[dim]{t('partners.recent_window.hint')}[/dim]")
+            yield OptionList(*options, id="recent-window-options")
+
+    def on_mount(self) -> None:  # pragma: no cover - textual focus wiring
+        self.query_one(OptionList).focus()
+
+    def on_option_list_option_selected(self, event: OptionList.OptionSelected) -> None:
+        _, value = _RECENT_WINDOW_OPTIONS[event.option_index]
+        self.dismiss(value)
+
+    def action_dismiss_palette(self) -> None:  # pragma: no cover - manual esc
+        self.dismiss(self._current)
+
+
 class TradeStatisticsScreen(Screen):
     """3 カラム統計画面．右端は Partners pane (上) + 時系列 Chart (下) を縦分割．"""
+
+    BINDINGS = [Binding("ctrl+p", "recent_window", "History window")]
 
     DEFAULT_CSS = """
     TradeStatisticsScreen Horizontal {
@@ -97,10 +183,15 @@ class TradeStatisticsScreen(Screen):
         super().__init__(name="statistics")
         self._state = state
         self._localizer = localizer
+        self._apply_localized_bindings()
         self._filter = TradeFilter()
         self._filtered_events_cache: list[TradeEvent] | None = None
         self._filtered_events_cache_key: tuple[str | None, str | None] | None = None
         self._layout_class: str | None = None
+        # 直近取引セクションの時間窓 (分)．``None`` は「全期間」．``^P`` パレットで切替．
+        self._recent_window_minutes: float | None = None
+        # 最後に選択していた item_guid (^P で設定変更時の再描画に使う)．
+        self._last_selected_item_guid: int | None = None
 
     def _classify_width(self, width: int) -> str:
         """terminal 幅から layout class を選ぶ (wide / mid / narrow)．"""
@@ -133,6 +224,42 @@ class TradeStatisticsScreen(Screen):
         に委譲する．
         """
         self._localizer = localizer
+        self._apply_localized_bindings()
+
+    def _apply_localized_bindings(self) -> None:
+        self.BINDINGS = [
+            Binding("ctrl+p", "recent_window", self._localizer.t("binding.recent_window")),
+        ]
+        self.refresh_bindings()
+
+    def action_recent_window(self) -> None:
+        """``^P``: 直近取引の時間窓を選ぶパレットを開く．"""
+        self.app.push_screen(
+            RecentWindowPalette(self._localizer, self._recent_window_minutes),
+            self._on_recent_window_chosen,
+        )
+
+    def _on_recent_window_chosen(self, value: float | None) -> None:
+        """パレットから返ってきた値を適用し，必要なら Partners pane を再描画．
+
+        現行と同一なら no-op (notify も出さない)．Esc キャンセルは同値経由で
+        ここに来るので自然に弾かれる．
+        """
+        if value == self._recent_window_minutes:
+            return
+        self._recent_window_minutes = value
+        self._notify_recent_window(value)
+        if self._last_selected_item_guid is not None:
+            self._update_partners_pane(self._last_selected_item_guid)
+
+    def _notify_recent_window(self, value: float | None) -> None:
+        t = self._localizer.t
+        if value is None:
+            self.app.notify(t("partners.recent_window.notice.all"))
+        elif value >= 60.0 and value % 60 == 0:
+            self.app.notify(t("partners.recent_window.notice.hours", value=value / 60.0))
+        else:
+            self.app.notify(t("partners.recent_window.notice.minutes", value=value))
 
     def compose(self) -> ComposeResult:
         # Trend 列 / 右カラム hide 等の layout 判定は compose の早い段階で固める．
@@ -454,6 +581,7 @@ class TradeStatisticsScreen(Screen):
             self._update_route_detail(row_key)
 
     def _update_partners_pane(self, item_guid: int) -> None:
+        self._last_selected_item_guid = item_guid
         rows = partners_for_item(
             self._state.events,
             item_guid,
@@ -633,4 +761,55 @@ class TradeStatisticsScreen(Screen):
                 f"{t('statistics.col.net_gold')}: {r.net_gold:+,}  "
                 f"{t('statistics.col.events')}: {r.event_count:,}"
             )
+        lines.append("")
+        lines.extend(self._format_recent_trades(item_guid))
         return "\n".join(lines)
+
+    # row 毎に「分／時間」を切り替える閾値．書記長フィードバック (#46 後続) で
+    # 全体 spread 判定を捨て，個別 row の age だけで単位を決める方針に変更．
+    _RECENT_ROW_HOURS_THRESHOLD_MIN = 120.0
+
+    def _format_recent_trades(self, item_guid: int, *, limit: int = 50) -> list[str]:
+        """直近取引セクションの行を生成．tick 降順 / tick=None は末尾 "時刻不明"．
+
+        相対時間は「最新イベント tick」を基準とし，row 毎に 120 分以下なら「分」，
+        超えたら「時間」に切り替えて表示する．``_recent_window_minutes`` が設定
+        されていれば ``events_for_item`` にそのまま渡し古い event を除外する．
+        """
+        t = self._localizer.t
+        recent = events_for_item(
+            self._state.events,
+            item_guid,
+            session=self._filter.session,
+            island=self._filter.island,
+            limit=limit,
+            max_age_minutes=self._recent_window_minutes,
+        )
+        header = f"[b]{t('partners.recent_heading')}[/b]"
+        if not recent:
+            return [header, f"[dim]{t('partners.recent_empty')}[/dim]"]
+        ticks = [ev.timestamp_tick for ev in recent if ev.timestamp_tick is not None]
+        now_tick = latest_tick(ticks)
+        lines: list[str] = [header]
+        for ev in recent:
+            lines.append(self._format_recent_trade_row(ev, now_tick=now_tick))
+        return lines
+
+    def _format_recent_trade_row(self, ev: TradeEvent, *, now_tick: int | None) -> str:
+        t = self._localizer.t
+        if ev.timestamp_tick is None or now_tick is None:
+            time_label = t("partners.recent_row.unknown")
+        else:
+            minutes = (now_tick - ev.timestamp_tick) / TICKS_PER_MINUTE
+            if minutes > self._RECENT_ROW_HOURS_THRESHOLD_MIN:
+                time_label = t("partners.recent_row.hours_ago", value=minutes / 60.0)
+            else:
+                time_label = t("partners.recent_row.minutes_ago", value=minutes)
+        island = ev.island_name or "—"
+        qty_color = "green" if ev.amount > 0 else ("red" if ev.amount < 0 else "dim")
+        gold_color = "green" if ev.total_price > 0 else ("red" if ev.total_price < 0 else "dim")
+        return (
+            f"[dim]{time_label}[/dim]  {island}  {ev.display_partner}  "
+            f"[{qty_color}]{ev.amount:+,}[/{qty_color}]  "
+            f"[{gold_color}]{ev.total_price:+,}[/{gold_color}]"
+        )

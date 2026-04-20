@@ -5,6 +5,7 @@ from __future__ import annotations
 from anno_save_analyzer.trade.aggregate import (
     by_item,
     by_route,
+    events_for_item,
     filter_events,
     partners_for_item,
 )
@@ -248,6 +249,88 @@ class TestPartnersForItem:
         events = [_ev(100, 1, 10, route_id="r")]
         rows = partners_for_item(events, 100)
         assert rows[0].display_name("en") == "Good_100"
+
+
+class TestEventsForItem:
+    def test_returns_matching_guid_only(self) -> None:
+        events = [
+            _ev(100, 1, 10, route_id="7", timestamp=500),
+            _ev(200, 1, 10, route_id="8", timestamp=700),
+            _ev(100, -2, -20, route_id="7", timestamp=600),
+        ]
+        out = events_for_item(events, 100)
+        assert len(out) == 2
+        assert all(e.item.guid == 100 for e in out)
+
+    def test_sorted_descending_by_tick(self) -> None:
+        events = [
+            _ev(100, 1, 10, timestamp=100),
+            _ev(100, 1, 10, timestamp=300),
+            _ev(100, 1, 10, timestamp=200),
+        ]
+        out = events_for_item(events, 100)
+        ticks = [e.timestamp_tick for e in out]
+        assert ticks == [300, 200, 100]
+
+    def test_tick_none_goes_last(self) -> None:
+        events = [
+            _ev(100, 1, 10, timestamp=None),
+            _ev(100, 1, 10, timestamp=200),
+            _ev(100, 1, 10, timestamp=100),
+        ]
+        out = events_for_item(events, 100)
+        assert out[0].timestamp_tick == 200
+        assert out[1].timestamp_tick == 100
+        assert out[-1].timestamp_tick is None
+
+    def test_limit_trims_result(self) -> None:
+        events = [_ev(100, 1, 10, timestamp=i) for i in range(100)]
+        out = events_for_item(events, 100, limit=5)
+        assert len(out) == 5
+        # 最新 5 tick (95..99) が降順で並ぶ
+        assert [e.timestamp_tick for e in out] == [99, 98, 97, 96, 95]
+
+    def test_negative_limit_returns_all(self) -> None:
+        events = [_ev(100, 1, 10, timestamp=i) for i in range(3)]
+        out = events_for_item(events, 100, limit=-1)
+        assert len(out) == 3
+
+    def test_session_and_island_filter(self) -> None:
+        events = [
+            _ev(100, 1, 10, session_id="0", island_name="A", timestamp=1),
+            _ev(100, 1, 10, session_id="0", island_name="B", timestamp=2),
+            _ev(100, 1, 10, session_id="1", island_name="A", timestamp=3),
+        ]
+        out = events_for_item(events, 100, session="0", island="A")
+        assert len(out) == 1
+        assert out[0].timestamp_tick == 1
+
+    def test_missing_guid_returns_empty(self) -> None:
+        events = [_ev(100, 1, 10, timestamp=1)]
+        assert events_for_item(events, 999) == []
+
+    def test_max_age_minutes_cuts_old_events(self) -> None:
+        """``max_age_minutes`` 指定時，最新 tick から指定分を超えた event は落ちる．"""
+        # tick=1000 = 最新．1 分 = 600 tick．
+        events = [
+            _ev(100, 1, 10, timestamp=1000),  # 0 min ago
+            _ev(100, 1, 10, timestamp=400),  # 1 min ago (600 tick 差)
+            _ev(100, 1, 10, timestamp=100),  # 1.5 min ago (900 tick 差)
+            _ev(100, 1, 10, timestamp=None),  # 時刻不明 → 常に残す
+        ]
+        out = events_for_item(events, 100, max_age_minutes=1.0)
+        # 0 min, 1 min (ちょうど境界), tick=None が残る．1.5 min は落ちる
+        ticks = [e.timestamp_tick for e in out]
+        assert 1000 in ticks
+        assert 400 in ticks
+        assert 100 not in ticks
+        assert None in ticks
+
+    def test_max_age_minutes_with_no_timed_events_is_noop(self) -> None:
+        """時刻付き event が皆無なら ``max_age_minutes`` は効かず全件返る．"""
+        events = [_ev(100, 1, 10, timestamp=None), _ev(100, 1, 10, timestamp=None)]
+        out = events_for_item(events, 100, max_age_minutes=5.0)
+        assert len(out) == 2
 
 
 class TestFilterEvents:
