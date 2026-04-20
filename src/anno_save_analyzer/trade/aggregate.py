@@ -172,7 +172,7 @@ def by_route(
             "route_name": None,
         }
     )
-    route_name_last_seen_tick: dict[tuple[str | None, str], int | None] = {}
+    route_name_latest_tick_by_key: dict[tuple[str | None, str], int | None] = {}
     for ev in events:
         kind = ev.partner.kind if ev.partner else "unknown"
         key = (ev.route_id, kind)
@@ -191,13 +191,12 @@ def by_route(
         # route_name 用の最新 tick を別管理し，入力順に依存せず最新 rename を採用する．
         if ev.route_name:
             route_name_tick = ev.timestamp_tick
-            current_name_tick = route_name_last_seen_tick.get(key)
-            if route_name_tick is None:
-                if bucket["route_name"] is None:
-                    bucket["route_name"] = ev.route_name
+            current_name_tick = route_name_latest_tick_by_key.get(key)
+            if route_name_tick is None and bucket["route_name"] is None:
+                bucket["route_name"] = ev.route_name
             elif current_name_tick is None or route_name_tick > current_name_tick:
                 bucket["route_name"] = ev.route_name
-                route_name_last_seen_tick[key] = route_name_tick
+                route_name_latest_tick_by_key[key] = route_name_tick
 
     summaries = [
         RouteSummary(route_id=route_id, partner_kind=kind, **bucket)
