@@ -192,8 +192,9 @@ def by_route(
         if ev.route_name:
             route_name_tick = ev.timestamp_tick
             current_name_tick = route_name_latest_tick_by_key.get(key)
-            if route_name_tick is None and bucket["route_name"] is None:
-                bucket["route_name"] = ev.route_name
+            if route_name_tick is None:
+                if bucket["route_name"] is None:
+                    bucket["route_name"] = ev.route_name
             elif current_name_tick is None or route_name_tick > current_name_tick:
                 bucket["route_name"] = ev.route_name
                 route_name_latest_tick_by_key[key] = route_name_tick

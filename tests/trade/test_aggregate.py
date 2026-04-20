@@ -158,6 +158,14 @@ class TestByRoute:
         rows = by_route(events)
         assert rows[0].route_name == "新ルート"
 
+    def test_route_name_with_no_tick_does_not_override_ticked_name(self) -> None:
+        events = [
+            _ev(1, 1, 1, route_id="7", kind="route", timestamp=200, route_name="新ルート"),
+            _ev(1, 1, 1, route_id="7", kind="route", timestamp=None, route_name="旧ルート"),
+        ]
+        rows = by_route(events)
+        assert rows[0].route_name == "新ルート"
+
     def test_display_route_fallback_chain(self) -> None:
         """route_name > ``#{route_id}`` > ``—``."""
         events = [
