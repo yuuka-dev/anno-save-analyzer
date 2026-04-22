@@ -98,9 +98,14 @@ def load_outer_filedb(save_path: Path) -> bytes:
     - zlib 圧縮 (``0x78 9c / da / 01``) → 展開して bare bytes
     - それ以外 → bare FileDB バイナリとしてそのまま返す
     """
-    raw = save_path.read_bytes()
-    if raw.startswith(b"Resource File V2."):
+    rda_magic = b"Resource File V2."
+    with save_path.open("rb") as fh:
+        magic = fh.read(len(rda_magic))
+
+    if magic.startswith(rda_magic):
         return extract_inner_filedb(save_path)
+
+    raw = save_path.read_bytes()
     if raw[:2] in (b"\x78\x9c", b"\x78\xda", b"\x78\x01"):
         return zlib.decompress(raw)
     return raw
