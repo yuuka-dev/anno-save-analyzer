@@ -202,6 +202,8 @@ class TestDashboardToHtml:
         assert match is not None
         parsed = json.loads(match.group(1))
         assert parsed["meta"]["save"] == "before <!-- middle --> after"
+
+
 class TestTitleInference:
     """GameTitle.from_save_path (PR A の拡張子推定)．"""
 
