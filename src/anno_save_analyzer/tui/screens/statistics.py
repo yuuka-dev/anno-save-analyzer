@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 
+from rich.text import Text
 from textual import events
 from textual.app import ComposeResult
 from textual.binding import Binding
@@ -626,7 +627,13 @@ class TradeStatisticsScreen(Screen):
             session=self._filter.session,
             island=self._filter.island,
         )
-        self.query_one("#partners-pane", Static).update(self._format_partners_pane(rows, item_guid))
+        text = Text.from_markup(self._format_partners_pane(rows, item_guid))
+        # 直近取引行がペイン幅超えても視覚的に改行されんよう no_wrap + crop．
+        # 書記長要望: 取引履歴は 1 行 = 1 イベント．溢れた分は切り落とす (スクロール
+        # の cognitive load より省略の方がマシという判断)．
+        text.no_wrap = True
+        text.overflow = "crop"
+        self.query_one("#partners-pane", Static).update(text)
         self._update_chart_pane(item_guid)
 
     def _chart_title_with_window(self, title: str) -> str:
