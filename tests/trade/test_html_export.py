@@ -182,7 +182,26 @@ class TestDashboardToHtml:
         clean_out = dashboard_to_html(clean_data)
         assert out.count("</script>") == clean_out.count("</script>")
 
-
+    def test_embedded_json_parses_with_html_comment_tokens_in_save_name(self) -> None:
+        data = build_dashboard_data(
+            events=[],
+            item_summaries=[],
+            route_summaries=[],
+            inventory_trends=[],
+            items=_items_dict(),
+            title=GameTitle.ANNO_1800,
+            locale="en",
+            save_name="before <!-- middle --> after",
+        )
+        out = dashboard_to_html(data)
+        match = re.search(
+            r'<script type="application/json" id="dashboard-data">(.*?)</script>',
+            out,
+            re.DOTALL,
+        )
+        assert match is not None
+        parsed = json.loads(match.group(1))
+        assert parsed["meta"]["save"] == "before <!-- middle --> after"
 class TestTitleInference:
     """GameTitle.from_save_path (PR A の拡張子推定)．"""
 
