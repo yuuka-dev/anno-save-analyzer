@@ -37,6 +37,7 @@ from .analysis import (
 from .clock import TICKS_PER_MINUTE, latest_tick
 from .items import ItemDictionary
 from .models import GameTitle, Locale, TradeEvent
+from .population import CityAreaMatch, ResidenceAggregate
 from .storage import IslandStorageTrend
 
 _PLOTLY_CDN = "https://cdn.plot.ly/plotly-2.35.2.min.js"
@@ -157,6 +158,46 @@ def _balance_payload(
     return out
 
 
+def _population_payload(
+    populations: dict[str, ResidenceAggregate],
+    matches: Iterable[CityAreaMatch],
+    items: ItemDictionary,
+    locale: str,
+) -> list[dict[str, Any]]:
+    """city_name → ResidenceAggregate + match 信頼度を融合した flat row 配列．"""
+    match_by_city = {m.city_name: m for m in matches}
+    out: list[dict[str, Any]] = []
+    for city, agg in populations.items():
+        m = match_by_city.get(city)
+        out.append(
+            {
+                "city": city,
+                "residents": agg.resident_total,
+                "residences": agg.residence_count,
+                "residents_per_residence": round(agg.residents_per_residence, 2),
+                "avg_saturation": round(agg.avg_saturation_mean, 3),
+                "product_money": agg.product_money_total,
+                "newspaper_money": agg.newspaper_money_total,
+                "gold_per_resident": round(agg.gold_per_resident, 3),
+                "goods_tracked": len(agg.product_saturations),
+                "match_area_manager": m.area_manager if m else "",
+                "match_jaccard": m.jaccard if m else None,
+                "match_confidence": m.confidence if m else "n/a",
+                "saturations": [
+                    {
+                        "guid": ps.product_guid,
+                        "name": _localize_name(items, ps.product_guid, locale),
+                        "current": round(ps.current, 3),
+                        "average": round(ps.average, 3),
+                    }
+                    for ps in agg.product_saturations
+                ],
+            }
+        )
+    out.sort(key=lambda r: -r["residents"])
+    return out
+
+
 def build_dashboard_data(
     *,
     events: Iterable[TradeEvent],
@@ -167,8 +208,14 @@ def build_dashboard_data(
     title: GameTitle,
     locale: Locale = "en",
     save_name: str = "save",
+    populations: dict[str, ResidenceAggregate] | None = None,
+    city_area_matches: Iterable[CityAreaMatch] = (),
 ) -> dict[str, Any]:
-    """HTML 埋め込み用 JSON blob を組み立てる．純関数．"""
+    """HTML 埋め込み用 JSON blob を組み立てる．純関数．
+
+    ``populations`` / ``city_area_matches`` は v0.4.3 PR B で追加．未指定なら
+    Population セクションは空になる (後方互換)．
+    """
     trends_list = list(inventory_trends)
     runways = compute_runways(trends_list)
     shortages = shortage_list(trends_list, threshold_min=120.0)
@@ -188,6 +235,7 @@ def build_dashboard_data(
         "runways": display_runway_rows(runways, items, locale),
         "shortages": display_runway_rows(shortages, items, locale),
         "balances": _balance_payload(balances, items, locale),
+        "populations": _population_payload(populations or {}, city_area_matches, items, locale),
     }
 
 
@@ -265,6 +313,7 @@ _TEMPLATE = """<!DOCTYPE html>
   <a href="#shortages">Shortages</a>
   <a href="#balance">Supply / Demand</a>
   <a href="#inventory">Inventory</a>
+  <a href="#population">Population</a>
   <a href="#items">Items</a>
   <a href="#routes">Routes</a>
   <a href="#events">Events</a>
@@ -292,6 +341,19 @@ _TEMPLATE = """<!DOCTYPE html>
   <section id="inventory">
     <h2>Inventory (per island × good)</h2>
     <div id="inventory-table"></div>
+  </section>
+
+  <section id="population">
+    <h2>Population & Need Saturation (per city)</h2>
+    <div class="chart" id="chart-population" style="min-height: 360px;"></div>
+    <div id="population-table"></div>
+    <p class="hint">
+      City ↔ AreaManager is joined by Jaccard overlap of product sets; low confidence
+      matches (jaccard &lt; 0.15) may swap between cities of the same size.
+      Click a row to see per-good saturation below.
+    </p>
+    <h3 id="saturation-heading" style="color:#ffd670;margin-top:1em;"></h3>
+    <div id="saturation-table"></div>
   </section>
 
   <section id="items">
@@ -470,6 +532,86 @@ _TEMPLATE = """<!DOCTYPE html>
     {{key: 'mean', label: 'Mean'}},
     {{key: 'slope_per_min', label: 'Slope/min'}},
   ]);
+
+  // --- Population section ---
+  const pops = D.populations || [];
+  if (pops.length) {{
+    // Horizontal bar chart of residents per city
+    Plotly.newPlot('chart-population', [{{
+      type: 'bar', orientation: 'h',
+      x: pops.slice(0, 30).map(r => r.residents),
+      y: pops.slice(0, 30).map(r => r.city),
+      marker: {{color: pops.slice(0, 30).map(r => r.avg_saturation < 0.3 ? '#ff5555' : r.avg_saturation < 0.5 ? '#ffd670' : '#66dd66')}},
+      text: pops.slice(0, 30).map(r => r.residents.toLocaleString() + ' (sat ' + (r.avg_saturation * 100).toFixed(0) + '%)'),
+      textposition: 'auto'
+    }}], {{
+      paper_bgcolor: '#222', plot_bgcolor: '#222',
+      font: {{color: '#ddd'}},
+      xaxis: {{title: 'Residents'}},
+      yaxis: {{automargin: true}},
+      margin: {{t: 20, r: 20, b: 40, l: 20}},
+    }}, {{displaylogo: false, responsive: true}});
+
+    // Click-to-drill saturation table
+    const satHeading = document.getElementById('saturation-heading');
+    const satContainer = document.getElementById('saturation-table');
+    function showSaturations(pop) {{
+      satHeading.textContent = pop.city + ' — per-good saturation';
+      renderTable('saturation-table', pop.saturations, [
+        {{key: 'name', label: 'Good'}},
+        {{key: 'current', label: 'Current'}},
+        {{key: 'average', label: 'Average'}},
+      ]);
+    }}
+
+    // Population table with row-click to drill saturations
+    const popContainer = document.getElementById('population-table');
+    popContainer.textContent = '';
+    const popCols = [
+      {{key: 'city', label: 'City'}},
+      {{key: 'residents', label: 'Residents'}},
+      {{key: 'residences', label: 'Residences'}},
+      {{key: 'residents_per_residence', label: 'Avg /residence'}},
+      {{key: 'avg_saturation', label: 'Avg saturation'}},
+      {{key: 'product_money', label: 'Product $'}},
+      {{key: 'gold_per_resident', label: '$ per resident'}},
+      {{key: 'goods_tracked', label: '# Goods'}},
+      {{key: 'match_area_manager', label: 'Matched AM'}},
+      {{key: 'match_confidence', label: 'Confidence'}},
+    ];
+    const popTable = el('table');
+    const popThead = el('thead');
+    const popHeaderRow = el('tr');
+    popCols.forEach(c => popHeaderRow.appendChild(el('th', {{text: c.label}})));
+    popThead.appendChild(popHeaderRow);
+    popTable.appendChild(popThead);
+    const popTbody = el('tbody');
+    pops.forEach(r => {{
+      const tr = el('tr');
+      popCols.forEach(c => {{
+        const v = r[c.key];
+        let disp = v == null ? '' : (typeof v === 'number' ? v.toLocaleString() : String(v));
+        const td = el('td', {{text: disp}});
+        if (typeof v === 'number') td.className = 'num';
+        if (c.key === 'match_confidence' && v) {{
+          td.className = (td.className ? td.className + ' ' : '') + 'status-' + (v === 'high' ? 'ok' : v === 'medium' ? 'warning' : 'critical');
+        }}
+        tr.appendChild(td);
+      }});
+      tr.style.cursor = 'pointer';
+      tr.addEventListener('click', () => showSaturations(r));
+      popTbody.appendChild(tr);
+    }});
+    popTable.appendChild(popTbody);
+    popContainer.appendChild(popTable);
+
+    // initial selection: top city
+    if (pops[0]) showSaturations(pops[0]);
+  }} else {{
+    document.getElementById('population-table').appendChild(
+      el('p', {{class: 'hint', text: '(no population data; only supported for Anno 1800 at present)'}})
+    );
+  }}
 
   renderTable('items-table', D.items, [
     {{key: 'name', label: 'Good'}},

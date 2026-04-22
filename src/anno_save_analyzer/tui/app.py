@@ -255,6 +255,13 @@ class TradeApp(App[None]):
             dashboard_to_html,
         )
 
+        # Population は storage_by_island / city_area_matches に紐付いた住居
+        # サマリ．filter が掛かっとれば当該島のみ，全量 export なら全都市．
+        if filt is not None and filt.island:
+            population_entry = self._state.population_by_city.get(filt.island)
+            populations = {filt.island: population_entry} if population_entry else {}
+        else:
+            populations = dict(self._state.population_by_city)
         dashboard_data = build_dashboard_data(
             events=events,
             item_summaries=item_rows,
@@ -264,6 +271,8 @@ class TradeApp(App[None]):
             title=self._state.title,
             locale=locale,
             save_name=self._state.save_path.name,
+            populations=populations,
+            city_area_matches=self._state.city_area_matches,
         )
         targets = [
             (
