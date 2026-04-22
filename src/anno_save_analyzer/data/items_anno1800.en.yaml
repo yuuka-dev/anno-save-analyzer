@@ -9,7 +9,7 @@
 536:
   name: "Regional Mail"
 836:
-  name: "Bauxite "
+  name: "Bauxite"
 838:
   name: "Aluminium Profiles"
 840:
@@ -117,7 +117,7 @@
 24852:
   name: "Cyanide"
 24863:
-  name: "Industrial lubricant "
+  name: "Â§--24863--Â§"
 25073:
   name: "Waste Water"
 25131:
@@ -135,7 +135,7 @@
 112653:
   name: "Explorer Workforce"
 112654:
-  name: "Technicians Workforce"
+  name: "Technician Workforce"
 112693:
   name: "Post Office"
 112694:
@@ -213,7 +213,7 @@
 114410:
   name: "Seafood Stew"
 114414:
-  name: "Clay Pipe"
+  name: "Clay Pipes"
 114425:
   name: "Radio Tower"
 114427:
@@ -221,7 +221,7 @@
 114428:
   name: "Leather Boots"
 114429:
-  name: "Ammunition"
+  name: "Â§--114429--Â§"
 114430:
   name: "Tailored Suits"
 114431:
@@ -249,39 +249,39 @@
 120008:
   name: "Wood"
 120014:
-  name: "Maybe later"
+  name: "Grapes"
 120016:
-  name: "Randomize"
+  name: "Champagne"
 120020:
   name: "Market"
 120021:
-  name: "Police Equipment"
+  name: "Coal"
 120022:
-  name: "Fans"
+  name: "Electricity"
 120030:
-  name: "Hardiff"
+  name: "Spectacles"
 120031:
-  name: "Eastmouth"
+  name: "Coffee Beans"
 120032:
-  name: "Hillmont"
+  name: "Coffee"
 120033:
-  name: "Cartholme"
+  name: "Fried Plantains"
 120034:
   name: "Corn"
 120035:
-  name: "Brachton"
+  name: "Tortillas"
 120036:
-  name: "Dunyorke"
+  name: "Alpaca Wool"
 120037:
-  name: "Sweethall"
+  name: "Bombins"
 120041:
-  name: "Siphington"
+  name: "Plantains"
 120042:
-  name: "Nubottle"
+  name: "Fish Oil"
 120043:
-  name: "Klipfford"
+  name: "Ponchos"
 120044:
-  name: "Old Abbey"
+  name: "Felt"
 120050:
   name: "Chapel"
 124478:
@@ -307,13 +307,13 @@
 133183:
   name: "Jam"
 133185:
-  name: "Aquatic Streetlights"
+  name: "Lemonade"
 133532:
   name: "Souvenirs"
 133535:
   name: "Museum"
 133536:
-  name: "Sunflower Swing"
+  name: "World's Fair"
 133573:
   name: "Variety Theatre"
 133891:
@@ -321,11 +321,11 @@
 134257:
   name: "Palace"
 134616:
-  name: "Fireworks Podium"
+  name: "Camphor Wax"
 134623:
-  name: "Elevators"
+  name: "Elevator"
 134781:
-  name: "\"Weeee!\" - The Editor -"
+  name: "Docklands"
 135086:
   name: "Resin"
 135087:
@@ -347,7 +347,7 @@
 135229:
   name: "Biscuits"
 135230:
-  name: "Typewriters"
+  name: "Typewriter"
 135231:
   name: "Toys"
 135232:
@@ -361,7 +361,7 @@
 135876:
   name: "Crockery Supply"
 135877:
-  name: "Vaccum Cleaner Supply"
+  name: "Vacuum Cleaner Supply"
 135878:
   name: "Refrigerator Supply"
 135879:
@@ -423,17 +423,17 @@
 1010198:
   name: "Red Peppers"
 1010199:
-  name: "Connecting to Ubisoft Servers..."
+  name: "Pigs"
 1010200:
   name: "Fish"
 1010201:
-  name: "Savegame Count"
+  name: "Clay"
 1010202:
   name: "Reinforced Concrete"
 1010203:
   name: "Soap"
 1010204:
-  name: "Savegame Storage"
+  name: "Brass"
 1010205:
   name: "Bricks"
 1010206:
@@ -455,37 +455,37 @@
 1010215:
   name: "Goulash"
 1010216:
-  name: "Remove"
+  name: "Schnapps"
 1010217:
   name: "Canned Food"
 1010218:
-  name: "Edit Preset"
+  name: "Steel Beams"
 1010219:
-  name: "First Time Bonus"
+  name: "Steel"
 1010221:
   name: "Weapons"
 1010222:
-  name: "Name"
+  name: "Dynamite"
 1010223:
-  name: "Playtime"
+  name: "Advanced Weapons"
 1010224:
-  name: "Size"
+  name: "Steam Motors"
 1010225:
-  name: "Saved on"
+  name: "Steam Carriages"
 1010226:
-  name: "Move Ship"
+  name: "Coal"
 1010227:
   name: "Iron"
 1010228:
   name: "Quartz Sand"
 1010229:
-  name: "Camera Speed and Tilt"
+  name: "Zinc"
 1010230:
   name: "Copper"
 1010231:
   name: "Cement"
 1010232:
-  name: "Beauty Building"
+  name: "Saltpetre"
 1010233:
   name: "Gold Ore"
 1010234:
@@ -497,47 +497,47 @@
 1010237:
   name: "Work Clothes"
 1010238:
-  name: "Start Game"
+  name: "Sausages"
 1010239:
-  name: "Scooter"
+  name: "Sugar"
 1010240:
-  name: "Film Reel"
+  name: "Cotton Fabric"
 1010241:
   name: "Glass"
 1010242:
   name: "Wood Veneers"
 1010243:
-  name: "Calamari"
+  name: "Filaments"
 1010245:
   name: "Penny Farthings"
 1010246:
-  name: "Jalea"
+  name: "Pocket Watches"
 1010247:
-  name: "Ice Cream"
+  name: "Fur Coats"
 1010248:
-  name: "Herbs"
+  name: "Gramophones"
 1010249:
-  name: "Nandu Leather"
+  name: "Gold"
 1010250:
-  name: "Milk"
+  name: "Jewellery"
 1010251:
-  name: "Orchid"
+  name: "Sugar Cane"
 1010252:
   name: "Tobacco"
 1010253:
   name: "Cotton"
 1010254:
-  name: "Ice Cube"
+  name: "Cocoa"
 1010255:
-  name: "Perfumes"
+  name: "Caoutchouc"
 1010256:
-  name: "Costumes"
+  name: "Pearls"
 1010257:
   name: "Rum"
 1010258:
-  name: "Motor"
+  name: "Chocolate"
 1010259:
-  name: "Fire Extinguishers"
+  name: "Cigars"
 1010348:
   name: "Boxing Arena"
 1010349:
@@ -557,8 +557,8 @@
 1010356:
   name: "Bank"
 1010366:
-  name: "Dragsborg"
+  name: "Jornalero Workforce"
 1010367:
-  name: "Arraceno"
+  name: "Obrero Workforce"
 1010566:
   name: "Oil"
