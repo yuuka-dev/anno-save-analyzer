@@ -28,6 +28,28 @@ class GameTitle(StrEnum):
     ANNO_1800 = "anno1800"
     ANNO_117 = "anno117"
 
+    @classmethod
+    def from_save_path(cls, path: object) -> GameTitle:
+        """セーブファイルの拡張子からタイトルを判定．
+
+        - ``.a7s`` → Anno 1800 (book 1 的な旧世代 container)
+        - ``.a8s`` → Anno 117: Pax Romana (新世代 container)
+
+        判別不能な拡張子なら ``ValueError``．``path`` は ``str`` でも ``Path`` でも OK．
+        """
+        from pathlib import Path
+
+        suffix = Path(str(path)).suffix.lower()
+        if suffix == ".a7s":
+            return cls.ANNO_1800
+        if suffix == ".a8s":
+            return cls.ANNO_117
+        raise ValueError(
+            f"Cannot infer game title from extension {suffix!r}; "
+            f"expected '.a7s' (Anno 1800) or '.a8s' (Anno 117). "
+            f"Use --title to override."
+        )
+
 
 class Item(BaseModel):
     """物資（GoodGuid に対応）．names は locale → name の dict．"""

@@ -248,6 +248,23 @@ class TradeApp(App[None]):
             for name in island_names:
                 inventory_trends.extend(self._state.storage_by_island.get(name, ()))
 
+        # HTML ダッシュボードは Plotly + 分析 (枯渇 / 需要供給 / 不足) 込みで
+        # 1 ファイルにまとめる．CSV は Excel 分析用に残す．
+        from anno_save_analyzer.trade.html_export import (
+            build_dashboard_data,
+            dashboard_to_html,
+        )
+
+        dashboard_data = build_dashboard_data(
+            events=events,
+            item_summaries=item_rows,
+            route_summaries=route_rows,
+            inventory_trends=inventory_trends,
+            items=self._state.items,
+            title=self._state.title,
+            locale=locale,
+            save_name=self._state.save_path.name,
+        )
         targets = [
             (
                 f"{basename}_items{suffix}_{stamp}.csv",
@@ -268,6 +285,10 @@ class TradeApp(App[None]):
             (
                 f"{basename}_inventory{suffix}_{stamp}.csv",
                 inventory_to_csv(inventory_trends, items=self._state.items, locale=locale),
+            ),
+            (
+                f"{basename}_dashboard{suffix}_{stamp}.html",
+                dashboard_to_html(dashboard_data, title_text=f"anno-save-analyzer: {basename}"),
             ),
         ]
         written: list[Path] = []

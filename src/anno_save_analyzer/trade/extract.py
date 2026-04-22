@@ -89,14 +89,18 @@ def extract_from_outer(
 
 
 def load_outer_filedb(save_path: Path) -> bytes:
-    """``.a7s`` / ``.a8s`` を解凍して内部 FileDB バイナリを返す．
+    """セーブファイルを解凍して内部 FileDB バイナリを返す．
 
-    bare FileDB バイナリ (テスト用 ``.bin``) も自動判定．zlib 圧縮済なら展開．
+    extension ではなく **magic prefix で形式判定**する (実 save は必ず
+    ``.a7s`` / ``.a8s``．テスト fixture や手動展開済みファイルにも対応するため)：
+
+    - RDA container (``Resource File V2.`` の ASCII prefix) → RDA 層を剥ぐ
+    - zlib 圧縮 (``0x78 9c / da / 01``) → 展開して bare bytes
+    - それ以外 → bare FileDB バイナリとしてそのまま返す
     """
-    suffix = save_path.suffix.lower()
-    if suffix in {".a7s", ".a8s"}:
-        return extract_inner_filedb(save_path)
     raw = save_path.read_bytes()
+    if raw.startswith(b"Resource File V2."):
+        return extract_inner_filedb(save_path)
     if raw[:2] in (b"\x78\x9c", b"\x78\xda", b"\x78\x01"):
         return zlib.decompress(raw)
     return raw

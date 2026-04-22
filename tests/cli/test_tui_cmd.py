@@ -16,7 +16,7 @@ runner = CliRunner()
 
 def _make_save(tmp_path: Path) -> Path:
     inner = make_inner_filedb({"route": [(7, 2088, 5, 0)]})
-    save = tmp_path / "fake.bin"
+    save = tmp_path / "fake.a8s"
     save.write_bytes(wrap_as_outer([inner]))
     return save
 
