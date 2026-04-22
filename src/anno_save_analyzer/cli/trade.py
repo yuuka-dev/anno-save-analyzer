@@ -10,6 +10,7 @@ from typing import Annotated
 
 import typer
 
+from anno_save_analyzer.cli._title import resolve_title
 from anno_save_analyzer.trade import (
     GameTitle,
     ItemDictionary,
@@ -73,8 +74,11 @@ def _emit_json(payload: object) -> None:
 def list_trades(
     save: Annotated[Path, typer.Argument(help="Path to the save file.")],
     title: Annotated[
-        GameTitleArg, typer.Option("--title", help="Game title.")
-    ] = GameTitleArg.ANNO_117,
+        GameTitleArg | None,
+        typer.Option(
+            "--title", help="Game title. Defaults to extension: .a7s=anno1800 / .a8s=anno117."
+        ),
+    ] = None,
     locale: Annotated[str, typer.Option("--locale", help="Display locale.")] = "en",
     session: Annotated[
         str | None, typer.Option("--session", help="Filter by session id (e.g. '0' / '1').")
@@ -88,7 +92,7 @@ def list_trades(
 ) -> None:
     """List every TradeEvent extracted from SAVE."""
     _ensure_format_supported(fmt)
-    title_v = title.to_title()
+    title_v = resolve_title(save, title.to_title() if title is not None else None)
     events = list(filter_events(_events(save, title_v, locale), session=session, island=island))
     # minutes_ago は max(timestamp_tick) 基準．newest event = 0.0．
     # clock.py の docstring 通り TICKS_PER_MINUTE で割る．
@@ -134,8 +138,11 @@ def summary(
     save: Annotated[Path, typer.Argument(help="Path to the save file.")],
     by: Annotated[SummaryAxis, typer.Option("--by", help="Aggregation axis.")] = SummaryAxis.ITEM,
     title: Annotated[
-        GameTitleArg, typer.Option("--title", help="Game title.")
-    ] = GameTitleArg.ANNO_117,
+        GameTitleArg | None,
+        typer.Option(
+            "--title", help="Game title. Defaults to extension: .a7s=anno1800 / .a8s=anno117."
+        ),
+    ] = None,
     locale: Annotated[str, typer.Option("--locale", help="Display locale.")] = "en",
     session: Annotated[
         str | None, typer.Option("--session", help="Filter by session id (e.g. '0' / '1').")
@@ -149,7 +156,7 @@ def summary(
 ) -> None:
     """Summarise trades by item or by route."""
     _ensure_format_supported(fmt)
-    title_v = title.to_title()
+    title_v = resolve_title(save, title.to_title() if title is not None else None)
     events = _events(save, title_v, locale)
     if by is SummaryAxis.ITEM:
         item_rows = by_item(events, session=session, island=island)
@@ -193,8 +200,11 @@ def diff(
     after: Annotated[Path, typer.Argument(help="Later save file.")],
     by: Annotated[SummaryAxis, typer.Option("--by", help="Aggregation axis.")] = SummaryAxis.ITEM,
     title: Annotated[
-        GameTitleArg, typer.Option("--title", help="Game title.")
-    ] = GameTitleArg.ANNO_117,
+        GameTitleArg | None,
+        typer.Option(
+            "--title", help="Game title. Defaults to extension: .a7s=anno1800 / .a8s=anno117."
+        ),
+    ] = None,
     locale: Annotated[str, typer.Option("--locale", help="Display locale.")] = "en",
     session: Annotated[
         str | None, typer.Option("--session", help="Filter by session id (e.g. '0' / '1').")
@@ -215,7 +225,8 @@ def diff(
 ) -> None:
     """Diff trade activity between BEFORE and AFTER save files."""
     _ensure_format_supported(fmt)
-    title_v = title.to_title()
+    # diff には save がないので before で推定 (前後とも同じゲームという前提)．
+    title_v = resolve_title(before, title.to_title() if title is not None else None)
     before_events = list(_events(before, title_v, locale))
     after_events = list(_events(after, title_v, locale))
     if by is SummaryAxis.ITEM:

@@ -21,7 +21,7 @@ def _make_save(tmp_path: Path) -> Path:
         }
     )
     outer = wrap_as_outer([inner])
-    save = tmp_path / "fake.bin"
+    save = tmp_path / "fake.a8s"
     save.write_bytes(outer)
     return save
 
@@ -105,9 +105,9 @@ class TestTradeDiffCommand:
                 "passive": [],  # 2142 removed
             }
         )
-        before = tmp_path / "before.bin"
+        before = tmp_path / "before.a8s"
         before.write_bytes(wrap_as_outer([before_inner]))
-        after = tmp_path / "after.bin"
+        after = tmp_path / "after.a8s"
         after.write_bytes(wrap_as_outer([after_inner]))
         return before, after
 
@@ -161,7 +161,7 @@ class TestTradeDiffCommand:
     def test_diff_by_route_show_unchanged(self, tmp_path: Path) -> None:
         """same before/after で route 差分，show_unchanged で unchanged 行も出す．"""
         same_inner = make_inner_filedb({"route": [(7, 2088, 5, 0)]})
-        save = tmp_path / "same.bin"
+        save = tmp_path / "same.a8s"
         save.write_bytes(wrap_as_outer([same_inner]))
         result = runner.invoke(
             app,

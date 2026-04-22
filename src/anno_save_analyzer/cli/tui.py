@@ -8,6 +8,7 @@ from typing import Annotated
 
 import typer
 
+from anno_save_analyzer.cli._title import resolve_title
 from anno_save_analyzer.trade.models import GameTitle
 
 
@@ -26,8 +27,11 @@ _THEME_SENTINEL = "__from_config__"
 def _launch(
     save: Annotated[Path, typer.Argument(help="Save file (.a7s / .a8s).")],
     title: Annotated[
-        GameTitleArg, typer.Option("--title", help="Game title.")
-    ] = GameTitleArg.ANNO_117,
+        GameTitleArg | None,
+        typer.Option(
+            "--title", help="Game title. Defaults to extension: .a7s=anno1800 / .a8s=anno117."
+        ),
+    ] = None,
     locale: Annotated[
         str,
         typer.Option(
@@ -106,7 +110,8 @@ def _launch(
             bar.label = f"  [{step}/{stage_total}] {stage}"
             bar.update(1)
 
-        state = load_state(save, title=title.to_title(), locale=locale, progress=_progress)
+        resolved_title = resolve_title(save, title.to_title() if title is not None else None)
+        state = load_state(save, title=resolved_title, locale=locale, progress=_progress)
     typer.secho("  ✓ ready", err=True, fg=typer.colors.GREEN)
 
     app = TradeApp(state, theme=theme_value, persist_settings=True)
