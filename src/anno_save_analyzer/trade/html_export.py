@@ -198,10 +198,11 @@ def dashboard_to_html(
 ) -> str:
     """JSON データから単一 HTML (Plotly + 表 + 埋め込み JSON) を生成．"""
     data_json = json.dumps(data, ensure_ascii=False, separators=(",", ":"))
-    # XSS 対策: embedded JSON 中の ``</script>`` が外側 script タグを誤って
-    # 閉じてしまうのを防ぐ．JSON parser は ``\/`` を ``/`` として読めるので
-    # 見た目不変のまま無害化できる．``<!--`` / ``-->`` も同じ脅威なので escape．
-    data_json = data_json.replace("</", "<\\/").replace("<!--", "<\\!--").replace("-->", "--\\>")
+    # XSS 対策: embedded JSON 中の ``</script>`` や ``<!--`` / ``-->`` が
+    # HTML parser に解釈されるのを防ぐ．後処理では JSON として常に合法な
+    # escape のみを使う必要があるため、``<`` / ``>`` を Unicode escape に
+    # 置換する。JSON parser は ``\\u003c`` / ``\\u003e`` を元の文字として読む。
+    data_json = data_json.replace("<", "\\u003c").replace(">", "\\u003e")
     meta = data["meta"]
     title_html = html.escape(title_text)
     save_html = html.escape(meta.get("save", "save"))
