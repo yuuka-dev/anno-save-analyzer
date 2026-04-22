@@ -24,10 +24,14 @@ def _trend_entry(
     samples: list[int],
     last_point_tick: int | None = 144380000,
     estimation: int | None = 0,
-    capacity: int = 120,
-    size: int = 120,
+    capacity: int | None = 120,
+    size: int | None = 120,
 ) -> list[Event]:
-    """StorageTrends 直下の (anon attrib + <1>) ペアを組む．"""
+    """StorageTrends 直下の (anon attrib + <1>) ペアを組む．
+
+    ``capacity`` / ``size`` が ``None`` の場合は named attrib を省く．
+    Anno 1800 の 2 サンプル形式を再現する用途．
+    """
     out: list[Event] = [
         ("A", 0x8FFF, struct.pack("<i", product_guid)),  # anonymous ProductGUID
         ("T", 1),  # trend entry <1>
@@ -37,8 +41,10 @@ def _trend_entry(
     if estimation is not None:
         out.append(("A", 0x8002, struct.pack("<i", estimation)))
     out.append(("T", 2))  # Points
-    out.append(("A", 0x8003, struct.pack("<q", capacity)))
-    out.append(("A", 0x8004, struct.pack("<q", size)))
+    if capacity is not None:
+        out.append(("A", 0x8003, struct.pack("<q", capacity)))
+    if size is not None:
+        out.append(("A", 0x8004, struct.pack("<q", size)))
     for v in samples:
         out.append(("A", 0x8FFF, struct.pack("<i", v)))  # anonymous sample
     out.append(("X",))  # close Points
@@ -139,6 +145,82 @@ class TestNpcIslandFilter:
         trends = list_storage_trends(inner)
         assert len(trends) == 1
         assert trends[0].island_name == "大阪民国"
+
+
+class TestAnno1800Schema:
+    """Anno 1800 は Points に capacity/size named attrib を持たず anonymous
+    i32 × 2 だけを残す schema．``len(samples)`` でフォールバックして yield
+    される必要がある (117 の full time-series と統一 API)．
+    """
+
+    def test_yields_trend_when_capacity_size_missing(self) -> None:
+        """capacity/size 欠落でも samples があれば trend を yield．"""
+        inner = _build_storage_fixture(
+            islands=[
+                # Anno 1800 の実形式: 2 サンプルだけ + capacity/size 省略
+                (
+                    "レニングラード",
+                    [
+                        (1010566, [186, 185]),  # delta: 1 減った
+                        (535, [23, 2]),  # Local Mail 大量消費直後
+                    ],
+                ),
+            ],
+        )
+        # _trend_entry デフォルトを Anno 1800 形式にオーバーライド
+        tags = {2: "Points", 3: "StorageTrends", 4: "AreaEconomy", 5: "AreaInfo"}
+        attribs = {0x8001: "LastPointTime", 0x8002: "Estimation", 0x8005: "CityName"}
+        events: list[Event] = [
+            ("T", 5),
+            ("T", 1),  # AreaInfo > <1>
+            ("A", 0x8005, "レニングラード".encode("utf-16-le")),
+            ("T", 4),
+            ("T", 3),
+            *_trend_entry(product_guid=1010566, samples=[186, 185], capacity=None, size=None),
+            *_trend_entry(product_guid=535, samples=[23, 2], capacity=None, size=None),
+            ("X",),
+            ("X",),
+            ("X",),
+            ("X",),
+        ]
+        inner = minimal_v3(tags=tags, attribs=attribs, events=events)
+        trends = list_storage_trends(inner)
+        assert len(trends) == 2
+        t0 = next(t for t in trends if t.product_guid == 1010566)
+        assert t0.points.samples == (186, 185)
+        # capacity/size は len(samples) にフォールバック
+        assert t0.points.capacity == 2
+        assert t0.points.size == 2
+        # latest は最新サンプル = samples[-1] = 185
+        assert t0.latest == 185
+        assert t0.peak == 186
+        # 2 点 slope: (n*sum_xy - sum_x*sum_y) / (n*sum_xx - sum_x^2)
+        # = (2*185 - 1*(186+185)) / (2*1 - 1) = (370-371)/1 = -1
+        assert t0.points.slope == -1.0
+
+    def test_empty_samples_still_rejected(self) -> None:
+        """samples 0 個 (なにも attrib 入っとらん Points) は yield されない．
+        fallback 条件 ``current_samples`` truthy check で弾かれる．"""
+        tags = {2: "Points", 3: "StorageTrends", 4: "AreaEconomy", 5: "AreaInfo"}
+        attribs = {0x8005: "CityName"}
+        events: list[Event] = [
+            ("T", 5),
+            ("T", 1),
+            ("A", 0x8005, "X".encode("utf-16-le")),
+            ("T", 4),
+            ("T", 3),
+            ("A", 0x8FFF, struct.pack("<i", 42)),  # ProductGUID anon
+            ("T", 1),  # trend entry <1>
+            ("T", 2),  # Points (empty)
+            ("X",),
+            ("X",),
+            ("X",),  # StorageTrends
+            ("X",),  # AreaEconomy
+            ("X",),  # AreaInfo > <1>
+            ("X",),  # AreaInfo
+        ]
+        inner = minimal_v3(tags=tags, attribs=attribs, events=events)
+        assert list_storage_trends(inner) == ()
 
 
 class TestEdgeCases:

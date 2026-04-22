@@ -1,8 +1,7 @@
 """島ごとの在庫時系列 (StorageTrends) 抽出．
 
-Anno 117 の内側 Session DOM には ``AreaInfo > <1> > AreaEconomy >
-StorageTrends`` 階層で **物資ごとの 120 サンプル固定 ring buffer** が保存されて
-いる．本モジュールは
+内側 Session DOM の ``AreaInfo > <1> > AreaEconomy > StorageTrends`` 階層から
+物資ごとの在庫履歴を取り出す．本モジュールは
 
 1. 生 FileDB bytes から ``IslandStorageTrend`` Pydantic model を抽出
 2. ``latest`` / ``peak`` / ``mean`` / ``slope`` 等の derived プロパティを提供
@@ -12,6 +11,7 @@ StorageTrends`` 階層で **物資ごとの 120 サンプル固定 ring buffer**
 
 ## DOM 構造 (実測)
 
+### Anno 117 (sample_anno117.a8s)
 ```
 AreaInfo > <1> (player island, CityName を持つ)
     └─ AreaEconomy
@@ -26,8 +26,27 @@ AreaInfo > <1> (player island, CityName を持つ)
                         └─ A <32768> × 120 (i32 各サンプル値．ring buffer)
 ```
 
-書記長の sample_anno117.a8s で 13 player islands × 110 unique GUIDs = 1,430
-trend rows を検証済．``Points`` は shift register で ``[-1]`` = 最新サンプル．
+1800 と違って `capacity` / `size` named attrib + 120 samples の full ring
+buffer．13 player islands × 110 unique GUIDs = 1,430 trend rows を検証済．
+``Points`` は shift register で ``[-1]`` = 最新サンプル．
+
+### Anno 1800 (sample_anno1800.a7s)
+```
+AreaInfo > <1> (player island, CityName を持つ)
+    └─ AreaEconomy
+        └─ StorageTrends
+            └─ <ProductGUID> (anonymous attrib, i32)
+                └─ <1>
+                    ├─ A LastPointTime: i64
+                    ├─ A Estimation: i32
+                    └─ T Points
+                        └─ A <32768> × 2 (i32．named attrib 無し．実質 [現在値, 前回値])
+```
+
+**Anno 1800 は 2 サンプルしか保存してない**．120 サンプル時系列じゃなくてデルタ
+ペア．latest / peak / slope は成立するが mean はほぼ意味なし，sparkline は
+2 文字だけ．完全な chart は描けん．``capacity`` / ``size`` named attrib が
+無いので loader 側で ``len(samples)`` にフォールバックして yield する．
 """
 
 from __future__ import annotations
@@ -246,21 +265,22 @@ def _iter_trends(inner: bytes, version, section: TagSection) -> Iterator[IslandS
         if in_points_depth is not None and closing_depth == in_points_depth:
             in_points_depth = None
         if in_trend_entry_depth is not None and closing_depth == in_trend_entry_depth:
-            # trend entry close: プレイヤー島 (city_name) かつ GUID 既知なら yield
-            if (
-                city_name
-                and current_guid is not None
-                and current_points_capacity is not None
-                and current_points_size is not None
-            ):
+            # trend entry close: プレイヤー島 (city_name) かつ GUID 既知かつ
+            # サンプルが 1 つ以上あれば yield．Anno 1800 は capacity / size
+            # named attrib を持たず 2 サンプルだけ残す形式なので，その場合は
+            # ``len(samples)`` で補完する (117 の 120 サンプル固定も同じ式で一致)．
+            if city_name and current_guid is not None and current_samples:
+                n = len(current_samples)
                 yield IslandStorageTrend(
                     island_name=city_name,
                     product_guid=current_guid,
                     last_point_tick=current_last_point,
                     estimation=current_estimation,
                     points=PointSeries(
-                        capacity=current_points_capacity,
-                        size=current_points_size,
+                        capacity=current_points_capacity
+                        if current_points_capacity is not None
+                        else n,
+                        size=current_points_size if current_points_size is not None else n,
                         samples=tuple(current_samples),
                     ),
                 )
