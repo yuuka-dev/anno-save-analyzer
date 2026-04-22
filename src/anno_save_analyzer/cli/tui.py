@@ -8,6 +8,7 @@ from typing import Annotated
 
 import typer
 
+from anno_save_analyzer.cli._title import resolve_title
 from anno_save_analyzer.trade.models import GameTitle
 
 
@@ -109,7 +110,7 @@ def _launch(
             bar.label = f"  [{step}/{stage_total}] {stage}"
             bar.update(1)
 
-        resolved_title = title.to_title() if title is not None else GameTitle.from_save_path(save)
+        resolved_title = resolve_title(save, title.to_title() if title is not None else None)
         state = load_state(save, title=resolved_title, locale=locale, progress=_progress)
     typer.secho("  ✓ ready", err=True, fg=typer.colors.GREEN)
 

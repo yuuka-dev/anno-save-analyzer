@@ -10,6 +10,7 @@ from typing import Annotated
 
 import typer
 
+from anno_save_analyzer.cli._title import resolve_title
 from anno_save_analyzer.trade import (
     GameTitle,
     ItemDictionary,
@@ -31,16 +32,6 @@ class GameTitleArg(StrEnum):
 
     def to_title(self) -> GameTitle:
         return GameTitle(self.value)
-
-
-def _resolve_title(save: Path, title: GameTitleArg | None) -> GameTitle:
-    """``--title`` 明示指定があればそれを使い，無ければ拡張子から推定．
-
-    ``.a7s`` → Anno 1800 / ``.a8s`` → Anno 117．判別不能なら ValueError．
-    """
-    if title is not None:
-        return title.to_title()
-    return GameTitle.from_save_path(save)
 
 
 class SummaryAxis(StrEnum):
@@ -101,7 +92,7 @@ def list_trades(
 ) -> None:
     """List every TradeEvent extracted from SAVE."""
     _ensure_format_supported(fmt)
-    title_v = _resolve_title(save, title)
+    title_v = resolve_title(save, title.to_title() if title is not None else None)
     events = list(filter_events(_events(save, title_v, locale), session=session, island=island))
     # minutes_ago は max(timestamp_tick) 基準．newest event = 0.0．
     # clock.py の docstring 通り TICKS_PER_MINUTE で割る．
@@ -165,7 +156,7 @@ def summary(
 ) -> None:
     """Summarise trades by item or by route."""
     _ensure_format_supported(fmt)
-    title_v = _resolve_title(save, title)
+    title_v = resolve_title(save, title.to_title() if title is not None else None)
     events = _events(save, title_v, locale)
     if by is SummaryAxis.ITEM:
         item_rows = by_item(events, session=session, island=island)
@@ -235,7 +226,7 @@ def diff(
     """Diff trade activity between BEFORE and AFTER save files."""
     _ensure_format_supported(fmt)
     # diff には save がないので before で推定 (前後とも同じゲームという前提)．
-    title_v = _resolve_title(before, title)
+    title_v = resolve_title(before, title.to_title() if title is not None else None)
     before_events = list(_events(before, title_v, locale))
     after_events = list(_events(after, title_v, locale))
     if by is SummaryAxis.ITEM:
