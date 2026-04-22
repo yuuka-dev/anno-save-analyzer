@@ -120,7 +120,7 @@ def _build_text_map(xml_bytes: bytes) -> dict[int, str]:
 
 
 def extract_products(config_data: bytes) -> list[dict[str, Any]]:
-    """assets.xml から Product asset のメタ情報を抽出．
+    """assets.xml から Product asset の GUID + internal name を抽出．
 
     Anno 1800 の Product は次の形:
 
@@ -135,8 +135,10 @@ def extract_products(config_data: bytes) -> list[dict[str, Any]]:
           </Values>
         </Asset>
 
-    117 と違うのは ``Text/OasisId`` でなく ``Text/LineID`` (大文字 ID)．
-    LocaText/<lang>/Text は埋め込み翻訳の fallback．
+    **重要**: Anno 1800 では Product の localized name は **Product GUID 自身**を
+    key にして texts_<lang>.xml から引く (117 の OasisId / 1800 の LineID は
+    誤参照がある)．実測で 280 Products 全件が GUID-direct で en/ja ともヒットする
+    ため，LineID 系は完全に無視してよい．
     """
     parser = etree.XMLParser(huge_tree=True, recover=True)
     root = etree.fromstring(config_data, parser=parser)
@@ -147,91 +149,30 @@ def extract_products(config_data: bytes) -> list[dict[str, Any]]:
             continue
         guid_el = asset.find("Values/Standard/GUID")
         name_el = asset.find("Values/Standard/Name")
-        line_el = asset.find("Values/Text/LineID")
         if guid_el is None or name_el is None or not guid_el.text or not name_el.text:
             continue
         try:
             guid = int(guid_el.text)
-            line_id = int(line_el.text) if line_el is not None and line_el.text else None
         except ValueError:
             continue
-        # 埋め込み英語 fallback (LocaText/English/Text) も拾っとく
-        embedded_en = None
-        en_text_el = asset.find("Values/Text/LocaText/English/Text")
-        if en_text_el is not None and en_text_el.text:
-            embedded_en = en_text_el.text
-        products.append(
-            {
-                "guid": guid,
-                "internal_name": name_el.text,
-                "oasis_id": line_id,
-                "embedded_en": embedded_en,
-            }
-        )
+        products.append({"guid": guid, "internal_name": name_el.text})
     products.sort(key=lambda p: p["guid"])
     return products
-
-
-_PRODUCT_NAME_MAX_LEN = 40
-"""LineID lookup 結果の採否に使う長さ閾値．Anno 1800 の Product 名は長くても
-"Reinforced Concrete" (19 chars) 程度．40 を超えたら quest text や description
-への誤参照と判定してフォールバックへ回す．"""
-
-_SUSPECT_SUBSTRINGS = ("<b>", "<br>", "<i>", ". ")
-"""LineID lookup 結果が description / rich text であることを示す marker．"""
-
-_SENTENCE_END_CHARS = ("!", "?", "。", "！", "？")
-"""末尾がこれらなら文章 (event 通知 / quest description) と判断してフォールバック．
-英語 Product 名は基本的に punctuation で終わらない (``"Cotton Fabric"`` / ``"Oil"``)
-ため，末尾 ``!`` は誤参照の強い signal．ピリオド ``.`` 単独末尾は製品略称の可能性が
-あるので除外 (例は無いが将来に備えて保守的に)．"""
-
-
-def _looks_like_product_name(text: str) -> bool:
-    if not text:
-        return False
-    stripped = text.strip()
-    if len(stripped) > _PRODUCT_NAME_MAX_LEN:
-        return False
-    if any(m in stripped for m in _SUSPECT_SUBSTRINGS):
-        return False
-    return not stripped.endswith(_SENTENCE_END_CHARS)
 
 
 def resolve_localized_name(
     product: dict[str, Any],
     text_map: dict[int, str],
-    *,
-    locale: str = "",
 ) -> str:
     """Product の localized name を取得．
 
-    Anno 1800 は Product ごとに ``LineID`` と ``LocaText/English/Text`` の
-    両方を持ち，それぞれ壊れ方が違う:
-
-    - ``LineID`` は texts_<lang>.xml への参照．**ごく一部の Product で誤った
-      entry に resolve する** (実測: GUID 1010017 ``Money`` の LineID 14965 が
-      quest 通知 "POCKET WATCHES RUN OUT!" に着く)．ただし大半は正しく
-      current game UI と一致する．
-    - ``LocaText/English/Text`` は ``<Status>Exported</Status>`` 付きの
-      per-asset canonical だが，**game patch で rename された場合に古い**
-      ケースがある (実測: GUID 1010240 embedded_en ``Cotton Fabric`` vs
-      LineID 5392 ``Film Reel``)．
-
-    戦略: **LineID 優先だが長文/HTML 系は description 誤参照と判断**．
-    それ以外は LineID を信じる．非 en locale で ja 翻訳が欠損してる場合は
-    embedded_en (英語) まで degrade させる．
+    ``texts_<lang>.xml`` は Product GUID 自身を key に持つ (例: ``<GUID>1010566</GUID>
+    <Text>Oil</Text>``)．実測で 280 Products 全件 en/ja ともヒットするため GUID-direct
+    参照のみで済む．欠損時は内部 name の prefix 剥きにフォールバック．
     """
-    oid = product["oasis_id"]
-    line_text = text_map.get(oid) if oid is not None else None
-    if line_text and _looks_like_product_name(line_text):
-        return line_text
-    # LineID が description っぽい，あるいは欠損 → embedded_en へ逃がす
-    if product.get("embedded_en"):
-        return product["embedded_en"]
-    # LineID に description 系でも他に無ければ使う
-    if line_text:
-        return line_text
+    guid = product["guid"]
+    if guid in text_map and text_map[guid]:
+        return text_map[guid]
     return _strip_internal_prefix(product["internal_name"])
 
 
@@ -261,7 +202,7 @@ def write_items_yaml(
     ]
     lines: list[str] = list(header)
     for p in products:
-        name = resolve_localized_name(p, text_map, locale=locale)
+        name = resolve_localized_name(p, text_map)
         lines.append(f"{p['guid']}:")
         lines.append(f"  name: {_yaml_quote(name)}")
         cat = existing_cat.get(p["guid"])

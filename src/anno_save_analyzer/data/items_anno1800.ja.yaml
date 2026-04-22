@@ -3,562 +3,562 @@
 # by scripts/generate_items_anno1800.py. Re-run after game updates.
 
 355:
-  name: "Botanical Garden"
+  name: "植物園"
 535:
-  name: "Local Mail"
+  name: "普通郵便"
 536:
-  name: "Regional Mail"
+  name: "地域郵便"
 836:
-  name: "Bauxite "
+  name: "ボーキサイト"
 838:
-  name: "Aluminium Profiles"
+  name: "アルミニウムの形材"
 840:
-  name: "Helium"
+  name: "ヘリウム"
 917:
-  name: "Water"
+  name: "水"
 1414:
-  name: "Industrial Lubricant"
+  name: "工業用潤滑剤"
 1591:
-  name: "Mineral Resource"
+  name: "鉱物資源"
 1955:
-  name: "Cultivation Area"
+  name: "耕作地"
 2038:
-  name: "Island Charter"
+  name: "入植許可証"
 2524:
-  name: "Overseas Mail"
+  name: "海外郵便"
 4267:
-  name: "New World Reports"
+  name: "新世界の論文"
 4268:
-  name: "Arctic Reports"
+  name: "北極の論文"
 5380:
-  name: "Calamari"
+  name: "イカ"
 5381:
-  name: "Jalea"
+  name: "ハレア"
 5382:
-  name: "Ice Cream"
+  name: "アイスクリーム"
 5383:
-  name: "Herbs"
+  name: "ハーブ"
 5384:
-  name: "Nandu Leather"
+  name: "ダチョウの革"
 5385:
-  name: "Milk"
+  name: "牛乳"
 5386:
-  name: "Orchid"
+  name: "蘭"
 5387:
   name: "Ice Cube"
 5388:
-  name: "Perfumes"
+  name: "香水"
 5389:
-  name: "Costumes"
+  name: "コスチューム"
 5390:
-  name: "Motor"
+  name: "モーター"
 5391:
-  name: "Scooter"
+  name: "スクーター"
 5392:
-  name: "Film Reel"
+  name: "フィルムリール"
 5393:
-  name: "Fire Extinguishers"
+  name: "消火器"
 5394:
-  name: "Police Equipment"
+  name: "警察装備"
 5395:
-  name: "Fans"
+  name: "換気扇"
 5397:
-  name: "Medicine"
+  name: "薬"
 5398:
-  name: "Minerals"
+  name: "鉱物"
 5399:
-  name: "Ammonia"
+  name: "アンモニア"
 5400:
-  name: "Pigments"
+  name: "顔料"
 5401:
-  name: "Nandu Feathers"
+  name: "ダチョウの羽"
 5406:
-  name: "Artista Workforce"
+  name: "アルティスタの労働力"
 5803:
-  name: "Soccer Balls"
+  name: "サッカーボール"
 5830:
-  name: "Cinema"
+  name: "映画館"
 5831:
-  name: "Samba School"
+  name: "サンバスクール"
 6261:
-  name: "Automated Riot Control"
+  name: "自動暴動鎮圧"
 6262:
-  name: "Automated Fire Protection"
+  name: "自動防火"
 6263:
-  name: "Automated Healthcare"
+  name: "自動医療"
 6265:
-  name: "Beach"
+  name: "ビーチ"
 6280:
-  name: "Electric Cables"
+  name: "電線"
 6360:
-  name: "Silver Ore"
+  name: "銀鉱石"
 6600:
-  name: "Mezcal"
+  name: "メスカル"
 24187:
-  name: "Trees"
+  name: "木"
 24320:
-  name: "Herbarium"
+  name: "植物標本"
 24807:
-  name: "Dung"
+  name: "フン"
 24808:
-  name: "Fertiliser"
+  name: "肥料"
 24821:
-  name: "Coke"
+  name: "コークス"
 24824:
-  name: "Chewing Gum"
+  name: "チューインガム"
 24837:
-  name: "Fuel"
+  name: "燃料"
 24846:
-  name: "Silver Amalgam"
+  name: "銀混合物"
 24850:
-  name: "Silver Bars"
+  name: "銀の延べ棒"
 24851:
-  name: "Silver Coins"
+  name: "銀貨"
 24852:
-  name: "Cyanide"
+  name: "シアン化物"
 24863:
   name: "Industrial lubricant "
 25073:
-  name: "Waste Water"
+  name: "廃水"
 25131:
-  name: "Atole"
+  name: "アトーレ"
 25506:
-  name: "Hot Sauce"
+  name: "ホットソース"
 25546:
-  name: "Hacienda"
+  name: "大農園"
 112518:
-  name: "Scrap"
+  name: "スクラップ"
 112520:
-  name: "Nice Scrap"
+  name: "上質なスクラップ"
 112523:
-  name: "Special Scrap"
+  name: "特殊なスクラップ"
 112653:
-  name: "Explorer Workforce"
+  name: "探検家の労働力"
 112654:
-  name: "Technicians Workforce"
+  name: "技術家の労働力"
 112693:
-  name: "Post Office"
+  name: "郵便局"
 112694:
-  name: "Caribou Meat"
+  name: "カリブーの肉"
 112695:
-  name: "Bear Fur"
+  name: "熊の毛皮"
 112696:
-  name: "Seal Skin"
+  name: "アザラシの皮"
 112697:
-  name: "Goose Feathers"
+  name: "ガチョウの羽"
 112698:
-  name: "Huskies"
+  name: "ハスキー"
 112699:
-  name: "Whale Oil"
+  name: "鯨油"
 112700:
-  name: "Parkas"
+  name: "防寒着"
 112701:
-  name: "Sleeping Bags"
+  name: "寝袋"
 112702:
-  name: "Oil Lamps"
+  name: "オイルランプ"
 112703:
-  name: "Husky Sleds"
+  name: "犬ぞり"
 112704:
-  name: "Sleds"
+  name: "そり"
 112705:
-  name: "Pemmican"
+  name: "非常食"
 112706:
-  name: "Arctic Gas"
+  name: "北極ガス"
 112708:
-  name: "Heat"
+  name: "熱"
 114340:
-  name: "Shepherd Workforce"
+  name: "羊飼いの労働力"
 114341:
-  name: "Elder Workforce"
+  name: "長老の労働力"
 114355:
-  name: "Marketplace"
+  name: "マーケット"
 114356:
-  name: "Wanza Timber"
+  name: "ワンザの木板"
 114357:
-  name: "Sanga Cow"
+  name: "サンガ牛"
 114358:
-  name: "Salt"
+  name: "塩"
 114359:
-  name: "Dried Meat"
+  name: "干し肉"
 114361:
-  name: "Musicians' Court"
+  name: "音楽広場"
 114362:
-  name: "Monastery"
+  name: "修道院"
 114364:
-  name: "Hibiscus Petals"
+  name: "ハイビスカスの花びら"
 114365:
-  name: "Linseed"
+  name: "亜麻仁"
 114367:
-  name: "Teff"
+  name: "テフ"
 114368:
-  name: "Indigo Dye"
+  name: "藍の染料"
 114369:
-  name: "Spices"
+  name: "香辛料"
 114370:
-  name: "Beeswax"
+  name: "蜜蝋"
 114371:
-  name: "Goat Milk"
+  name: "ヤギのミルク"
 114390:
-  name: "Hibiscus Tea"
+  name: "ハイビスカスティー"
 114391:
-  name: "Linen"
+  name: "リネン"
 114401:
-  name: "Finery"
+  name: "美服"
 114402:
-  name: "Mud Bricks"
+  name: "泥レンガ"
 114404:
-  name: "Tapestries"
+  name: "タペストリー"
 114408:
-  name: "Spiced Flour"
+  name: "香辛料入り小麦粉"
 114410:
-  name: "Seafood Stew"
+  name: "シーフードシチュー"
 114414:
-  name: "Clay Pipe"
+  name: "陶製のパイプ"
 114425:
-  name: "Radio Tower"
+  name: "ラジオ塔"
 114427:
-  name: "Decorative Cloth"
+  name: "飾り布"
 114428:
-  name: "Leather Boots"
+  name: "革の長靴"
 114429:
   name: "Ammunition"
 114430:
-  name: "Tailored Suits"
+  name: "オーダースーツ"
 114431:
-  name: "Telephones"
+  name: "電話"
 114433:
-  name: "Essential Oil"
+  name: "精油"
 114890:
-  name: "Canteen"
+  name: "食堂"
 115980:
-  name: "Lost Expedition Scrap"
+  name: "行方不明の探検隊のスクラップ"
 117698:
-  name: "Illuminated Script"
+  name: "彩飾された写本"
 117699:
-  name: "Lanterns"
+  name: "ランタン"
 117701:
-  name: "Ornate Candles"
+  name: "華美なキャンドル"
 117702:
-  name: "Paper"
+  name: "紙"
 118724:
-  name: "Ceramics"
+  name: "陶器"
 118728:
-  name: "Lobster"
+  name: "ロブスター"
 119392:
-  name: "Research Points"
+  name: "研究ポイント"
 120008:
-  name: "Wood"
+  name: "丸太"
 120014:
-  name: "後で"
+  name: "ブドウ"
 120016:
-  name: "ランダム設定"
+  name: "シャンパン"
 120020:
-  name: "Market"
+  name: "市場"
 120021:
-  name: "警察装備"
+  name: "石炭"
 120022:
-  name: "換気扇"
+  name: "電気"
 120030:
-  name: "ハーディフ"
+  name: "眼鏡"
 120031:
-  name: "イーストマウス"
+  name: "コーヒー豆"
 120032:
-  name: "ヒルモント"
+  name: "コーヒー"
 120033:
-  name: "カーソーム"
+  name: "揚げバナナ"
 120034:
-  name: "Corn"
+  name: "トウモロコシ"
 120035:
-  name: "ブラクトン"
+  name: "トルティーヤ"
 120036:
-  name: "ダンヨーク"
+  name: "アルパカ生地"
 120037:
-  name: "スウィートホール"
+  name: "山高帽"
 120041:
-  name: "シフィントン"
+  name: "バナナ"
 120042:
-  name: "ヌーボトル"
+  name: "魚油"
 120043:
-  name: "クリップフォード"
+  name: "ポンチョ"
 120044:
-  name: "オールド・アビー"
+  name: "フェルト"
 120050:
-  name: "Chapel"
+  name: "礼拝堂"
 124478:
-  name: "Scholar Workforce"
+  name: "学者の労働力"
 132723:
-  name: "Tourist Customers"
+  name: "観光客の入店数"
 132751:
-  name: "Restaurant"
+  name: "レストラン"
 132754:
-  name: "Bar"
+  name: "バー"
 132755:
-  name: "Café"
+  name: "カフェ"
 132761:
-  name: "The Iron Tower"
+  name: "アイアンタワー"
 133093:
-  name: "Cinnamon"
+  name: "シナモン"
 133095:
-  name: "Coconut Oil"
+  name: "ココナッツオイル"
 133097:
-  name: "Citrus"
+  name: "柑橘類"
 133181:
-  name: "Shampoo"
+  name: "シャンプー"
 133183:
-  name: "Jam"
+  name: "ジャム"
 133185:
-  name: "水の街灯"
+  name: "レモネード"
 133532:
-  name: "Souvenirs"
+  name: "土産物"
 133535:
-  name: "Museum"
+  name: "博物館"
 133536:
-  name: "ヒマワリのブランコ"
+  name: "世界博覧会"
 133573:
-  name: "Variety Theatre"
+  name: "多目的劇場"
 133891:
-  name: "Tourist Mooring"
+  name: "観光停泊地"
 134257:
-  name: "Palace"
+  name: "宮殿"
 134616:
-  name: "花火の台"
+  name: "樟脳"
 134623:
-  name: "Elevators"
+  name: "エレベーター"
 134781:
-  name: "「ワーイ！」（編集長からのコメント）"
+  name: "港湾地区"
 135086:
-  name: "Resin"
+  name: "松脂"
 135087:
-  name: "Cherry Wood"
+  name: "サクラの木"
 135107:
-  name: "Furniture Store"
+  name: "家具店"
 135108:
-  name: "Department Store"
+  name: "デパート"
 135109:
-  name: "Drug Store"
+  name: "ドラッグストア"
 135129:
-  name: "Lacquer"
+  name: "ラッカー"
 135130:
-  name: "Ethanol"
+  name: "エタノール"
 135150:
-  name: "Celluloid"
+  name: "セルロイド"
 135186:
-  name: "Chewing Gum"
+  name: "チューインガム"
 135229:
-  name: "Biscuits"
+  name: "ビスケット"
 135230:
-  name: "Typewriters"
+  name: "タイプライター"
 135231:
-  name: "Toys"
+  name: "おもちゃ"
 135232:
-  name: "Billiard Tables"
+  name: "ビリヤード台"
 135233:
-  name: "Violins"
+  name: "バイオリン"
 135234:
-  name: "Cognac"
+  name: "コニャック"
 135816:
-  name: "Toaster Supply"
+  name: "トースターの供給"
 135876:
-  name: "Crockery Supply"
+  name: "陶器の供給"
 135877:
-  name: "Vaccum Cleaner Supply"
+  name: "電気掃除機の供給"
 135878:
-  name: "Refrigerator Supply"
+  name: "冷蔵庫の供給"
 135879:
-  name: "Briefcase Supply"
+  name: "ブリーフケースの供給"
 135880:
-  name: "Banker's Lamp Supply"
+  name: "バンカーズランプの供給"
 135881:
-  name: "Vanity Screen Supply"
+  name: "パーテーションの供給"
 135882:
-  name: "Writing Desk Supply"
+  name: "書き物机の供給"
 135883:
-  name: "Four-Poster Bed Supply"
+  name: "四柱式ベッドの供給"
 135884:
-  name: "Lounge Seating Supply"
+  name: "ラウンジチェアの供給"
 135885:
-  name: "Toothpaste Supply"
+  name: "歯磨き粉の供給"
 135886:
-  name: "Detergent Supply"
+  name: "洗剤の供給"
 135887:
-  name: "Lipstick Supply"
+  name: "口紅の供給"
 135888:
-  name: "Face Cream Supply"
+  name: "美顔クリームの供給"
 135889:
-  name: "Pomade Supply"
+  name: "ポマードの供給"
 137757:
-  name: "Skyline Tower"
+  name: "スカイラインタワー"
 269751:
-  name: "Fuel"
+  name: "燃料"
 270042:
-  name: "Fuel"
+  name: "燃料"
 601485:
-  name: "Zoo"
+  name: "動物園"
 1010017:
-  name: "Coins"
+  name: "コイン"
 1010052:
-  name: "Farmer Workforce"
+  name: "農家の労働力"
 1010115:
-  name: "Worker Workforce"
+  name: "労働者の労働力"
 1010116:
-  name: "Artisan Workforce"
+  name: "職人の労働力"
 1010117:
-  name: "Engineer Workforce"
+  name: "技師の労働力"
 1010128:
-  name: "Investor Workforce"
+  name: "投資家の労働力"
 1010190:
-  name: "Influence"
+  name: "影響力"
 1010192:
-  name: "Grain"
+  name: "穀物"
 1010193:
-  name: "Beef"
+  name: "牛肉"
 1010194:
-  name: "こんな無意味な虐殺に勝者などいるわけがない…"
+  name: "ホップ"
 1010195:
-  name: "Potatoes"
+  name: "ジャガイモ"
 1010196:
-  name: "Timber"
+  name: "木板"
 1010197:
-  name: "Wool"
+  name: "羊毛"
 1010198:
-  name: "Red Peppers"
+  name: "赤トウガラシ"
 1010199:
-  name: "Ubisoftサーバーに接続中…"
+  name: "豚"
 1010200:
-  name: "Fish"
+  name: "魚"
 1010201:
-  name: "セーブゲーム数"
+  name: "粘土"
 1010202:
-  name: "Reinforced Concrete"
+  name: "鉄筋コンクリート"
 1010203:
-  name: "Soap"
+  name: "石鹸"
 1010204:
-  name: "セーブゲーム容量"
+  name: "真鍮"
 1010205:
-  name: "Bricks"
+  name: "レンガ"
 1010206:
-  name: "Sewing Machines"
+  name: "ミシン"
 1010207:
-  name: "Windows"
+  name: "窓"
 1010208:
-  name: "Light Bulbs"
+  name: "電球"
 1010209:
-  name: "Furs"
+  name: "毛皮"
 1010210:
-  name: "Sails"
+  name: "帆布"
 1010211:
-  name: "Chassis"
+  name: "シャーシ"
 1010213:
-  name: "Bread"
+  name: "パン"
 1010214:
-  name: "Beer"
+  name: "ビール"
 1010215:
-  name: "Goulash"
+  name: "グーラッシュ"
 1010216:
-  name: "外す"
+  name: "シュナップス"
 1010217:
-  name: "Canned Food"
+  name: "缶詰"
 1010218:
-  name: "プリセットを編集"
+  name: "鉄骨材"
 1010219:
-  name: "初回ボーナス"
+  name: "鋼鉄"
 1010221:
-  name: "Weapons"
+  name: "武器"
 1010222:
-  name: "名前"
+  name: "ダイナマイト"
 1010223:
-  name: "プレイ時間"
+  name: "最新武器"
 1010224:
-  name: "サイズ"
+  name: "蒸気モーター"
 1010225:
-  name: "保存日時"
+  name: "蒸気自動車"
 1010226:
-  name: "船の移動"
+  name: "石炭"
 1010227:
-  name: "Iron"
+  name: "鉄"
 1010228:
-  name: "Quartz Sand"
+  name: "けい砂"
 1010229:
-  name: "カメラの速度/傾き"
+  name: "亜鉛"
 1010230:
-  name: "Copper"
+  name: "銅"
 1010231:
-  name: "Cement"
+  name: "セメント"
 1010232:
-  name: "美しい建物"
+  name: "硝石"
 1010233:
-  name: "Gold Ore"
+  name: "金鉱"
 1010234:
-  name: "Tallow"
+  name: "獣脂"
 1010235:
-  name: "Flour"
+  name: "小麦粉"
 1010236:
-  name: "Malt"
+  name: "麦芽"
 1010237:
-  name: "Work Clothes"
+  name: "作業着"
 1010238:
-  name: "ゲーム開始"
+  name: "ソーセージ"
 1010239:
-  name: "スクーター"
+  name: "砂糖"
 1010240:
-  name: "フィルムリール"
+  name: "綿布"
 1010241:
-  name: "Glass"
+  name: "ガラス"
 1010242:
-  name: "Wood Veneers"
+  name: "寄せ木細工"
 1010243:
-  name: "イカ"
+  name: "フィラメント"
 1010245:
-  name: "Penny Farthings"
+  name: "ファージング硬貨"
 1010246:
-  name: "ハレア"
+  name: "懐中時計"
 1010247:
-  name: "アイスクリーム"
+  name: "毛皮のコート"
 1010248:
-  name: "ハーブ"
+  name: "蓄音機"
 1010249:
-  name: "ダチョウの革"
+  name: "金"
 1010250:
-  name: "牛乳"
+  name: "宝石"
 1010251:
-  name: "蘭"
+  name: "さとうきび"
 1010252:
-  name: "Tobacco"
+  name: "タバコ"
 1010253:
-  name: "Cotton"
+  name: "木綿"
 1010254:
-  name: "Ice Cube"
+  name: "ココア"
 1010255:
-  name: "香水"
+  name: "天然ゴム"
 1010256:
-  name: "コスチューム"
+  name: "真珠"
 1010257:
-  name: "Rum"
+  name: "ラム酒"
 1010258:
-  name: "モーター"
+  name: "チョコレート"
 1010259:
-  name: "消火器"
+  name: "葉巻"
 1010348:
-  name: "Boxing Arena"
+  name: "格闘アリーナ"
 1010349:
-  name: "Pub"
+  name: "パブ"
 1010350:
-  name: "Church"
+  name: "教会"
 1010351:
-  name: "School"
+  name: "学校"
 1010352:
-  name: "Variety Theatre"
+  name: "多目的劇場"
 1010353:
-  name: "University"
+  name: "大学"
 1010354:
-  name: "Electricity"
+  name: "電気"
 1010355:
-  name: "ジャガーの顎が閉じるのを感じます…"
+  name: "会員制クラブ"
 1010356:
-  name: "Bank"
+  name: "銀行"
 1010366:
-  name: "ドラグスボルグ"
+  name: "日雇い労働者の労働者"
 1010367:
-  name: "アラセン"
+  name: "労働者の労働力"
 1010566:
-  name: "Oil"
+  name: "石油"

@@ -134,19 +134,23 @@ class TestAnno1800RealSampleExtraction:
 
 
 class TestItemDictionaryLoading:
-    """``ItemDictionary.load(ANNO_1800)`` で en/ja の両方が読めること．"""
+    """``ItemDictionary.load(ANNO_1800)`` で en/ja の両方が読めること．
+
+    texts_<lang>.xml は Product GUID 自身を key にして翻訳を持つため，実測で
+    280 Products 全件が en / ja ともヒットする (2026-04-22)．フォールバック
+    ロジックは発動しない想定．
+    """
 
     def test_en_yaml_loads_with_major_products(self) -> None:
         d = ItemDictionary.load(GameTitle.ANNO_1800, locales=("en",))
-        # Key Anno 1800 Products
         assert d[1010566].names.get("en") == "Oil"
         assert d[1010257].names.get("en") == "Rum"
-        # 主要 coin/Money はデータ側で LineID 誤参照があるが embedded_en fallback で救う
         assert d[1010017].names.get("en") == "Coins"
+        assert d[1010240].names.get("en") == "Cotton Fabric"
 
-    def test_ja_yaml_loads_and_falls_back_for_missing_translations(self) -> None:
+    def test_ja_yaml_loads_with_native_translations(self) -> None:
         d = ItemDictionary.load(GameTitle.ANNO_1800, locales=("en", "ja"))
-        # ja で明示翻訳のあるもの
-        assert d[1010240].names.get("ja") == "フィルムリール"
-        # ja 翻訳欠落で embedded_en に degrade する品目 (Money)
-        assert d[1010017].names.get("ja") == "Coins"
+        assert d[1010566].names.get("ja") == "石油"
+        assert d[1010257].names.get("ja") == "ラム酒"
+        assert d[1010017].names.get("ja") == "コイン"
+        assert d[1010240].names.get("ja") == "綿布"
