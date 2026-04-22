@@ -32,6 +32,13 @@ from anno_save_analyzer.trade import (
 from anno_save_analyzer.trade.aggregate import ItemSummary, RouteSummary
 from anno_save_analyzer.trade.extract import extract_from_outer, load_outer_filedb
 from anno_save_analyzer.trade.models import TradeEvent
+from anno_save_analyzer.trade.population import (
+    CityAreaMatch,
+    ResidenceAggregate,
+    build_am_consumption_signatures,
+    list_residence_aggregates,
+    match_cities_to_area_managers,
+)
 from anno_save_analyzer.trade.sessions import session_locale_key
 
 
@@ -74,6 +81,12 @@ class TuiState:
     # island_name (CityName) → 在庫時系列 (物資別) のリスト．
     # Inventory tab の入力．同名島が複数 session にある場合は上書きせず連結する．
     storage_by_island: dict[str, tuple[IslandStorageTrend, ...]] = field(default_factory=dict)
+    # island_name (CityName) → 住居サマリ (人口 / 平均満足度 / 物資ごとの満足率)．
+    # Jaccard overlap heuristic で AreaManager_N を結合 (population.py 参照)．
+    # low-confidence match もあるため ``city_area_matches`` で confidence を表面化．
+    population_by_city: dict[str, ResidenceAggregate] = field(default_factory=dict)
+    # CityName ↔ AreaManager のマッチ結果．debugging / UI での「信頼度低」マーク用．
+    city_area_matches: tuple[CityAreaMatch, ...] = field(default_factory=tuple)
 
 
 def build_overview(
@@ -177,6 +190,11 @@ def load_state(
     routes_by_session = _collect_routes_by_session(inner_payloads, overview.session_ids)
     storage_by_island = _collect_storage_by_island(inner_payloads)
 
+    progress("analysing population")
+    population_by_city, city_area_matches = _collect_population_by_city(
+        inner_payloads, storage_by_island
+    )
+
     return TuiState(
         save_path=save_path,
         title=title,
@@ -191,6 +209,8 @@ def load_state(
         islands_by_session=islands_by_session,
         routes_by_session=routes_by_session,
         storage_by_island=storage_by_island,
+        population_by_city=population_by_city,
+        city_area_matches=city_area_matches,
     )
 
 
@@ -257,3 +277,44 @@ def _collect_storage_by_island(
         for t in list_storage_trends(inner):
             aggregated.setdefault(t.island_name, []).append(t)
     return {name: tuple(items) for name, items in aggregated.items()}
+
+
+def _collect_population_by_city(
+    inner_payloads: list[bytes],
+    storage_by_island: dict[str, tuple[IslandStorageTrend, ...]],
+) -> tuple[dict[str, ResidenceAggregate], tuple[CityAreaMatch, ...]]:
+    """各セッションで AreaManager の住居サマリを集計し，CityName に結合する．
+
+    AreaInfo ↔ AreaManager の直接的な join キーが save に無いため
+    「CityName の StorageTrends nonzero 品目」と「AreaManager の Residence7
+    ConsumptionStates 品目」の Jaccard overlap で bijective match する．
+    低 confidence match は ``city_area_matches`` で呼び出し側に露出する．
+    """
+    all_matches: list[CityAreaMatch] = []
+    population: dict[str, ResidenceAggregate] = {}
+    for inner in inner_payloads:
+        if not inner:
+            continue
+        aggregates = list_residence_aggregates(inner)
+        if not aggregates:
+            continue
+        trends_in_session = list_storage_trends(inner)
+        cities_in_session = {t.island_name for t in trends_in_session}
+        if not cities_in_session:
+            continue
+        city_sigs = {
+            city: {
+                t.product_guid for t in trends_in_session if t.island_name == city and t.latest > 0
+            }
+            for city in cities_in_session
+        }
+        am_sigs = build_am_consumption_signatures(aggregates)
+        am_counts = {a.area_manager: a.residence_count for a in aggregates}
+        matches = match_cities_to_area_managers(city_sigs, am_sigs, am_counts)
+        agg_by_am = {a.area_manager: a for a in aggregates}
+        for m in matches:
+            agg = agg_by_am.get(m.area_manager)
+            if agg is not None and m.city_name not in population:
+                population[m.city_name] = agg
+        all_matches.extend(matches)
+    return population, tuple(all_matches)
