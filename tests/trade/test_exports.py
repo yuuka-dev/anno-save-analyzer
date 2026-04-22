@@ -225,6 +225,7 @@ class TestEventsToCsvAndJson:
         rows = list(csv.reader(io.StringIO(out)))
         assert rows[0] == [
             "timestamp_tick",
+            "minutes_ago",
             "session_id",
             "island_name",
             "route_id",
@@ -237,14 +238,30 @@ class TestEventsToCsvAndJson:
             "total_price",
         ]
         assert rows[1][0] == "100"  # timestamp
-        assert rows[1][4] == "商会ルート"  # route_name
-        assert rows[1][7] == "100"  # item_guid
+        assert rows[1][1] == "0.00"  # minutes_ago (自己 = max tick なので 0)
+        assert rows[1][5] == "商会ルート"  # route_name
+        assert rows[1][8] == "100"  # item_guid
         # 2 行目 partner=None
-        assert rows[2][4] == ""  # route_name
-        assert rows[2][5] == ""  # partner_id
-        assert rows[2][6] == ""  # partner_kind
-        # timestamp 無し
+        assert rows[2][5] == ""  # route_name
+        assert rows[2][6] == ""  # partner_id
+        assert rows[2][7] == ""  # partner_kind
+        # timestamp 無し → minutes_ago も空
         assert rows[2][0] == ""
+        assert rows[2][1] == ""
+
+    def test_events_csv_minutes_ago_scales_with_tick_delta(self) -> None:
+        """``minutes_ago`` が max(tick) 基準 + TICKS_PER_MINUTE で割算されとる．"""
+        from anno_save_analyzer.trade.clock import TICKS_PER_MINUTE
+
+        events = [
+            self._ev(timestamp_tick=0),
+            self._ev(timestamp_tick=TICKS_PER_MINUTE * 10),  # max → 0.00
+        ]
+        out = events_to_csv(events)
+        rows = list(csv.reader(io.StringIO(out)))
+        # 最古は max との差 = 10 分
+        assert rows[1][1] == "10.00"
+        assert rows[2][1] == "0.00"
 
     def test_events_csv_respects_locale(self) -> None:
         events = [self._ev(guid=100)]
@@ -274,8 +291,25 @@ class TestEventsToCsvAndJson:
         ]
         out = events_to_csv(events)
         rows = list(csv.reader(io.StringIO(out)))
-        # island_name 列は index 2
-        assert rows[1][2] == "大阪民国"
+        # minutes_ago 列追加で island_name は index 3 に後退
+        assert rows[1][3] == "大阪民国"
+
+    def test_events_json_includes_minutes_ago(self) -> None:
+        """JSON export でも minutes_ago が各 event に付く．"""
+        from anno_save_analyzer.trade.clock import TICKS_PER_MINUTE
+
+        events = [
+            self._ev(timestamp_tick=0),
+            self._ev(timestamp_tick=TICKS_PER_MINUTE * 10),
+        ]
+        parsed = json.loads(events_to_json(events))
+        assert parsed[0]["minutes_ago"] == 10.0
+        assert parsed[1]["minutes_ago"] == 0.0
+
+    def test_events_json_minutes_ago_null_when_tick_missing(self) -> None:
+        events = [self._ev(timestamp_tick=None)]
+        parsed = json.loads(events_to_json(events))
+        assert parsed[0]["minutes_ago"] is None
 
     def test_events_json_includes_island_name(self) -> None:
         events = [self._ev(island_name="Osaka")]

@@ -1,41 +1,45 @@
 """ゲーム内 tick ↔ 実時間 (分) 換算．
 
-Anno 1800 / 117 の内部 tick はシミュレーション歩進単位．書記長の
-``sample_anno1800.a7s`` を Anno 1800 で開き，取引履歴 UI の「N 分前」表記と
-save 内の ``timestamp_tick`` を突き合わせて校正した:
+Anno 1800 / 117 の内部 tick はシミュレーション歩進単位．**1 tick = 1 ms**
+とするのが正解 (つまり ``TICKS_PER_MINUTE = 60_000``)．根拠は 2 つ:
 
-=========================  =====  ===========================
-Δtick (最新取引との差)     UI 分  備考
-=========================  =====  ===========================
-     2,700                    2    （近傍．UI 丸めで分精度）
-    17,400                    3
-   101,000                    5
-   500,400                   12
- 1,000,300                   20
-=========================  =====  ===========================
+1. **Rolling history buffer が 2 時間固定**．実測で ``sample_anno1800.a7s``
+   の timestamp_tick spread = 7,199,400，``sample_anno117.a8s`` = 7,199,000．
+   どちらも本質的に 7,200,000 = 120 × 60,000 で，2 時間ちょうどの
+   rolling buffer を強く示唆する．
 
-5 点最小二乗 fit で ``slope ≈ 1.76e-5 min/tick`` → **TPM ≈ 57,000
-tick/分**．切片 ≈ 2.7 分は Anno 1800 がゲーム停止できない仕様で書記長が UI
-を確認している間に進んだ tick 分．``sample_anno117.a8s`` は同じ係数で
-``range ≈ 3.5 h`` になり，書記長のプレイ感と整合する．タイトル固有に
-差が出たら ``interpreter`` 層で override すればよい．
+2. **書記長実セーブのエクスポート 12 行に対する最小二乗 fit** (2026-04-22):
+
+   =========================  =======  ============================
+   Δtick (oldest - newest)    Δ 分前  TPM (= Δtick / Δmin)
+   =========================  =======  ============================
+    5,191,900                 84      61,808
+   =========================  =======  ============================
+
+   線形 fit は TPM ≈ 60,800．±1 min の丸め誤差を考慮すると TPM = 60,000
+   に収束する．
+
+旧値 ``TICKS_PER_MINUTE = 57,000`` は別の save の UI ``N 分前`` 表示を 5 点
+見て fit した値だったが，UI 値が整数丸めで ±1 分精度のため fit の標準誤差が
+大きく ~6% 外した．12 行のエクスポートと buffer 観察で 60_000 に訂正．
+
+**注**: 取引履歴 UI が示す「X 分前」は save-time tick (= ゲーム save 時点の
+now_tick) 基準だが，本 tool は ``max(recent event tick)`` を基準にしとる．
+そのため最新イベントの表示は常に "0 分前" となり，ゲーム UI とは save-time
+と max-event-tick の差分 (書記長セーブで ~5 分) だけ系統的にズレる．
+save-time 基準への切替は別途 issue 化の予定．
 """
 
 from __future__ import annotations
 
 from collections.abc import Iterable
 
-# 1 分あたりの tick 数．
-# 校正: sample_anno1800.a7s UI との 5 点対応から fit した値．docstring 参照．
-# 旧仮定 (600) は在庫 120 サンプル ≈ 2h という UI 観察からの逆算だったが，
-# 取引履歴 UI との突き合わせで ~95 倍大きいことが判明．
-TICKS_PER_MINUTE = 57_000
+# 1 分あたりの tick 数．1 tick = 1 ms で 60,000．docstring 参照．
+TICKS_PER_MINUTE = 60_000
 
-# ``StorageTrends > Points`` の 1 サンプル = 何 tick か．
-# 在庫 UI 観察で「120 サンプル ≈ 2 時間」が書記長確認済．``TICKS_PER_MINUTE``
-# の校正後もこの観察は崩れない (偶然 1 サンプル ≈ 1 分のまま)．将来在庫側
-# だけ粒度が変わった場合はここで分岐させる．
-SAMPLE_INTERVAL_TICKS = TICKS_PER_MINUTE  # 1 sample = 1 minute 仮定
+# ``StorageTrends > Points`` の 1 サンプル = 何 tick か．実測 UI の
+# 「120 サンプル ≈ 2 時間」観察から TPM と一致する (1 sample = 1 min)．
+SAMPLE_INTERVAL_TICKS = TICKS_PER_MINUTE  # 1 sample = 1 minute
 
 
 def minutes_relative_to(tick: int, *, now_tick: int) -> float:

@@ -89,10 +89,20 @@ def list_trades(
     """List every TradeEvent extracted from SAVE."""
     _ensure_format_supported(fmt)
     title_v = title.to_title()
-    events = filter_events(_events(save, title_v, locale), session=session, island=island)
+    events = list(filter_events(_events(save, title_v, locale), session=session, island=island))
+    # minutes_ago は max(timestamp_tick) 基準．newest event = 0.0．
+    # clock.py の docstring 通り TICKS_PER_MINUTE で割る．
+    from anno_save_analyzer.trade.clock import TICKS_PER_MINUTE, latest_tick
+
+    now_tick = latest_tick(e.timestamp_tick for e in events if e.timestamp_tick is not None)
     payload = [
         {
             "timestamp_tick": ev.timestamp_tick,
+            "minutes_ago": (
+                None
+                if ev.timestamp_tick is None or now_tick is None
+                else round((now_tick - ev.timestamp_tick) / TICKS_PER_MINUTE, 2)
+            ),
             "item": {
                 "guid": ev.item.guid,
                 "name": ev.item.display_name(locale),

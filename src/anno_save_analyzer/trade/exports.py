@@ -12,6 +12,7 @@ import json
 from collections.abc import Iterable
 
 from .aggregate import ItemSummary, RouteSummary
+from .clock import TICKS_PER_MINUTE, latest_tick
 from .items import ItemDictionary
 from .models import Locale, TradeEvent
 from .routes import TradeRouteDef
@@ -115,12 +116,20 @@ def routes_to_csv(
 def events_to_csv(events: Iterable[TradeEvent], *, locale: Locale = "en") -> str:
     """個別 TradeEvent を CSV にエクスポート (ledger 全量)．
 
-    列: timestamp_tick, session_id, island_name, route_id, route_name,
-         partner_id, partner_kind, item_guid, item_name, amount, total_price
+    列: timestamp_tick, minutes_ago, session_id, island_name, route_id,
+        route_name, partner_id, partner_kind, item_guid, item_name, amount,
+        total_price
+
+    ``minutes_ago`` は ``max(event timestamp_tick)`` を基準とした正値 (最新
+    イベントが 0.0)．``TICKS_PER_MINUTE`` で割るので clock.py の docstring と
+    精度が連動する．``timestamp_tick`` が None なら空欄．
     """
+    events_list = list(events)
+    now_tick = latest_tick(e.timestamp_tick for e in events_list if e.timestamp_tick is not None)
     rows: list[list[str]] = [
         [
             "timestamp_tick",
+            "minutes_ago",
             "session_id",
             "island_name",
             "route_id",
@@ -133,12 +142,17 @@ def events_to_csv(events: Iterable[TradeEvent], *, locale: Locale = "en") -> str
             "total_price",
         ]
     ]
-    for ev in events:
+    for ev in events_list:
         partner_id = ev.partner.id if ev.partner else ""
         partner_kind = ev.partner.kind if ev.partner else ""
+        if ev.timestamp_tick is None or now_tick is None:
+            minutes_ago = ""
+        else:
+            minutes_ago = f"{(now_tick - ev.timestamp_tick) / TICKS_PER_MINUTE:.2f}"
         rows.append(
             [
                 "" if ev.timestamp_tick is None else str(ev.timestamp_tick),
+                minutes_ago,
                 ev.session_id or "",
                 ev.island_name or "",
                 ev.route_id or "",
@@ -197,12 +211,24 @@ def inventory_to_csv(
 
 
 def events_to_json(events: Iterable[TradeEvent], *, locale: Locale = "en") -> str:
-    """TradeEvent を JSON 配列にエクスポート (human-readable / 2-space indent)．"""
+    """TradeEvent を JSON 配列にエクスポート (human-readable / 2-space indent)．
+
+    各 event に ``minutes_ago`` (max event tick 基準) を付与する．
+    timestamp_tick 無しの event は ``minutes_ago = null``．
+    """
+    events_list = list(events)
+    now_tick = latest_tick(e.timestamp_tick for e in events_list if e.timestamp_tick is not None)
     data = []
-    for ev in events:
+    for ev in events_list:
+        minutes_ago: float | None
+        if ev.timestamp_tick is None or now_tick is None:
+            minutes_ago = None
+        else:
+            minutes_ago = round((now_tick - ev.timestamp_tick) / TICKS_PER_MINUTE, 2)
         data.append(
             {
                 "timestamp_tick": ev.timestamp_tick,
+                "minutes_ago": minutes_ago,
                 "session_id": ev.session_id,
                 "island_name": ev.island_name,
                 "route_id": ev.route_id,

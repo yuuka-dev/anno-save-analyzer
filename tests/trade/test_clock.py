@@ -24,9 +24,10 @@ class TestMinutesRelativeTo:
         # 理論上 future は無いが式としては正値で返る．
         assert minutes_relative_to(1000 + TICKS_PER_MINUTE, now_tick=1000) == pytest.approx(1.0)
 
-    def test_ticks_per_minute_constant_is_calibrated_57k(self) -> None:
-        """Anno 1800 UI との突き合わせ校正値．clock.py docstring の表を参照．"""
-        assert TICKS_PER_MINUTE == 57_000
+    def test_ticks_per_minute_constant_is_60k(self) -> None:
+        """1 tick = 1 ms 校正．clock.py docstring 参照．rolling buffer 2h
+        観察 + 書記長エクスポート 12 行 fit で裏付け済 (2026-04-22)．"""
+        assert TICKS_PER_MINUTE == 60_000
 
 
 class TestLatestTick:
@@ -65,7 +66,7 @@ class TestInventorySampleMinutes:
 
         out = inventory_sample_minutes(5)
         assert out[-1] == 0.0
-        # 最古サンプルは -(5-1)*1 = -4 分 (step=600 tick = 1 min default)
+        # 最古サンプルは -(5-1)*1 = -4 分 (step=SAMPLE_INTERVAL_TICKS=TPM → 1 sample = 1 min)
         assert out[0] == -4.0
         # 昇順
         assert out == sorted(out)
