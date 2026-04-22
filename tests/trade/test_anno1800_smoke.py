@@ -118,3 +118,35 @@ class TestAnno1800RealSampleExtraction:
         route_events = [e for e in events if e.partner and e.partner.kind == "route"]
         if route_events:
             assert all(e.route_id is not None for e in route_events)
+
+    def test_item_names_resolved_not_just_raw_guid(self, events: list) -> None:
+        """``items_anno1800.en.yaml`` が populate されとる前提で，主要 Product の
+        名前が ``Good_<guid>`` フォールバックでなく canonical 名で出ることを確認．
+
+        実測した代表 Product: 1010566=Oil / 1010257=Rum / 1010207=Windows．
+        """
+        expected = {1010566: "Oil", 1010257: "Rum", 1010207: "Windows"}
+        found = {e.item.guid: e.item.names.get("en") for e in events if e.item.guid in expected}
+        for guid, name in expected.items():
+            assert found.get(guid) == name, (
+                f"Product {guid} expected en name {name!r} but got {found.get(guid)!r}"
+            )
+
+
+class TestItemDictionaryLoading:
+    """``ItemDictionary.load(ANNO_1800)`` で en/ja の両方が読めること．"""
+
+    def test_en_yaml_loads_with_major_products(self) -> None:
+        d = ItemDictionary.load(GameTitle.ANNO_1800, locales=("en",))
+        # Key Anno 1800 Products
+        assert d[1010566].names.get("en") == "Oil"
+        assert d[1010257].names.get("en") == "Rum"
+        # 主要 coin/Money はデータ側で LineID 誤参照があるが embedded_en fallback で救う
+        assert d[1010017].names.get("en") == "Coins"
+
+    def test_ja_yaml_loads_and_falls_back_for_missing_translations(self) -> None:
+        d = ItemDictionary.load(GameTitle.ANNO_1800, locales=("en", "ja"))
+        # ja で明示翻訳のあるもの
+        assert d[1010240].names.get("ja") == "フィルムリール"
+        # ja 翻訳欠落で embedded_en に degrade する品目 (Money)
+        assert d[1010017].names.get("ja") == "Coins"
