@@ -83,8 +83,9 @@ class ProductBalance(BaseModel):
 
 
 def compute_runways(trends: Iterable[IslandStorageTrend]) -> list[IslandProductRunway]:
-    """trend 群を runway 指標に変換．空 / None 安全で non-trend は skip．
+    """trend 群を runway 指標に変換．空 iterable に対しても安全に処理する．
 
+    各 trend はそのまま ``IslandProductRunway`` に変換される。
     結果は ``runway_min`` 昇順 (逼迫順)．``None`` (安定/増加) は末尾にまとめる．
     """
     out: list[IslandProductRunway] = []
