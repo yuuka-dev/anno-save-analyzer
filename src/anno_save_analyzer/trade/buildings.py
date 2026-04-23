@@ -143,9 +143,7 @@ def _read_yaml(filename: str, data_dir: Path | None) -> dict[Any, Any]:
     if payload is None:
         return {}
     if not isinstance(payload, Mapping):
-        raise ValueError(
-            f"YAML root must be a mapping in {filename}, got {type(payload).__name__}"
-        )
+        raise ValueError(f"YAML root must be a mapping in {filename}, got {type(payload).__name__}")
     return dict(payload)
 
 
