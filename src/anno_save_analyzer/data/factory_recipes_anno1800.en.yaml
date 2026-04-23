@@ -1,0 +1,2865 @@
+source:
+  calculator_version: null
+factories:
+- guid: 24798
+  name: Hacienda Sugar Cane Farm
+  tpmin: 2
+  region: 5000001
+  dlcs:
+  - dlc10
+  outputs:
+  - product_guid: 1010251
+    amount: 1
+    storage_amount: 4
+  inputs: []
+- guid: 25003
+  name: Hacienda Corn Farm
+  tpmin: 1
+  region: 5000001
+  dlcs:
+  - dlc10
+  outputs:
+  - product_guid: 120034
+    amount: 1
+    storage_amount: 4
+  inputs: []
+- guid: 25005
+  name: Hacienda Coffee Farm
+  tpmin: 1
+  region: 5000001
+  dlcs:
+  - dlc10
+  outputs:
+  - product_guid: 120031
+    amount: 1
+    storage_amount: 2
+  inputs: []
+- guid: 25006
+  name: Hacienda Caoutchouc Plantation
+  tpmin: 1
+  region: 5000001
+  dlcs:
+  - dlc10
+  outputs:
+  - product_guid: 1010255
+    amount: 1
+    storage_amount: 4
+  inputs: []
+- guid: 25009
+  name: Hacienda Cocoa Farm
+  tpmin: 1
+  region: 5000001
+  dlcs:
+  - dlc10
+  outputs:
+  - product_guid: 1010254
+    amount: 1
+    storage_amount: 2
+  inputs: []
+- guid: 25019
+  name: Hacienda Potato Farm
+  tpmin: 2
+  region: 5000001
+  dlcs:
+  - dlc10
+  outputs:
+  - product_guid: 1010195
+    amount: 1
+    storage_amount: 4
+  inputs: []
+- guid: 25020
+  name: Hacienda Spice Farm
+  tpmin: 1
+  region: 5000001
+  dlcs:
+  - dlc10
+  outputs:
+  - product_guid: 114369
+    amount: 1
+    storage_amount: 2
+  inputs: []
+- guid: 25128
+  name: Hacienda Grain Farm
+  tpmin: 1
+  region: 5000001
+  dlcs:
+  - dlc10
+  outputs:
+  - product_guid: 1010192
+    amount: 1
+    storage_amount: 2
+  inputs: []
+- guid: 24801
+  name: Hacienda Rum Distillery
+  tpmin: 2
+  region: 5000001
+  dlcs:
+  - dlc10
+  outputs:
+  - product_guid: 1010257
+    amount: 1
+    storage_amount: 4
+  inputs:
+  - product_guid: 120008
+    amount: 1
+  - product_guid: 1010251
+    amount: 1
+- guid: 25064
+  name: Hacienda Beer Brewery
+  tpmin: 1
+  region: 5000001
+  dlcs:
+  - dlc10
+  outputs:
+  - product_guid: 1010214
+    amount: 1
+    storage_amount: 2
+  inputs:
+  - product_guid: 1010192
+    amount: 1
+  - product_guid: 120034
+    amount: 1
+- guid: 25126
+  name: Hacienda Atole Maker
+  tpmin: 1
+  region: 5000001
+  dlcs:
+  - dlc10
+  outputs:
+  - product_guid: 25131
+    amount: 1
+    storage_amount: 2
+  inputs:
+  - product_guid: 120034
+    amount: 1
+  - product_guid: 1010251
+    amount: 1
+- guid: 25350
+  name: Hacienda Schnapps Distillery
+  tpmin: 1
+  region: 5000001
+  dlcs:
+  - dlc10
+  outputs:
+  - product_guid: 1010216
+    amount: 1
+    storage_amount: 4
+  inputs:
+  - product_guid: 1010195
+    amount: 1
+- guid: 25508
+  name: Hacienda Hot Sauce Factory
+  tpmin: 0.5
+  region: 5000001
+  dlcs:
+  - dlc10
+  outputs:
+  - product_guid: 25506
+    amount: 1
+    storage_amount: 2
+  inputs:
+  - product_guid: 114369
+    amount: 1
+- guid: 24805
+  name: Hacienda Fertiliser Works
+  tpmin: 2
+  region: 5000001
+  dlcs:
+  - dlc10
+  outputs:
+  - product_guid: 24808
+    amount: 1
+    storage_amount: 5
+  inputs:
+  - product_guid: 24807
+    amount: 1
+- guid: 1010262
+  name: Grain Farm
+  tpmin: 1
+  region: 5000000
+  dlcs: []
+  outputs:
+  - product_guid: 1010192
+    amount: 1
+    storage_amount: 2
+  inputs: []
+- guid: 1010263
+  name: Cattle Farm
+  tpmin: 0.5
+  region: 5000000
+  dlcs: []
+  outputs:
+  - product_guid: 1010193
+    amount: 1
+    storage_amount: 1
+  inputs: []
+- guid: 1010264
+  name: Hop Farm
+  tpmin: 0.6666666666666667
+  region: 5000000
+  dlcs: []
+  outputs:
+  - product_guid: 1010194
+    amount: 1
+    storage_amount: 1
+  inputs: []
+- guid: 1010265
+  name: Potato Farm
+  tpmin: 2
+  region: 5000000
+  dlcs: []
+  outputs:
+  - product_guid: 1010195
+    amount: 1
+    storage_amount: 4
+  inputs: []
+- guid: 1010266
+  name: Lumberjack's Hut
+  tpmin: 4
+  region: 5000000
+  dlcs: []
+  outputs:
+  - product_guid: 120008
+    amount: 1
+    storage_amount: 8
+  inputs: []
+- guid: 1010267
+  name: Sheep Farm
+  tpmin: 2
+  region: 5000000
+  dlcs: []
+  outputs:
+  - product_guid: 1010197
+    amount: 1
+    storage_amount: 4
+  inputs: []
+- guid: 1010269
+  name: Pig Farm
+  tpmin: 1
+  region: 5000000
+  dlcs: []
+  outputs:
+  - product_guid: 1010199
+    amount: 1
+    storage_amount: 4
+  inputs: []
+- guid: 1010558
+  name: Hunting Cabin
+  tpmin: 1
+  region: 5000000
+  dlcs: []
+  outputs:
+  - product_guid: 1010209
+    amount: 1
+    storage_amount: 4
+  inputs: []
+- guid: 100654
+  name: Red Pepper Farm
+  tpmin: 0.5
+  region: 5000000
+  dlcs: []
+  outputs:
+  - product_guid: 1010198
+    amount: 1
+    storage_amount: 1
+  inputs: []
+- guid: 100655
+  name: Vineyard
+  tpmin: 0.5
+  region: 5000000
+  dlcs: []
+  outputs:
+  - product_guid: 120014
+    amount: 1
+    storage_amount: 1
+  inputs: []
+- guid: 1010278
+  name: Fishery
+  tpmin: 2
+  region: 5000000
+  dlcs: []
+  outputs:
+  - product_guid: 1010200
+    amount: 1
+    storage_amount: 4
+  inputs: []
+- guid: 1010310
+  name: Saltpetre Works
+  tpmin: 0.5
+  region: 5000000
+  dlcs: []
+  outputs:
+  - product_guid: 1010232
+    amount: 1
+    storage_amount: 1
+  inputs: []
+- guid: 1010560
+  name: Sand Mine
+  tpmin: 2
+  region: 5000000
+  dlcs: []
+  outputs:
+  - product_guid: 1010228
+    amount: 1
+    storage_amount: 4
+  inputs: []
+- guid: 1010280
+  name: Concrete Factory
+  tpmin: 1
+  region: 5000000
+  dlcs: []
+  outputs:
+  - product_guid: 1010202
+    amount: 1
+    storage_amount: 2
+  inputs:
+  - product_guid: 1010231
+    amount: 1
+  - product_guid: 1010219
+    amount: 1
+- guid: 1010281
+  name: Soap Factory
+  tpmin: 2
+  region: 5000000
+  dlcs: []
+  outputs:
+  - product_guid: 1010203
+    amount: 1
+    storage_amount: 4
+  inputs:
+  - product_guid: 1010234
+    amount: 1
+- guid: 1010283
+  name: Brick Factory
+  tpmin: 1
+  region: 5000000
+  dlcs: []
+  outputs:
+  - product_guid: 1010205
+    amount: 1
+    storage_amount: 2
+  inputs:
+  - product_guid: 1010201
+    amount: 1
+- guid: 100451
+  name: Sawmill
+  tpmin: 4
+  region: 5000000
+  dlcs: []
+  outputs:
+  - product_guid: 1010196
+    amount: 1
+    storage_amount: 8
+  inputs:
+  - product_guid: 120008
+    amount: 1
+- guid: 1010325
+  name: Fur Dealer
+  tpmin: 2
+  region: 5000000
+  dlcs: []
+  outputs:
+  - product_guid: 1010247
+    amount: 1
+    storage_amount: 4
+  inputs:
+  - product_guid: 1010209
+    amount: 1
+  - product_guid: 1010240
+    amount: 1
+- guid: 1010286
+  name: Light Bulb Factory
+  tpmin: 1
+  region: 5000000
+  dlcs: []
+  outputs:
+  - product_guid: 1010208
+    amount: 1
+    storage_amount: 2
+  inputs:
+  - product_guid: 1010241
+    amount: 1
+  - product_guid: 1010243
+    amount: 1
+- guid: 1010285
+  name: Window Makers
+  tpmin: 1
+  region: 5000000
+  dlcs: []
+  outputs:
+  - product_guid: 1010207
+    amount: 1
+    storage_amount: 2
+  inputs:
+  - product_guid: 120008
+    amount: 1
+  - product_guid: 1010241
+    amount: 1
+- guid: 1010288
+  name: Sailmakers
+  tpmin: 2
+  region: 5000000
+  dlcs: []
+  outputs:
+  - product_guid: 1010210
+    amount: 1
+    storage_amount: 4
+  inputs:
+  - product_guid: 1010197
+    amount: 1
+- guid: 100416
+  name: Clay Pit
+  tpmin: 2
+  region: 5000000
+  dlcs: []
+  outputs:
+  - product_guid: 1010201
+    amount: 1
+    storage_amount: 4
+  inputs: []
+- guid: 1010289
+  name: Coachmakers
+  tpmin: 0.5
+  region: 5000000
+  dlcs: []
+  outputs:
+  - product_guid: 1010211
+    amount: 1
+    storage_amount: 1
+  inputs:
+  - product_guid: 120008
+    amount: 1
+  - product_guid: 1010255
+    amount: 1
+- guid: 1010291
+  name: Bakery
+  tpmin: 1
+  region: 5000000
+  dlcs: []
+  outputs:
+  - product_guid: 1010213
+    amount: 1
+    storage_amount: 2
+  inputs:
+  - product_guid: 1010235
+    amount: 1
+- guid: 1010292
+  name: Brewery
+  tpmin: 1
+  region: 5000000
+  dlcs: []
+  outputs:
+  - product_guid: 1010214
+    amount: 1
+    storage_amount: 2
+  inputs:
+  - product_guid: 1010194
+    amount: 1
+  - product_guid: 1010236
+    amount: 1
+- guid: 1010293
+  name: Artisanal Kitchen
+  tpmin: 0.5
+  region: 5000000
+  dlcs: []
+  outputs:
+  - product_guid: 1010215
+    amount: 1
+    storage_amount: 1
+  inputs:
+  - product_guid: 1010193
+    amount: 1
+  - product_guid: 1010198
+    amount: 1
+- guid: 1010295
+  name: Cannery
+  tpmin: 0.6666666666666667
+  region: 5000000
+  dlcs: []
+  outputs:
+  - product_guid: 1010217
+    amount: 1
+    storage_amount: 1
+  inputs:
+  - product_guid: 1010227
+    amount: 1
+  - product_guid: 1010215
+    amount: 1
+- guid: 1010294
+  name: Schnapps Distillery
+  tpmin: 2
+  region: 5000000
+  dlcs: []
+  outputs:
+  - product_guid: 1010216
+    amount: 1
+    storage_amount: 4
+  inputs:
+  - product_guid: 1010195
+    amount: 1
+- guid: 1010316
+  name: Slaughterhouse
+  tpmin: 1
+  region: 5000000
+  dlcs: []
+  outputs:
+  - product_guid: 1010238
+    amount: 1
+    storage_amount: 4
+  inputs:
+  - product_guid: 1010199
+    amount: 1
+- guid: 100659
+  name: Champagne Cellar
+  tpmin: 2
+  region: 5000000
+  dlcs: []
+  outputs:
+  - product_guid: 120016
+    amount: 1
+    storage_amount: 4
+  inputs:
+  - product_guid: 120014
+    amount: 1
+  - product_guid: 1010241
+    amount: 1
+- guid: 1010296
+  name: Steelworks
+  tpmin: 1.3333333333333335
+  region: 5000000
+  dlcs: []
+  outputs:
+  - product_guid: 1010218
+    amount: 1
+    storage_amount: 2
+  inputs:
+  - product_guid: 1010219
+    amount: 1
+- guid: 1010297
+  name: Furnace
+  tpmin: 2
+  region: 5000000
+  dlcs: []
+  outputs:
+  - product_guid: 1010219
+    amount: 1
+    storage_amount: 4
+  inputs:
+  - product_guid: 1010227
+    amount: 1
+  - product_guid: 1010226
+    amount: 1
+- guid: 1010298
+  name: Charcoal Kiln
+  tpmin: 2
+  region: 5000000
+  dlcs: []
+  outputs:
+  - product_guid: 1010226
+    amount: 1
+    storage_amount: 4
+  inputs: []
+- guid: 1010299
+  name: Weapon Factory
+  tpmin: 0.6666666666666667
+  region: 5000000
+  dlcs: []
+  outputs:
+  - product_guid: 1010221
+    amount: 1
+    storage_amount: 1
+  inputs:
+  - product_guid: 1010219
+    amount: 1
+- guid: 1010301
+  name: Heavy Weapons Factory
+  tpmin: 0.5
+  region: 5000000
+  dlcs: []
+  outputs:
+  - product_guid: 1010223
+    amount: 1
+    storage_amount: 1
+  inputs:
+  - product_guid: 1010219
+    amount: 1
+  - product_guid: 1010222
+    amount: 1
+- guid: 1010302
+  name: Motor Assembly Line
+  tpmin: 0.6666666666666667
+  region: 5000000
+  dlcs: []
+  outputs:
+  - product_guid: 1010224
+    amount: 1
+    storage_amount: 1
+  inputs:
+  - product_guid: 1010219
+    amount: 1
+  - product_guid: 1010204
+    amount: 1
+- guid: 1010303
+  name: Cab Assembly Line
+  tpmin: 1
+  region: 5000000
+  dlcs: []
+  outputs:
+  - product_guid: 1010225
+    amount: 1
+    storage_amount: 2
+  inputs:
+  - product_guid: 1010211
+    amount: 1
+  - product_guid: 1010224
+    amount: 1
+- guid: 1010282
+  name: Brass Smeltery
+  tpmin: 1
+  region: 5000000
+  dlcs: []
+  outputs:
+  - product_guid: 1010204
+    amount: 1
+    storage_amount: 2
+  inputs:
+  - product_guid: 1010229
+    amount: 1
+  - product_guid: 1010230
+    amount: 1
+- guid: 101331
+  name: Oil Refinery
+  tpmin: 4
+  region: 5000000
+  dlcs: []
+  outputs:
+  - product_guid: 1010566
+    amount: 1
+    storage_amount: 200
+  inputs: []
+- guid: 1010304
+  name: Coal Mine
+  tpmin: 4
+  region: 5000000
+  dlcs: []
+  outputs:
+  - product_guid: 1010226
+    amount: 1
+    storage_amount: 8
+  inputs:
+  - product_guid: 1591
+    amount: null
+- guid: 1010305
+  name: Iron Mine
+  tpmin: 4
+  region: 5000000
+  dlcs: []
+  outputs:
+  - product_guid: 1010227
+    amount: 1
+    storage_amount: 8
+  inputs:
+  - product_guid: 1591
+    amount: null
+- guid: 1010307
+  name: Zinc Mine
+  tpmin: 2
+  region: 5000000
+  dlcs: []
+  outputs:
+  - product_guid: 1010229
+    amount: 1
+    storage_amount: 4
+  inputs:
+  - product_guid: 1591
+    amount: null
+- guid: 1010308
+  name: Copper Mine
+  tpmin: 2
+  region: 5000000
+  dlcs: []
+  outputs:
+  - product_guid: 1010230
+    amount: 1
+    storage_amount: 4
+  inputs:
+  - product_guid: 1591
+    amount: null
+- guid: 1010309
+  name: Limestone Quarry
+  tpmin: 2
+  region: 5000000
+  dlcs: []
+  outputs:
+  - product_guid: 1010231
+    amount: 1
+    storage_amount: 4
+  inputs:
+  - product_guid: 1591
+    amount: null
+- guid: 1010312
+  name: Rendering Works
+  tpmin: 1
+  region: 5000000
+  dlcs: []
+  outputs:
+  - product_guid: 1010234
+    amount: 1
+    storage_amount: 4
+  inputs:
+  - product_guid: 1010199
+    amount: 1
+- guid: 1010313
+  name: Flour Mill
+  tpmin: 2
+  region: 5000000
+  dlcs: []
+  outputs:
+  - product_guid: 1010235
+    amount: 1
+    storage_amount: 4
+  inputs:
+  - product_guid: 1010192
+    amount: 1
+- guid: 1010314
+  name: Malthouse
+  tpmin: 2
+  region: 5000000
+  dlcs: []
+  outputs:
+  - product_guid: 1010236
+    amount: 1
+    storage_amount: 4
+  inputs:
+  - product_guid: 1010192
+    amount: 1
+- guid: 1010315
+  name: Framework Knitters
+  tpmin: 2
+  region: 5000000
+  dlcs: []
+  outputs:
+  - product_guid: 1010237
+    amount: 1
+    storage_amount: 4
+  inputs:
+  - product_guid: 1010197
+    amount: 1
+- guid: 1010300
+  name: Dynamite Factory
+  tpmin: 1
+  region: 5000000
+  dlcs: []
+  outputs:
+  - product_guid: 1010222
+    amount: 1
+    storage_amount: 2
+  inputs:
+  - product_guid: 1010234
+    amount: 1
+  - product_guid: 1010232
+    amount: 1
+- guid: 1010319
+  name: Glassmakers
+  tpmin: 2
+  region: 5000000
+  dlcs: []
+  outputs:
+  - product_guid: 1010241
+    amount: 1
+    storage_amount: 4
+  inputs:
+  - product_guid: 1010228
+    amount: 1
+- guid: 1010320
+  name: Marquetry Workshop
+  tpmin: 1
+  region: 5000000
+  dlcs: []
+  outputs:
+  - product_guid: 1010242
+    amount: 1
+    storage_amount: 2
+  inputs:
+  - product_guid: 120008
+    amount: 1
+- guid: 1010321
+  name: Filament Factory
+  tpmin: 1
+  region: 5000000
+  dlcs: []
+  outputs:
+  - product_guid: 1010243
+    amount: 1
+    storage_amount: 2
+  inputs:
+  - product_guid: 1010226
+    amount: 1
+- guid: 1010323
+  name: Bicycle Factory
+  tpmin: 2
+  region: 5000000
+  dlcs: []
+  outputs:
+  - product_guid: 1010245
+    amount: 1
+    storage_amount: 4
+  inputs:
+  - product_guid: 1010219
+    amount: 1
+  - product_guid: 1010255
+    amount: 1
+- guid: 1010324
+  name: Clockmakers
+  tpmin: 0.6666666666666667
+  region: 5000000
+  dlcs: []
+  outputs:
+  - product_guid: 1010246
+    amount: 1
+    storage_amount: 1
+  inputs:
+  - product_guid: 1010241
+    amount: 1
+  - product_guid: 1010249
+    amount: 1
+- guid: 1010284
+  name: Sewing Machine Factory
+  tpmin: 2
+  region: 5000000
+  dlcs: []
+  outputs:
+  - product_guid: 1010206
+    amount: 1
+    storage_amount: 4
+  inputs:
+  - product_guid: 120008
+    amount: 1
+  - product_guid: 1010219
+    amount: 1
+- guid: 1010326
+  name: Gramophone Factory
+  tpmin: 0.5
+  region: 5000000
+  dlcs: []
+  outputs:
+  - product_guid: 1010248
+    amount: 1
+    storage_amount: 1
+  inputs:
+  - product_guid: 1010242
+    amount: 1
+  - product_guid: 1010204
+    amount: 1
+- guid: 1010327
+  name: Goldsmiths
+  tpmin: 1
+  region: 5000000
+  dlcs: []
+  outputs:
+  - product_guid: 1010249
+    amount: 1
+    storage_amount: 2
+  inputs:
+  - product_guid: 1010226
+    amount: 1
+  - product_guid: 1010233
+    amount: 1
+- guid: 1010328
+  name: Jewellers
+  tpmin: 2
+  region: 5000000
+  dlcs: []
+  outputs:
+  - product_guid: 1010250
+    amount: 1
+    storage_amount: 4
+  inputs:
+  - product_guid: 1010256
+    amount: 1
+  - product_guid: 1010249
+    amount: 1
+- guid: 101250
+  name: Spectacle Factory
+  tpmin: 0.6666666666666667
+  region: 5000000
+  dlcs: []
+  outputs:
+  - product_guid: 120030
+    amount: 1
+    storage_amount: 1
+  inputs:
+  - product_guid: 1010241
+    amount: 1
+  - product_guid: 1010204
+    amount: 1
+- guid: 1010329
+  name: Sugar Cane Plantation
+  tpmin: 2
+  region: 5000001
+  dlcs: []
+  outputs:
+  - product_guid: 1010251
+    amount: 1
+    storage_amount: 4
+  inputs: []
+- guid: 1010330
+  name: Tobacco Plantation
+  tpmin: 0.5
+  region: 5000001
+  dlcs: []
+  outputs:
+  - product_guid: 1010252
+    amount: 1
+    storage_amount: 1
+  inputs: []
+- guid: 1010331
+  name: Cotton Plantation
+  tpmin: 1
+  region: 5000001
+  dlcs: []
+  outputs:
+  - product_guid: 1010253
+    amount: 1
+    storage_amount: 2
+  inputs: []
+- guid: 1010332
+  name: Cocoa Plantation
+  tpmin: 1
+  region: 5000001
+  dlcs: []
+  outputs:
+  - product_guid: 1010254
+    amount: 1
+    storage_amount: 2
+  inputs: []
+- guid: 1010333
+  name: Caoutchouc Plantation
+  tpmin: 1
+  region: 5000001
+  dlcs: []
+  outputs:
+  - product_guid: 1010255
+    amount: 1
+    storage_amount: 2
+  inputs: []
+- guid: 101260
+  name: Lumberjack's Hut
+  tpmin: 4
+  region: 5000001
+  dlcs: []
+  outputs:
+  - product_guid: 120008
+    amount: 1
+    storage_amount: 8
+  inputs: []
+- guid: 101251
+  name: Coffee Plantation
+  tpmin: 1
+  region: 5000001
+  dlcs: []
+  outputs:
+  - product_guid: 120031
+    amount: 1
+    storage_amount: 2
+  inputs: []
+- guid: 101263
+  name: Plantain Plantation
+  tpmin: 2
+  region: 5000001
+  dlcs: []
+  outputs:
+  - product_guid: 120041
+    amount: 1
+    storage_amount: 4
+  inputs: []
+- guid: 101269
+  name: Cattle Farm
+  tpmin: 1
+  region: 5000001
+  dlcs: []
+  outputs:
+  - product_guid: 1010193
+    amount: 1
+    storage_amount: 2
+  inputs: []
+- guid: 101270
+  name: Corn Farm
+  tpmin: 1
+  region: 5000001
+  dlcs: []
+  outputs:
+  - product_guid: 120034
+    amount: 1
+    storage_amount: 2
+  inputs: []
+- guid: 101272
+  name: Alpaca Farm
+  tpmin: 2
+  region: 5000001
+  dlcs: []
+  outputs:
+  - product_guid: 120036
+    amount: 1
+    storage_amount: 4
+  inputs: []
+- guid: 1010339
+  name: Pearl Farm
+  tpmin: 0.6666666666666667
+  region: 5000001
+  dlcs: []
+  outputs:
+  - product_guid: 1010256
+    amount: 1
+    storage_amount: 1
+  inputs: []
+- guid: 101262
+  name: Fish Oil Factory
+  tpmin: 2
+  region: 5000001
+  dlcs: []
+  outputs:
+  - product_guid: 120042
+    amount: 1
+    storage_amount: 4
+  inputs: []
+- guid: 101261
+  name: Sawmill
+  tpmin: 4
+  region: 5000001
+  dlcs: []
+  outputs:
+  - product_guid: 1010196
+    amount: 1
+    storage_amount: 8
+  inputs:
+  - product_guid: 120008
+    amount: 1
+- guid: 101265
+  name: Sailmakers
+  tpmin: 2
+  region: 5000001
+  dlcs: []
+  outputs:
+  - product_guid: 1010210
+    amount: 1
+    storage_amount: 4
+  inputs:
+  - product_guid: 1010240
+    amount: 1
+- guid: 1010318
+  name: Cotton Mill
+  tpmin: 2
+  region: 5000001
+  dlcs: []
+  outputs:
+  - product_guid: 1010240
+    amount: 1
+    storage_amount: 4
+  inputs:
+  - product_guid: 1010253
+    amount: 1
+- guid: 101267
+  name: Clay Pit
+  tpmin: 2
+  region: 5000001
+  dlcs: []
+  outputs:
+  - product_guid: 1010201
+    amount: 1
+    storage_amount: 4
+  inputs: []
+- guid: 101268
+  name: Brick Factory
+  tpmin: 1
+  region: 5000001
+  dlcs: []
+  outputs:
+  - product_guid: 1010205
+    amount: 1
+    storage_amount: 2
+  inputs:
+  - product_guid: 1010201
+    amount: 1
+- guid: 101415
+  name: Felt Producer
+  tpmin: 2
+  region: 5000001
+  dlcs: []
+  outputs:
+  - product_guid: 120044
+    amount: 1
+    storage_amount: 4
+  inputs:
+  - product_guid: 120036
+    amount: 1
+- guid: 101273
+  name: Bombín Weaver
+  tpmin: 2
+  region: 5000001
+  dlcs: []
+  outputs:
+  - product_guid: 120037
+    amount: 1
+    storage_amount: 4
+  inputs:
+  - product_guid: 1010240
+    amount: 1
+  - product_guid: 120044
+    amount: 1
+- guid: 1010340
+  name: Rum Distillery
+  tpmin: 2
+  region: 5000001
+  dlcs: []
+  outputs:
+  - product_guid: 1010257
+    amount: 1
+    storage_amount: 4
+  inputs:
+  - product_guid: 120008
+    amount: 1
+  - product_guid: 1010251
+    amount: 1
+- guid: 1010341
+  name: Chocolate Factory
+  tpmin: 2
+  region: 5000001
+  dlcs: []
+  outputs:
+  - product_guid: 1010258
+    amount: 1
+    storage_amount: 4
+  inputs:
+  - product_guid: 1010239
+    amount: 1
+  - product_guid: 1010254
+    amount: 1
+- guid: 101252
+  name: Coffee Roaster
+  tpmin: 2
+  region: 5000001
+  dlcs: []
+  outputs:
+  - product_guid: 120032
+    amount: 1
+    storage_amount: 4
+  inputs:
+  - product_guid: 120031
+    amount: 1
+- guid: 101264
+  name: Fried Plantain Kitchen
+  tpmin: 2
+  region: 5000001
+  dlcs: []
+  outputs:
+  - product_guid: 120033
+    amount: 1
+    storage_amount: 4
+  inputs:
+  - product_guid: 120042
+    amount: 1
+  - product_guid: 120041
+    amount: 1
+- guid: 101271
+  name: Tortilla Maker
+  tpmin: 2
+  region: 5000001
+  dlcs: []
+  outputs:
+  - product_guid: 120035
+    amount: 1
+    storage_amount: 4
+  inputs:
+  - product_guid: 1010193
+    amount: 1
+  - product_guid: 120034
+    amount: 1
+- guid: 1010561
+  name: Oil Refinery
+  tpmin: 4
+  region: 5000001
+  dlcs: []
+  outputs:
+  - product_guid: 1010566
+    amount: 1
+    storage_amount: 200
+  inputs: []
+- guid: 101311
+  name: Gold Mine
+  tpmin: 0.4
+  region: 5000001
+  dlcs: []
+  outputs:
+  - product_guid: 1010233
+    amount: 1
+    storage_amount: 1
+  inputs:
+  - product_guid: 1591
+    amount: null
+- guid: 1010317
+  name: Sugar Refinery
+  tpmin: 2
+  region: 5000001
+  dlcs: []
+  outputs:
+  - product_guid: 1010239
+    amount: 1
+    storage_amount: 4
+  inputs:
+  - product_guid: 1010251
+    amount: 1
+- guid: 101266
+  name: Poncho Darner
+  tpmin: 2
+  region: 5000001
+  dlcs: []
+  outputs:
+  - product_guid: 120043
+    amount: 1
+    storage_amount: 4
+  inputs:
+  - product_guid: 120036
+    amount: 1
+- guid: 101296
+  name: Marquetry Workshop
+  tpmin: 1
+  region: 5000001
+  dlcs: []
+  outputs:
+  - product_guid: 1010242
+    amount: 1
+    storage_amount: 2
+  inputs:
+  - product_guid: 120008
+    amount: 1
+- guid: 1010342
+  name: Cigar Factory
+  tpmin: 2
+  region: 5000001
+  dlcs: []
+  outputs:
+  - product_guid: 1010259
+    amount: 1
+    storage_amount: 4
+  inputs:
+  - product_guid: 1010242
+    amount: 1
+  - product_guid: 1010252
+    amount: 1
+- guid: 114703
+  name: Lumberjack's Hut
+  tpmin: 4
+  region: 160001
+  dlcs:
+  - dlc3
+  outputs:
+  - product_guid: 120008
+    amount: 1
+    storage_amount: 8
+  inputs: []
+- guid: 112667
+  name: Caribou Hunting Cabin
+  tpmin: 1
+  region: 160001
+  dlcs:
+  - dlc3
+  outputs:
+  - product_guid: 112694
+    amount: 1
+    storage_amount: 2
+  inputs:
+  - product_guid: 1955
+    amount: null
+- guid: 112676
+  name: Goose Farm
+  tpmin: 0.5
+  region: 160001
+  dlcs:
+  - dlc3
+  outputs:
+  - product_guid: 112697
+    amount: 1
+    storage_amount: 1
+  inputs: []
+- guid: 112673
+  name: Bear Hunting Cabin
+  tpmin: 0.6666666666666667
+  region: 160001
+  dlcs:
+  - dlc3
+  outputs:
+  - product_guid: 112695
+    amount: 1
+    storage_amount: 1
+  inputs:
+  - product_guid: 1955
+    amount: null
+- guid: 112682
+  name: Husky Farm
+  tpmin: 0.5
+  region: 160001
+  dlcs:
+  - dlc3
+  outputs:
+  - product_guid: 112698
+    amount: 1
+    storage_amount: 1
+  inputs: []
+- guid: 116034
+  name: Prime Hunting Cabin
+  tpmin: 4
+  region: 160001
+  dlcs:
+  - dlc3
+  outputs:
+  - product_guid: 1010209
+    amount: 1
+    storage_amount: 8
+  inputs:
+  - product_guid: 1955
+    amount: null
+- guid: 114705
+  name: Charcoal Kiln
+  tpmin: 2
+  region: 160001
+  dlcs:
+  - dlc3
+  outputs:
+  - product_guid: 1010226
+    amount: 1
+    storage_amount: 4
+  inputs: []
+- guid: 112666
+  name: Whaling Station
+  tpmin: 1
+  region: 160001
+  dlcs:
+  - dlc3
+  outputs:
+  - product_guid: 112699
+    amount: 1
+    storage_amount: 2
+  inputs: []
+- guid: 112674
+  name: Seal Hunting Docks
+  tpmin: 2
+  region: 160001
+  dlcs:
+  - dlc3
+  outputs:
+  - product_guid: 112696
+    amount: 1
+    storage_amount: 2
+  inputs: []
+- guid: 114704
+  name: Sawmill
+  tpmin: 4
+  region: 160001
+  dlcs:
+  - dlc3
+  outputs:
+  - product_guid: 1010196
+    amount: 1
+    storage_amount: 8
+  inputs:
+  - product_guid: 120008
+    amount: 1
+- guid: 112675
+  name: Sleeping Bag Factory
+  tpmin: 1
+  region: 160001
+  dlcs:
+  - dlc3
+  outputs:
+  - product_guid: 112701
+    amount: 1
+    storage_amount: 4
+  inputs:
+  - product_guid: 112696
+    amount: 1
+  - product_guid: 112697
+    amount: 1
+- guid: 112679
+  name: Oil Lamp Factory
+  tpmin: 1
+  region: 160001
+  dlcs:
+  - dlc3
+  outputs:
+  - product_guid: 112702
+    amount: 1
+    storage_amount: 2
+  inputs:
+  - product_guid: 112699
+    amount: 1
+  - product_guid: 1010204
+    amount: 1
+- guid: 112672
+  name: Parka Factory
+  tpmin: 0.6666666666666667
+  region: 160001
+  dlcs:
+  - dlc3
+  outputs:
+  - product_guid: 112700
+    amount: 1
+    storage_amount: 1
+  inputs:
+  - product_guid: 112695
+    amount: 1
+  - product_guid: 112696
+    amount: 1
+- guid: 112681
+  name: Sled Frame Factory
+  tpmin: 1
+  region: 160001
+  dlcs:
+  - dlc3
+  outputs:
+  - product_guid: 112704
+    amount: 1
+    storage_amount: 2
+  inputs:
+  - product_guid: 112696
+    amount: 1
+  - product_guid: 120008
+    amount: 1
+- guid: 112680
+  name: Husky Sled Factory
+  tpmin: 1
+  region: 160001
+  dlcs:
+  - dlc3
+  outputs:
+  - product_guid: 112703
+    amount: 1
+    storage_amount: 2
+  inputs:
+  - product_guid: 112698
+    amount: 1
+  - product_guid: 112704
+    amount: 1
+- guid: 112668
+  name: Pemmican Cookhouse
+  tpmin: 1
+  region: 160001
+  dlcs:
+  - dlc3
+  outputs:
+  - product_guid: 112705
+    amount: 1
+    storage_amount: 2
+  inputs:
+  - product_guid: 112699
+    amount: 1
+  - product_guid: 112694
+    amount: 1
+- guid: 112690
+  name: Arctic Gas Mine
+  tpmin: 0.22222222222222224
+  region: 160001
+  dlcs:
+  - dlc3
+  outputs:
+  - product_guid: 112706
+    amount: 1
+    storage_amount: 1
+  inputs: []
+- guid: 116029
+  name: Deep Gold Mine
+  tpmin: 1
+  region: 160001
+  dlcs:
+  - dlc3
+  outputs:
+  - product_guid: 1010233
+    amount: 1
+    storage_amount: 3
+  inputs:
+  - product_guid: 1591
+    amount: null
+- guid: 118571
+  name: Fuel Station
+  tpmin: 4
+  region: 5000000
+  dlcs: []
+  outputs:
+  - product_guid: 270042
+    amount: 1
+    storage_amount: 20
+  inputs:
+  - product_guid: 1010566
+    amount: 1
+- guid: 269840
+  name: Fuel Station
+  tpmin: 4
+  region: 5000001
+  dlcs: []
+  outputs:
+  - product_guid: 270042
+    amount: 1
+    storage_amount: 20
+  inputs:
+  - product_guid: 1010566
+    amount: 1
+- guid: 119028
+  name: Fuel Station
+  tpmin: 4
+  region: 114327
+  dlcs:
+  - dlc6
+  outputs:
+  - product_guid: 270042
+    amount: 1
+    storage_amount: 20
+  inputs:
+  - product_guid: 1010566
+    amount: 1
+- guid: 133004
+  name: 'Orchard: Coconut Oil'
+  tpmin: 2
+  region: 5000001
+  dlcs:
+  - dlc8
+  - dlc12
+  outputs:
+  - product_guid: 133095
+    amount: 1
+    storage_amount: 10
+  inputs:
+  - product_guid: 1955
+    amount: null
+- guid: 133030
+  name: 'Orchard: Cinnamon'
+  tpmin: 2
+  region: 5000001
+  dlcs:
+  - dlc8
+  - dlc9
+  outputs:
+  - product_guid: 133093
+    amount: 1
+    storage_amount: 10
+  inputs:
+  - product_guid: 1955
+    amount: null
+- guid: 133031
+  name: 'Orchard: Citrus'
+  tpmin: 2
+  region: 5000001
+  dlcs:
+  - dlc8
+  - dlc9
+  - dlc12
+  outputs:
+  - product_guid: 133097
+    amount: 1
+    storage_amount: 10
+  inputs:
+  - product_guid: 1955
+    amount: null
+- guid: 134614
+  name: 'Orchard: Camphor Wax'
+  tpmin: 2
+  region: 5000001
+  dlcs:
+  - dlc8
+  - dlc9
+  - dlc12
+  outputs:
+  - product_guid: 134616
+    amount: 1
+    storage_amount: 10
+  inputs:
+  - product_guid: 1955
+    amount: null
+- guid: 924
+  name: Bomb Factory
+  tpmin: 1
+  region: 5000000
+  dlcs:
+  - dlc11
+  outputs:
+  - product_guid: 846
+    amount: 1
+    storage_amount: 10
+  inputs:
+  - product_guid: 1010232
+    amount: 1
+  - product_guid: 1010222
+    amount: 1
+  - product_guid: 1010219
+    amount: 1
+- guid: 934
+  name: Sea Mine Factory
+  tpmin: 1
+  region: 5000000
+  dlcs:
+  - dlc11
+  outputs:
+  - product_guid: 847
+    amount: 1
+    storage_amount: 10
+  inputs:
+  - product_guid: 1010230
+    amount: 1
+  - product_guid: 1010222
+    amount: 1
+  - product_guid: 1010219
+    amount: 1
+- guid: 935
+  name: Pamphlet Printer
+  tpmin: 1
+  region: 5000000
+  dlcs:
+  - dlc11
+  outputs:
+  - product_guid: 848
+    amount: 1
+    storage_amount: 10
+  inputs:
+  - product_guid: 120008
+    amount: 1
+  - product_guid: 1010253
+    amount: 1
+- guid: 936
+  name: Care Package Factory
+  tpmin: 1
+  region: 5000000
+  dlcs:
+  - dlc11
+  outputs:
+  - product_guid: 849
+    amount: 1
+    storage_amount: 10
+  inputs:
+  - product_guid: 1010217
+    amount: 1
+  - product_guid: 1010258
+    amount: 1
+  - product_guid: 1010216
+    amount: 1
+- guid: 1345
+  name: Charcoal Kiln
+  tpmin: 2
+  region: 5000001
+  dlcs:
+  - dlc11
+  - dlc12
+  outputs:
+  - product_guid: 1010226
+    amount: 1
+    storage_amount: 4
+  inputs: []
+- guid: 1418
+  name: Industrial Oil Press
+  tpmin: 2
+  region: 5000001
+  dlcs:
+  - dlc11
+  outputs:
+  - product_guid: 1414
+    amount: 1
+    storage_amount: 9
+  inputs:
+  - product_guid: 120042
+    amount: 1
+  - product_guid: 1010232
+    amount: 1
+- guid: 835
+  name: Aluminium Smelter
+  tpmin: 0.6666666666666667
+  region: 5000001
+  dlcs:
+  - dlc11
+  - dlc12
+  outputs:
+  - product_guid: 838
+    amount: 1
+    storage_amount: 4
+  inputs:
+  - product_guid: 836
+    amount: 1
+  - product_guid: 1010226
+    amount: 1
+- guid: 906
+  name: Bomb Factory
+  tpmin: 1
+  region: 5000001
+  dlcs:
+  - dlc11
+  outputs:
+  - product_guid: 846
+    amount: 1
+    storage_amount: 10
+  inputs:
+  - product_guid: 1010232
+    amount: 1
+  - product_guid: 1010222
+    amount: 1
+  - product_guid: 1010219
+    amount: 1
+- guid: 907
+  name: Sea Mine Factory
+  tpmin: 1
+  region: 5000001
+  dlcs:
+  - dlc11
+  outputs:
+  - product_guid: 847
+    amount: 1
+    storage_amount: 10
+  inputs:
+  - product_guid: 1010230
+    amount: 1
+  - product_guid: 1010222
+    amount: 1
+  - product_guid: 1010219
+    amount: 1
+- guid: 908
+  name: Pamphlet Printer
+  tpmin: 1
+  region: 5000001
+  dlcs:
+  - dlc11
+  outputs:
+  - product_guid: 848
+    amount: 1
+    storage_amount: 10
+  inputs:
+  - product_guid: 120008
+    amount: 1
+  - product_guid: 1010253
+    amount: 1
+- guid: 916
+  name: Care Package Factory
+  tpmin: 1
+  region: 5000001
+  dlcs:
+  - dlc11
+  outputs:
+  - product_guid: 849
+    amount: 1
+    storage_amount: 10
+  inputs:
+  - product_guid: 1010217
+    amount: 1
+  - product_guid: 1010258
+    amount: 1
+  - product_guid: 1010216
+    amount: 1
+- guid: 915
+  name: Water Drop Factory
+  tpmin: 1
+  region: 5000001
+  dlcs:
+  - dlc11
+  outputs:
+  - product_guid: 850
+    amount: 1
+    storage_amount: 10
+  inputs:
+  - product_guid: 917
+    amount: null
+- guid: 1308
+  name: Bauxite Mine
+  tpmin: 6
+  region: 5000001
+  dlcs:
+  - dlc11
+  - dlc12
+  outputs:
+  - product_guid: 836
+    amount: 1
+    storage_amount: 12
+  inputs: []
+- guid: 1353
+  name: Helium Extractor
+  tpmin: 4
+  region: 5000001
+  dlcs:
+  - dlc11
+  outputs:
+  - product_guid: 840
+    amount: 1
+    storage_amount: 8
+  inputs:
+  - product_guid: 1414
+    amount: 1
+  - product_guid: 1010201
+    amount: 1
+- guid: 122963
+  name: Wanza Woodcutter
+  tpmin: 4
+  region: 114327
+  dlcs:
+  - dlc6
+  outputs:
+  - product_guid: 114356
+    amount: 1
+    storage_amount: 8
+  inputs: []
+- guid: 114448
+  name: Linseed Farm
+  tpmin: 1
+  region: 114327
+  dlcs:
+  - dlc6
+  outputs:
+  - product_guid: 114365
+    amount: 1
+    storage_amount: 2
+  inputs: []
+- guid: 114447
+  name: Hibiscus Farm
+  tpmin: 1
+  region: 114327
+  dlcs:
+  - dlc6
+  outputs:
+  - product_guid: 114364
+    amount: 1
+    storage_amount: 2
+  inputs: []
+- guid: 114450
+  name: Teff Farm
+  tpmin: 1
+  region: 114327
+  dlcs:
+  - dlc6
+  outputs:
+  - product_guid: 114367
+    amount: 1
+    storage_amount: 2
+  inputs: []
+- guid: 114451
+  name: Indigo Farm
+  tpmin: 1
+  region: 114327
+  dlcs:
+  - dlc6
+  outputs:
+  - product_guid: 114368
+    amount: 1
+    storage_amount: 2
+  inputs: []
+- guid: 114452
+  name: Spice Farm
+  tpmin: 1
+  region: 114327
+  dlcs:
+  - dlc6
+  outputs:
+  - product_guid: 114369
+    amount: 1
+    storage_amount: 2
+  inputs: []
+- guid: 114453
+  name: Apiary
+  tpmin: 2
+  region: 114327
+  dlcs:
+  - dlc6
+  outputs:
+  - product_guid: 114370
+    amount: 1
+    storage_amount: 4
+  inputs: []
+- guid: 114439
+  name: Sanga Farm
+  tpmin: 1
+  region: 114327
+  dlcs:
+  - dlc6
+  outputs:
+  - product_guid: 114357
+    amount: 1
+    storage_amount: 2
+  inputs: []
+- guid: 114456
+  name: Goat Farm
+  tpmin: 1
+  region: 114327
+  dlcs:
+  - dlc6
+  outputs:
+  - product_guid: 114371
+    amount: 1
+    storage_amount: 2
+  inputs: []
+- guid: 114440
+  name: Salt Works
+  tpmin: 2
+  region: 114327
+  dlcs:
+  - dlc6
+  outputs:
+  - product_guid: 114358
+    amount: 1
+    storage_amount: 4
+  inputs: []
+- guid: 118729
+  name: Lobster Fishery
+  tpmin: 1
+  region: 114327
+  dlcs:
+  - dlc6
+  outputs:
+  - product_guid: 118728
+    amount: 1
+    storage_amount: 2
+  inputs: []
+- guid: 117743
+  name: Clay Collector
+  tpmin: 4
+  region: 114327
+  dlcs:
+  - dlc6
+  outputs:
+  - product_guid: 1010201
+    amount: 1
+    storage_amount: 8
+  inputs: []
+- guid: 117744
+  name: Paper Mill
+  tpmin: 4
+  region: 114327
+  dlcs:
+  - dlc6
+  outputs:
+  - product_guid: 117702
+    amount: 1
+    storage_amount: 8
+  inputs:
+  - product_guid: 120008
+    amount: 1
+- guid: 114441
+  name: Linen Mill
+  tpmin: 2
+  region: 114327
+  dlcs:
+  - dlc6
+  outputs:
+  - product_guid: 114391
+    amount: 1
+    storage_amount: 4
+  inputs:
+  - product_guid: 114365
+    amount: 1
+- guid: 114459
+  name: Teff Mill
+  tpmin: 2
+  region: 114327
+  dlcs:
+  - dlc6
+  outputs:
+  - product_guid: 114408
+    amount: 1
+    storage_amount: 4
+  inputs:
+  - product_guid: 114367
+    amount: 1
+  - product_guid: 114369
+    amount: 1
+- guid: 114461
+  name: Chandler
+  tpmin: 2
+  region: 114327
+  dlcs:
+  - dlc6
+  outputs:
+  - product_guid: 117701
+    amount: 1
+    storage_amount: 4
+  inputs:
+  - product_guid: 114370
+    amount: 1
+  - product_guid: 1010253
+    amount: 1
+- guid: 114444
+  name: Dry-House
+  tpmin: 2
+  region: 114327
+  dlcs:
+  - dlc6
+  outputs:
+  - product_guid: 114359
+    amount: 1
+    storage_amount: 4
+  inputs:
+  - product_guid: 114357
+    amount: 1
+  - product_guid: 114358
+    amount: 1
+- guid: 114466
+  name: Embroiderer
+  tpmin: 1
+  region: 114327
+  dlcs:
+  - dlc6
+  outputs:
+  - product_guid: 114401
+    amount: 1
+    storage_amount: 2
+  inputs:
+  - product_guid: 114391
+    amount: 1
+- guid: 114468
+  name: Tea Spicer
+  tpmin: 0.6666666666666667
+  region: 114327
+  dlcs:
+  - dlc6
+  outputs:
+  - product_guid: 114390
+    amount: 1
+    storage_amount: 1
+  inputs:
+  - product_guid: 114364
+    amount: 1
+- guid: 118725
+  name: Ceramics Workshop
+  tpmin: 2
+  region: 114327
+  dlcs:
+  - dlc6
+  outputs:
+  - product_guid: 118724
+    amount: 1
+    storage_amount: 4
+  inputs:
+  - product_guid: 1010201
+    amount: 1
+  - product_guid: 114368
+    amount: 1
+- guid: 114469
+  name: Tapestry Looms
+  tpmin: 2
+  region: 114327
+  dlcs:
+  - dlc6
+  outputs:
+  - product_guid: 114404
+    amount: 1
+    storage_amount: 4
+  inputs:
+  - product_guid: 114391
+    amount: 1
+  - product_guid: 114368
+    amount: 1
+- guid: 114467
+  name: Brick Dry-House
+  tpmin: 1
+  region: 114327
+  dlcs:
+  - dlc6
+  outputs:
+  - product_guid: 114402
+    amount: 1
+    storage_amount: 2
+  inputs:
+  - product_guid: 1010201
+    amount: 1
+  - product_guid: 114367
+    amount: 1
+- guid: 114471
+  name: Wat Kitchen
+  tpmin: 1
+  region: 114327
+  dlcs:
+  - dlc6
+  outputs:
+  - product_guid: 114410
+    amount: 1
+    storage_amount: 2
+  inputs:
+  - product_guid: 118728
+    amount: 1
+  - product_guid: 114408
+    amount: 1
+- guid: 114472
+  name: Pipe Maker
+  tpmin: 0.6666666666666667
+  region: 114327
+  dlcs:
+  - dlc6
+  outputs:
+  - product_guid: 114414
+    amount: 1
+    storage_amount: 1
+  inputs:
+  - product_guid: 1010201
+    amount: 1
+  - product_guid: 1010252
+    amount: 1
+- guid: 114470
+  name: Luminer
+  tpmin: 1
+  region: 114327
+  dlcs:
+  - dlc6
+  outputs:
+  - product_guid: 117698
+    amount: 1
+    storage_amount: 2
+  inputs:
+  - product_guid: 114368
+    amount: 1
+  - product_guid: 117702
+    amount: 1
+- guid: 114464
+  name: Lanternsmith
+  tpmin: 1
+  region: 114327
+  dlcs:
+  - dlc6
+  outputs:
+  - product_guid: 117699
+    amount: 1
+    storage_amount: 2
+  inputs:
+  - product_guid: 117701
+    amount: 1
+  - product_guid: 1010241
+    amount: 1
+- guid: 118733
+  name: Bootmakers
+  tpmin: 1
+  region: 5000000
+  dlcs:
+  - dlc6
+  outputs:
+  - product_guid: 114428
+    amount: 1
+    storage_amount: 2
+  inputs:
+  - product_guid: 114357
+    amount: 1
+- guid: 118734
+  name: Tailor's Shop
+  tpmin: 1
+  region: 5000000
+  dlcs:
+  - dlc6
+  outputs:
+  - product_guid: 114430
+    amount: 1
+    storage_amount: 2
+  inputs:
+  - product_guid: 114391
+    amount: 1
+  - product_guid: 1010240
+    amount: 1
+- guid: 118735
+  name: Telephone Manufacturer
+  tpmin: 0.6666666666666667
+  region: 5000000
+  dlcs:
+  - dlc6
+  outputs:
+  - product_guid: 114431
+    amount: 1
+    storage_amount: 1
+  inputs:
+  - product_guid: 1010243
+    amount: 1
+  - product_guid: 1010242
+    amount: 1
+- guid: 124738
+  name: Advanced Coffee Roaster
+  tpmin: 1
+  region: 5000000
+  dlcs:
+  - dlc6
+  outputs:
+  - product_guid: 120032
+    amount: 1
+    storage_amount: 4
+  inputs:
+  - product_guid: 1010236
+    amount: 1
+- guid: 124737
+  name: Advanced Rum Distillery
+  tpmin: 1
+  region: 5000000
+  dlcs:
+  - dlc6
+  outputs:
+  - product_guid: 1010257
+    amount: 1
+    storage_amount: 4
+  inputs:
+  - product_guid: 1010226
+    amount: 1
+  - product_guid: 1010195
+    amount: 1
+- guid: 124739
+  name: Advanced Cotton Mill
+  tpmin: 1
+  region: 5000000
+  dlcs:
+  - dlc6
+  outputs:
+  - product_guid: 1010240
+    amount: 1
+    storage_amount: 4
+  inputs:
+  - product_guid: 1010197
+    amount: 1
+  - product_guid: 120008
+    amount: 1
+- guid: 132777
+  name: 'Chemical Plant: Lemonade'
+  tpmin: 2
+  region: 5000000
+  dlcs:
+  - dlc8
+  outputs:
+  - product_guid: 133185
+    amount: 1
+    storage_amount: 10
+  inputs:
+  - product_guid: 1010232
+    amount: 1
+  - product_guid: 1010239
+    amount: 1
+  - product_guid: 133097
+    amount: 1
+- guid: 132786
+  name: 'Chemical Plant: Shampoo'
+  tpmin: 2
+  region: 5000000
+  dlcs:
+  - dlc8
+  outputs:
+  - product_guid: 133181
+    amount: 1
+    storage_amount: 10
+  inputs:
+  - product_guid: 1010203
+    amount: 1
+  - product_guid: 133095
+    amount: 1
+  - product_guid: 133093
+    amount: 1
+- guid: 133533
+  name: 'Chemical Plant: Souvenirs'
+  tpmin: 2
+  region: 5000000
+  dlcs:
+  - dlc8
+  outputs:
+  - product_guid: 133532
+    amount: 1
+    storage_amount: 10
+  inputs:
+  - product_guid: 1010241
+    amount: 1
+  - product_guid: 1010253
+    amount: 1
+  - product_guid: 134616
+    amount: 1
+- guid: 133496
+  name: 'Orchard: Jam'
+  tpmin: 2
+  region: 5000000
+  dlcs:
+  - dlc8
+  - dlc10
+  outputs:
+  - product_guid: 133183
+    amount: 1
+    storage_amount: 10
+  inputs:
+  - product_guid: 1955
+    amount: null
+- guid: 135088
+  name: 'Orchard: Cherry Wood'
+  tpmin: 2
+  region: 5000000
+  dlcs:
+  - dlc9
+  outputs:
+  - product_guid: 135087
+    amount: 1
+    storage_amount: 10
+  inputs:
+  - product_guid: 1955
+    amount: null
+- guid: 135085
+  name: 'Orchard: Resin'
+  tpmin: 2
+  region: 5000000
+  dlcs:
+  - dlc9
+  outputs:
+  - product_guid: 135086
+    amount: 1
+    storage_amount: 10
+  inputs:
+  - product_guid: 1955
+    amount: null
+- guid: 134622
+  name: 'Assembly Line: Elevators'
+  tpmin: 2
+  region: 5000000
+  dlcs:
+  - dlc9
+  outputs:
+  - product_guid: 134623
+    amount: 1
+    storage_amount: 3
+  inputs:
+  - product_guid: 1010219
+    amount: 1
+  - product_guid: 1010242
+    amount: 1
+  - product_guid: 1010224
+    amount: 1
+- guid: 135361
+  name: 'Assembly Line: Biscuits'
+  tpmin: 2
+  region: 5000000
+  dlcs:
+  - dlc9
+  outputs:
+  - product_guid: 135229
+    amount: 1
+    storage_amount: 3
+  inputs:
+  - product_guid: 1010234
+    amount: 1
+  - product_guid: 1010235
+    amount: 1
+  - product_guid: 133097
+    amount: 1
+- guid: 135148
+  name: 'Assembly Line: Typewriters'
+  tpmin: 2
+  region: 5000000
+  dlcs:
+  - dlc9
+  outputs:
+  - product_guid: 135230
+    amount: 1
+    storage_amount: 3
+  inputs:
+  - product_guid: 1010219
+    amount: 1
+  - product_guid: 1010204
+    amount: 1
+  - product_guid: 135129
+    amount: 1
+- guid: 135133
+  name: 'Chemical Plant: Lacquer'
+  tpmin: 2
+  region: 5000000
+  dlcs:
+  - dlc9
+  outputs:
+  - product_guid: 135129
+    amount: 1
+    storage_amount: 10
+  inputs:
+  - product_guid: 1010228
+    amount: 1
+  - product_guid: 135086
+    amount: 1
+  - product_guid: 135130
+    amount: 1
+- guid: 135418
+  name: 'Artisan''s Workshop: Cognac'
+  tpmin: 1
+  region: 5000000
+  dlcs:
+  - dlc9
+  outputs:
+  - product_guid: 135234
+    amount: 1
+    storage_amount: 3
+  inputs:
+  - product_guid: 120014
+    amount: 1
+  - product_guid: 135087
+    amount: 1
+  - product_guid: 1010239
+    amount: 1
+- guid: 135397
+  name: 'Artisan''s Workshop: Violins'
+  tpmin: 1
+  region: 5000000
+  dlcs:
+  - dlc9
+  outputs:
+  - product_guid: 135233
+    amount: 1
+    storage_amount: 3
+  inputs:
+  - product_guid: 1010219
+    amount: 1
+  - product_guid: 135087
+    amount: 1
+  - product_guid: 135129
+    amount: 1
+- guid: 135407
+  name: 'Artisan''s Workshop: Billiard Tables'
+  tpmin: 1
+  region: 5000000
+  dlcs:
+  - dlc9
+  outputs:
+  - product_guid: 135232
+    amount: 1
+    storage_amount: 3
+  inputs:
+  - product_guid: 135087
+    amount: 1
+  - product_guid: 120044
+    amount: 1
+  - product_guid: 135150
+    amount: 1
+- guid: 135669
+  name: 'Artisan''s Workshop: Toys'
+  tpmin: 1
+  region: 5000000
+  dlcs:
+  - dlc9
+  outputs:
+  - product_guid: 135231
+    amount: 1
+    storage_amount: 3
+  inputs:
+  - product_guid: 120044
+    amount: 1
+  - product_guid: 135150
+    amount: 1
+  - product_guid: 135129
+    amount: 1
+- guid: 135185
+  name: 'Chemical Plant: Chewing Gum'
+  tpmin: 2
+  region: 5000001
+  dlcs:
+  - dlc9
+  outputs:
+  - product_guid: 135186
+    amount: 1
+    storage_amount: 10
+  inputs:
+  - product_guid: 1010255
+    amount: 1
+  - product_guid: 1010239
+    amount: 1
+  - product_guid: 133093
+    amount: 1
+- guid: 135134
+  name: 'Chemical Plant: Ethanol'
+  tpmin: 2
+  region: 5000001
+  dlcs:
+  - dlc9
+  - dlc12
+  outputs:
+  - product_guid: 135130
+    amount: 1
+    storage_amount: 10
+  inputs:
+  - product_guid: 120008
+    amount: 1
+  - product_guid: 120034
+    amount: 1
+- guid: 135224
+  name: 'Chemical Plant: Celluloid'
+  tpmin: 2
+  region: 5000001
+  dlcs:
+  - dlc9
+  - dlc12
+  outputs:
+  - product_guid: 135150
+    amount: 1
+    storage_amount: 10
+  inputs:
+  - product_guid: 1010253
+    amount: 1
+  - product_guid: 134616
+    amount: 1
+  - product_guid: 135130
+    amount: 1
+- guid: 5457
+  name: Nandu Farm
+  tpmin: 2
+  region: 5000001
+  dlcs: []
+  outputs:
+  - product_guid: 5384
+    amount: 1
+    storage_amount: 4
+  inputs: []
+- guid: 5463
+  name: Herb Garden
+  tpmin: 2
+  region: 5000001
+  dlcs: []
+  outputs:
+  - product_guid: 5383
+    amount: 1
+    storage_amount: 4
+  inputs: []
+- guid: 5814
+  name: Orchid Farm
+  tpmin: 2
+  region: 5000001
+  dlcs: []
+  outputs:
+  - product_guid: 5386
+    amount: 1
+    storage_amount: 4
+  inputs: []
+- guid: 7919
+  name: Calamari Fishery
+  tpmin: 1
+  region: 5000001
+  dlcs: []
+  outputs:
+  - product_guid: 5380
+    amount: 1
+    storage_amount: 4
+  inputs: []
+- guid: 6080
+  name: Furnace
+  tpmin: 2
+  region: 5000001
+  dlcs:
+  - dlc12
+  outputs:
+  - product_guid: 1010219
+    amount: 1
+    storage_amount: 4
+  inputs:
+  - product_guid: 1010227
+    amount: 1
+  - product_guid: 1010226
+    amount: 1
+- guid: 6083
+  name: Sewing Machine Factory
+  tpmin: 2
+  region: 5000001
+  dlcs:
+  - dlc12
+  outputs:
+  - product_guid: 1010206
+    amount: 1
+    storage_amount: 4
+  inputs:
+  - product_guid: 120008
+    amount: 1
+  - product_guid: 838
+    amount: 1
+- guid: 6279
+  name: Cable Factory
+  tpmin: 1
+  region: 5000001
+  dlcs:
+  - dlc12
+  outputs:
+  - product_guid: 6280
+    amount: 1
+    storage_amount: 2
+  inputs:
+  - product_guid: 1010230
+    amount: 1
+  - product_guid: 1010255
+    amount: 1
+- guid: 5458
+  name: Jalea Kitchen
+  tpmin: 2
+  region: 5000001
+  dlcs:
+  - dlc12
+  outputs:
+  - product_guid: 5381
+    amount: 1
+    storage_amount: 4
+  inputs:
+  - product_guid: 5380
+    amount: 1
+  - product_guid: 5383
+    amount: 1
+  - product_guid: 120034
+    amount: 1
+- guid: 5459
+  name: Ice Cream Factory
+  tpmin: 1
+  region: 5000001
+  dlcs:
+  - dlc12
+  outputs:
+  - product_guid: 5382
+    amount: 1
+    storage_amount: 4
+  inputs:
+  - product_guid: 5385
+    amount: 1
+  - product_guid: 1010258
+    amount: 1
+  - product_guid: 133097
+    amount: 1
+- guid: 6594
+  name: Mezcal Bar
+  tpmin: 2
+  region: 5000001
+  dlcs:
+  - dlc12
+  outputs:
+  - product_guid: 6600
+    amount: 1
+    storage_amount: 4
+  inputs:
+  - product_guid: 133097
+    amount: 1
+  - product_guid: 1010239
+    amount: 1
+  - product_guid: 5383
+    amount: 1
+- guid: 5658
+  name: Scooter Factory
+  tpmin: 0.5
+  region: 5000001
+  dlcs:
+  - dlc12
+  outputs:
+  - product_guid: 5391
+    amount: 1
+    storage_amount: 4
+  inputs:
+  - product_guid: 5390
+    amount: 1
+  - product_guid: 5400
+    amount: 1
+  - product_guid: 1010255
+    amount: 1
+- guid: 5659
+  name: Motor Assembly Plant
+  tpmin: 1
+  region: 5000001
+  dlcs:
+  - dlc12
+  outputs:
+  - product_guid: 5390
+    amount: 1
+    storage_amount: 4
+  inputs:
+  - product_guid: 6280
+    amount: 1
+  - product_guid: 135150
+    amount: 1
+  - product_guid: 1010219
+    amount: 1
+- guid: 5862
+  name: Fan Factory
+  tpmin: 1
+  region: 5000001
+  dlcs:
+  - dlc12
+  outputs:
+  - product_guid: 5395
+    amount: 1
+    storage_amount: 4
+  inputs:
+  - product_guid: 5390
+    amount: 1
+  - product_guid: 838
+    amount: 1
+- guid: 1388
+  name: Iron Mine
+  tpmin: 4
+  region: 5000001
+  dlcs:
+  - dlc12
+  outputs:
+  - product_guid: 1010227
+    amount: 1
+    storage_amount: 8
+  inputs: []
+- guid: 1390
+  name: Mineral Mine
+  tpmin: 4
+  region: 5000001
+  dlcs:
+  - dlc12
+  outputs:
+  - product_guid: 5398
+    amount: 1
+    storage_amount: 6
+  inputs: []
+- guid: 5657
+  name: Perfume Mixer
+  tpmin: 1
+  region: 5000001
+  dlcs:
+  - dlc12
+  outputs:
+  - product_guid: 5388
+    amount: 1
+    storage_amount: 4
+  inputs:
+  - product_guid: 5386
+    amount: 1
+  - product_guid: 135130
+    amount: 1
+  - product_guid: 133095
+    amount: 1
+- guid: 5879
+  name: Ball Manufactory
+  tpmin: 2
+  region: 5000001
+  dlcs:
+  - dlc12
+  outputs:
+  - product_guid: 5803
+    amount: 1
+    storage_amount: 4
+  inputs:
+  - product_guid: 5384
+    amount: 1
+  - product_guid: 1010255
+    amount: 1
+- guid: 5933
+  name: Costume Shop
+  tpmin: 1
+  region: 5000001
+  dlcs:
+  - dlc12
+  outputs:
+  - product_guid: 5389
+    amount: 1
+    storage_amount: 4
+  inputs:
+  - product_guid: 1010240
+    amount: 1
+  - product_guid: 5400
+    amount: 1
+  - product_guid: 5401
+    amount: 1
+- guid: 5828
+  name: 'Chemical Plant: Film Reels'
+  tpmin: 2
+  region: 5000001
+  dlcs:
+  - dlc12
+  outputs:
+  - product_guid: 5392
+    amount: 1
+    storage_amount: 10
+  inputs:
+  - product_guid: 1010232
+    amount: 1
+  - product_guid: 135150
+    amount: 1
+- guid: 6630
+  name: 'Arsenal: Police Equipment'
+  tpmin: 1
+  region: 5000001
+  dlcs:
+  - dlc12
+  outputs:
+  - product_guid: 5394
+    amount: 1
+    storage_amount: 10
+  inputs:
+  - product_guid: 120008
+    amount: 1
+  - product_guid: 1010219
+    amount: 1
+  - product_guid: 1010240
+    amount: 1
+- guid: 6629
+  name: 'Laboratory: Fire Extinguisher'
+  tpmin: 1.3333333333333335
+  region: 5000001
+  dlcs:
+  - dlc12
+  outputs:
+  - product_guid: 5393
+    amount: 1
+    storage_amount: 3
+  inputs:
+  - product_guid: 1010219
+    amount: 1
+  - product_guid: 1010255
+    amount: 1
+- guid: 6631
+  name: 'Laboratory: Medicine'
+  tpmin: 1.3333333333333335
+  region: 5000001
+  dlcs:
+  - dlc12
+  outputs:
+  - product_guid: 5397
+    amount: 1
+    storage_amount: 3
+  inputs:
+  - product_guid: 5383
+    amount: 1
+  - product_guid: 5386
+    amount: 1
+  - product_guid: 135130
+    amount: 1
+- guid: 5462
+  name: 'Laboratory: Pigments'
+  tpmin: 1.3333333333333335
+  region: 5000001
+  dlcs:
+  - dlc12
+  outputs:
+  - product_guid: 5400
+    amount: 1
+    storage_amount: 4
+  inputs:
+  - product_guid: 5398
+    amount: 1
+  - product_guid: 1010232
+    amount: 1
+- guid: 8027
+  name: Powered Pasture
+  tpmin: 0.25
+  region: 5000001
+  dlcs: []
+  outputs:
+  - product_guid: 1010232
+    amount: 1
+    storage_amount: 1
+  inputs: []
+- guid: 8002
+  name: Pasture
+  tpmin: 1
+  region: 5000001
+  dlcs: []
+  outputs:
+  - product_guid: 5385
+    amount: 1
+    storage_amount: 1
+  inputs: []
+- guid: 8026
+  name: Powered Pasture
+  tpmin: 0.5
+  region: 5000001
+  dlcs: []
+  outputs:
+  - product_guid: 5401
+    amount: 1
+    storage_amount: 1
+  inputs: []
+- guid: 190872
+  name: All Animal Farms
+  tpmin: 0.6666666666666666
+  region: 5000001
+  dlcs:
+  - dlc10
+  outputs:
+  - product_guid: 24807
+    amount: 1
+    storage_amount: null
+  inputs: []

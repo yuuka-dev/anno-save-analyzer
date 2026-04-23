@@ -85,6 +85,53 @@ def _build_ja_payload(data: dict[str, Any]) -> dict[str, Any]:
     return {"tiers": tiers}
 
 
+def _build_factories_en_payload(data: dict[str, Any]) -> dict[str, Any]:
+    """``factory_recipes_anno1800.en.yaml`` の canonical ペイロード．
+
+    factory template GUID → (name, tpmin, region, dlcs, outputs, inputs)．
+    save の ``objects > <1>`` 直下 ``guid`` attrib がこの ``guid`` と一致する．
+    """
+    recipes: list[dict[str, Any]] = []
+    for f in data.get("factories", []):
+        name = f.get("loca_text", {}).get(_LOCALE_EN) or f.get("name") or ""
+        recipes.append(
+            {
+                "guid": f["guid"],
+                "name": name,
+                "tpmin": f.get("tpmin"),
+                "region": f.get("region"),
+                "dlcs": list(f.get("dlcs") or []),
+                "outputs": [
+                    {
+                        "product_guid": o["product_guid"],
+                        "amount": o.get("amount"),
+                        "storage_amount": o.get("storage_amount"),
+                    }
+                    for o in f.get("outputs") or []
+                ],
+                "inputs": [
+                    {"product_guid": i["product_guid"], "amount": i.get("amount")}
+                    for i in f.get("inputs") or []
+                ],
+            }
+        )
+    return {
+        "source": {"calculator_version": data.get("source", {}).get("calculator_version")},
+        "factories": recipes,
+    }
+
+
+def _build_factories_ja_payload(data: dict[str, Any]) -> dict[str, Any]:
+    """``factory_recipes_anno1800.ja.yaml`` — guid + 日本語名のみ．"""
+    recipes: list[dict[str, Any]] = []
+    for f in data.get("factories", []):
+        ja = f.get("loca_text", {}).get(_LOCALE_JA)
+        if not ja:
+            continue
+        recipes.append({"guid": f["guid"], "name": ja.replace(_ZERO_WIDTH, "")})
+    return {"factories": recipes}
+
+
 def _dump_yaml(payload: dict[str, Any], out_path: Path) -> None:
     """敵対的な YAML 差分を避けるため ``sort_keys=False`` + ``allow_unicode``．"""
     out_path.write_text(
@@ -115,12 +162,15 @@ def main(argv: list[str] | None = None) -> int:
     args.data_dir.mkdir(parents=True, exist_ok=True)
 
     data = _run_node(args.calculator_dir)
-    en_path = args.data_dir / "consumption_anno1800.en.yaml"
-    ja_path = args.data_dir / "consumption_anno1800.ja.yaml"
-    _dump_yaml(_build_en_payload(data), en_path)
-    _dump_yaml(_build_ja_payload(data), ja_path)
-    print(f"wrote {en_path}", file=sys.stderr)
-    print(f"wrote {ja_path}", file=sys.stderr)
+    outputs = [
+        (args.data_dir / "consumption_anno1800.en.yaml", _build_en_payload(data)),
+        (args.data_dir / "consumption_anno1800.ja.yaml", _build_ja_payload(data)),
+        (args.data_dir / "factory_recipes_anno1800.en.yaml", _build_factories_en_payload(data)),
+        (args.data_dir / "factory_recipes_anno1800.ja.yaml", _build_factories_ja_payload(data)),
+    ]
+    for path, payload in outputs:
+        _dump_yaml(payload, path)
+        print(f"wrote {path}", file=sys.stderr)
     return 0
 
 
