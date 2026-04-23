@@ -50,6 +50,18 @@ addopts = [
     "-ra",
     "--strict-markers",
 ]
+markers = [
+    # 実 save を舐める / 大きい fixture を走査する重いテスト．
+    "slow: 実 save を読む / 巨大 DOM を走査するなど数秒オーダーの試験",
+    # 複数 module またぐ結合試験 (tests/integration/)．CI は引き続き走らせる前提．
+    "integration: save → extract → model → render の複数 layer 結合",
+    # CLI / GUI など entrypoint 起動まで含むシステム試験 (tests/system/)．
+    # sample save に依存する場合が多く，CI は workflow_dispatch 時のみを想定．
+    "system: CLI / GUI entrypoint 起動を含む end-to-end",
+    # PySide6 GUI package の widget テスト．pytest-qt 要．Linux CI は
+    # ``QT_QPA_PLATFORM=offscreen`` で動かすが実機検証は Windows runner．
+    "gui: pytest-qt を使う GUI widget 試験",
+]
 
 [tool.coverage.run]
 branch = true
