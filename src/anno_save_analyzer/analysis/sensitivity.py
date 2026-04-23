@@ -53,20 +53,48 @@ def route_leave_one_out(frames: AnalysisFrames) -> pd.DataFrame:
     rows: list[dict] = []
     for route_id, group in routed.groupby("route_id"):
         route_name = group["route_name"].iloc[0]
-        tick_span = (group["timestamp_tick"].max() - group["timestamp_tick"].min()) or 0
-        minutes = max(1.0, float(tick_span) / TICKS_PER_MINUTE)
+        max_tick = group["timestamp_tick"].max()
+        min_tick = group["timestamp_tick"].min()
+        if pd.isna(max_tick) or pd.isna(min_tick):
+            tick_span = 0.0
+        else:
+            tick_delta = max_tick - min_tick
+            tick_span = 0.0 if pd.isna(tick_delta) else float(tick_delta)
+        minutes = max(1.0, tick_span / TICKS_PER_MINUTE)
         tons_per_min = float(group["amount"].sum()) / minutes
 
         # route が運んでる unique products
         products = group["product_guid"].unique().tolist()
+        route_islands = set(group["island_name"].dropna().astype(str))
+        route_area_managers: set[str] = set()
+        if (
+            route_islands
+            and not frames.islands.empty
+            and "city_name" in frames.islands
+            and "area_manager" in frames.islands
+        ):
+            route_area_managers = set(
+                frames.islands.loc[
+                    frames.islands["city_name"].isin(route_islands), "area_manager"
+                ]
+                .dropna()
+                .astype(str)
+            )
+
         # その島 × 物資の現在 balance で「delta - tons_per_min/len(products)」を
         # 減算した場合に deficit 化するものを数える (均等分担仮定の MVP)
         added_deficit = 0
         per_product_contribution = tons_per_min / len(products) if products else 0.0
         for product_guid in products:
             mask = balance["product_guid"] == product_guid
+            location_mask = pd.Series(False, index=balance.index)
+            if "city_name" in balance and route_islands:
+                location_mask |= balance["city_name"].isin(route_islands)
+            if "area_manager" in balance and route_area_managers:
+                location_mask |= balance["area_manager"].isin(route_area_managers)
+            if location_mask.any():
+                mask &= location_mask
             for _, row in balance[mask].iterrows():
-                new_delta = row["delta_per_minute"] + per_product_contribution
                 # 「route 除外 = 消費地に届かない」→ その分 produced が減る
                 # 近似: delta_new = delta - per_product_contribution (赤字悪化方向)
                 # ここでは route が消費地に供給する想定なので delta から引く
@@ -76,8 +104,6 @@ def route_leave_one_out(frames: AnalysisFrames) -> pd.DataFrame:
                 now_deficit = simulated < 0
                 if now_deficit and not was_deficit:
                     added_deficit += 1
-                # ループ内で new_delta 未使用の宣言は警告になるので参照だけ
-                del new_delta
         recommended = (
             "safe_to_remove" if added_deficit == 0 else f"impacts_{added_deficit}_products"
         )

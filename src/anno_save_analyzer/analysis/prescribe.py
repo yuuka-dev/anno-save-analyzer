@@ -71,7 +71,7 @@ def diagnose(
     persistence_df = _persistence_by_product(storage_by_island)
     correlation_df = saturation_vs_deficit(frames)
     routes_df = rank_routes(frames.trade_events)
-    strong_routes_products = _strong_route_products(routes_df, th)
+    strong_routes_products = _strong_route_products(frames.trade_events, routes_df, th)
 
     merged = balance.merge(
         frames.islands[["area_manager", "avg_saturation_mean"]],
@@ -108,19 +108,31 @@ def _persistence_by_product(
     )
 
 
-def _strong_route_products(routes_df: pd.DataFrame, th: Thresholds) -> set[int]:
-    """強い route (tons_per_min >= threshold) が流してる unique product guid 集合．
-
-    MVP: route → product の明示 mapping は route ranking にはないので，
-    一旦「強い route が存在すればその島はよく輸送されてる」扱いで保守的に
-    bool を product 単位まで落とす用途には足りない．ここでは route ranking
-    から強 route の events_count > 0 な product は全部 "strong route に載る"
-    と近似．正確化は後続 issue で．
-    """
-    if routes_df.empty:
+def _strong_route_products(
+    trade_events_df: pd.DataFrame,
+    routes_df: pd.DataFrame,
+    th: Thresholds,
+) -> set[tuple[str, int]]:
+    """強い route が到達する ``(island_name, product_guid)`` の集合を返す．"""
+    if trade_events_df.empty or routes_df.empty:
         return set()
     strong = routes_df[routes_df["tons_per_min"] >= th.strong_route_tons_per_min]
-    return set(strong["route_id"].dropna())  # placeholder: product 粒度まで落とさない
+    if strong.empty:
+        return set()
+    strong_route_ids = set(strong["route_id"].dropna())
+    events = trade_events_df[trade_events_df["route_id"].isin(strong_route_ids)].copy()
+    if events.empty:
+        return set()
+    events = events[events["island_name"].notna()].copy()
+    events["product_guid_numeric"] = pd.to_numeric(events["product_guid"], errors="coerce")
+    events = events[events["product_guid_numeric"].notna()]
+    return set(
+        zip(
+            events["island_name"].astype(str),
+            events["product_guid_numeric"].astype(int),
+            strict=False,
+        )
+    )
 
 
 def _classify_single(
@@ -128,7 +140,7 @@ def _classify_single(
     row: pd.Series,
     persistence_df: pd.DataFrame,
     correlation_df: pd.DataFrame,
-    strong_routes_products: set,
+    strong_routes_products: set[tuple[str, int]],
     thresholds: Thresholds,
 ) -> dict:
     area_manager = row["area_manager"]
@@ -154,7 +166,8 @@ def _classify_single(
 
     persistence = _persistence_for(persistence_df, city_name or area_manager, product_guid)
     correlation = _correlation_for(correlation_df, product_guid)
-    has_strong_route = bool(strong_routes_products)  # MVP 粒度: island-product ではなく global
+    route_key = city_name if city_name is not None else area_manager
+    has_strong_route = (str(route_key), product_guid) in strong_routes_products
 
     # Rule 1: 慢性 deficit × 高満足度 × 運べてる → 生産増一択
     if (

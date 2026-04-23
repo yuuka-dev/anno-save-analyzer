@@ -317,6 +317,44 @@ class TestRouteRanking:
         assert result.empty
         assert "tons_per_min" in result.columns
 
+    def test_zero_tick_span_treated_as_one_minute(self) -> None:
+        events = pd.DataFrame(
+            [
+                {
+                    "timestamp_tick": 100,
+                    "product_guid": 100,
+                    "product_name": "Wood",
+                    "amount": 30,
+                    "total_price": 90,
+                    "session_id": "0",
+                    "island_name": "岡山",
+                    "route_id": "route:z",
+                    "route_name": "RZ",
+                    "partner_id": "route:z",
+                    "partner_kind": "route",
+                    "source_method": "history",
+                },
+                {
+                    "timestamp_tick": 100,
+                    "product_guid": 200,
+                    "product_name": "Bread",
+                    "amount": 15,
+                    "total_price": 45,
+                    "session_id": "0",
+                    "island_name": "岡山",
+                    "route_id": "route:z",
+                    "route_name": "RZ",
+                    "partner_id": "route:z",
+                    "partner_kind": "route",
+                    "source_method": "history",
+                },
+            ]
+        ).astype({"timestamp_tick": "Int64"})
+        row = rank_routes(events).iloc[0]
+        assert row["ticks_span"] == 0
+        assert row["tons_per_min"] == pytest.approx(45.0)
+        assert row["gold_per_min"] == pytest.approx(135.0)
+
 
 # ---------- E: persistence classify ----------
 
@@ -378,6 +416,108 @@ class TestRouteSensitivity:
         )
         result = route_leave_one_out(empty)
         assert result.empty
+
+    def test_leave_one_out_scopes_to_route_islands(self) -> None:
+        frames = AnalysisFrames(
+            islands=pd.DataFrame(
+                [
+                    {"area_manager": "A1", "city_name": "岡山"},
+                    {"area_manager": "A2", "city_name": "広島"},
+                ]
+            ),
+            tiers=pd.DataFrame(),
+            balance=pd.DataFrame(
+                [
+                    {
+                        "area_manager": "A1",
+                        "city_name": "岡山",
+                        "product_guid": 100,
+                        "product_name": "Wood",
+                        "delta_per_minute": 0.3,
+                    },
+                    {
+                        "area_manager": "A2",
+                        "city_name": "広島",
+                        "product_guid": 100,
+                        "product_name": "Wood",
+                        "delta_per_minute": 0.3,
+                    },
+                ]
+            ),
+            trade_events=pd.DataFrame(
+                [
+                    {
+                        "timestamp_tick": 0,
+                        "product_guid": 100,
+                        "product_name": "Wood",
+                        "amount": 30,
+                        "total_price": 90,
+                        "session_id": "0",
+                        "island_name": "岡山",
+                        "route_id": "route:ok",
+                        "route_name": "ROK",
+                        "partner_id": "route:ok",
+                        "partner_kind": "route",
+                        "source_method": "history",
+                    },
+                    {
+                        "timestamp_tick": TICKS_PER_MINUTE,
+                        "product_guid": 100,
+                        "product_name": "Wood",
+                        "amount": 30,
+                        "total_price": 90,
+                        "session_id": "0",
+                        "island_name": "岡山",
+                        "route_id": "route:ok",
+                        "route_name": "ROK",
+                        "partner_id": "route:ok",
+                        "partner_kind": "route",
+                        "source_method": "history",
+                    },
+                ]
+            ).astype({"timestamp_tick": "Int64"}),
+        )
+
+        row = route_leave_one_out(frames).iloc[0]
+        assert row["added_deficit_count"] == 1
+
+    def test_leave_one_out_handles_all_na_ticks(self) -> None:
+        frames = AnalysisFrames(
+            islands=pd.DataFrame([{"area_manager": "A1", "city_name": "岡山"}]),
+            tiers=pd.DataFrame(),
+            balance=pd.DataFrame(
+                [
+                    {
+                        "area_manager": "A1",
+                        "city_name": "岡山",
+                        "product_guid": 100,
+                        "product_name": "Wood",
+                        "delta_per_minute": 1.0,
+                    }
+                ]
+            ),
+            trade_events=pd.DataFrame(
+                [
+                    {
+                        "timestamp_tick": pd.NA,
+                        "product_guid": 100,
+                        "product_name": "Wood",
+                        "amount": 5,
+                        "total_price": 10,
+                        "session_id": "0",
+                        "island_name": "岡山",
+                        "route_id": "route:na",
+                        "route_name": "RNA",
+                        "partner_id": "route:na",
+                        "partner_kind": "route",
+                        "source_method": "history",
+                    }
+                ]
+            ).astype({"timestamp_tick": "Int64"}),
+        )
+        row = route_leave_one_out(frames).iloc[0]
+        assert row["route_id"] == "route:na"
+        assert row["tons_per_min"] == pytest.approx(5.0)
 
 
 # ---------- G: forecast ----------

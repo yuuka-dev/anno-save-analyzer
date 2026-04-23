@@ -10,6 +10,7 @@ import pandas as pd
 
 from anno_save_analyzer.analysis.frames import AnalysisFrames
 from anno_save_analyzer.analysis.prescribe import Thresholds, diagnose
+from anno_save_analyzer.trade.clock import TICKS_PER_MINUTE
 from anno_save_analyzer.trade.storage import IslandStorageTrend, PointSeries
 
 
@@ -152,6 +153,97 @@ class TestRebalanceMix:
         # Rule 3: 強い route があって delta < 0 → rebalance_mix
         assert row["category"] == "rebalance_mix"
         assert "構成見直し" in row["rationale"]
+
+    def test_strong_route_applies_per_island_product(self) -> None:
+        frames = AnalysisFrames(
+            islands=pd.DataFrame(
+                [
+                    {
+                        "area_manager": "A1",
+                        "city_name": "岡山",
+                        "is_player": True,
+                        "session_key": None,
+                        "session_display": None,
+                        "resident_total": 1000,
+                        "residence_count": 100,
+                        "avg_saturation_mean": 0.5,
+                        "deficit_count": 1,
+                    },
+                    {
+                        "area_manager": "A2",
+                        "city_name": "広島",
+                        "is_player": True,
+                        "session_key": None,
+                        "session_display": None,
+                        "resident_total": 1000,
+                        "residence_count": 100,
+                        "avg_saturation_mean": 0.5,
+                        "deficit_count": 1,
+                    },
+                ]
+            ),
+            tiers=pd.DataFrame(),
+            balance=pd.DataFrame(
+                [
+                    {
+                        "area_manager": "A1",
+                        "city_name": "岡山",
+                        "product_guid": 200,
+                        "product_name": "Bread",
+                        "produced_per_minute": 1.0,
+                        "consumed_per_minute": 3.0,
+                        "delta_per_minute": -2.0,
+                        "is_deficit": True,
+                    },
+                    {
+                        "area_manager": "A2",
+                        "city_name": "広島",
+                        "product_guid": 200,
+                        "product_name": "Bread",
+                        "produced_per_minute": 1.0,
+                        "consumed_per_minute": 3.0,
+                        "delta_per_minute": -2.0,
+                        "is_deficit": True,
+                    },
+                ]
+            ),
+            trade_events=pd.DataFrame(
+                [
+                    {
+                        "timestamp_tick": 0,
+                        "product_guid": 200,
+                        "product_name": "Bread",
+                        "amount": 50,
+                        "total_price": 100,
+                        "session_id": "0",
+                        "island_name": "岡山",
+                        "route_id": "route:1",
+                        "route_name": "R1",
+                        "partner_id": "route:1",
+                        "partner_kind": "route",
+                        "source_method": "history",
+                    },
+                    {
+                        "timestamp_tick": 5 * TICKS_PER_MINUTE,
+                        "product_guid": 200,
+                        "product_name": "Bread",
+                        "amount": 50,
+                        "total_price": 100,
+                        "session_id": "0",
+                        "island_name": "岡山",
+                        "route_id": "route:1",
+                        "route_name": "R1",
+                        "partner_id": "route:1",
+                        "partner_kind": "route",
+                        "source_method": "history",
+                    },
+                ]
+            ).astype({"timestamp_tick": "Int64"}),
+        )
+
+        result = diagnose(frames).set_index("city_name")
+        assert result.loc["岡山", "category"] == "rebalance_mix"
+        assert result.loc["広島", "category"] == "monitor"
 
 
 # ---------- monitor fallback ----------

@@ -55,12 +55,8 @@ def rank_routes(trade_events_df: pd.DataFrame) -> pd.DataFrame:
         .reset_index()
     )
     agg["ticks_span"] = (agg["tick_max"] - agg["tick_min"]).fillna(0).astype("Int64")
-    minutes = agg["ticks_span"].astype(float) / TICKS_PER_MINUTE
-    # 0 割り避け: minutes == 0 は events_count をそのまま /min 換算相当として使う
-    agg["tons_per_min"] = (
-        (agg["total_amount"].astype(float) / minutes).where(minutes > 0, 0.0).fillna(0.0)
-    )
-    agg["gold_per_min"] = (
-        (agg["total_gold"].astype(float) / minutes).where(minutes > 0, 0.0).fillna(0.0)
-    )
+    minutes = (agg["ticks_span"].astype(float) / TICKS_PER_MINUTE).clip(lower=1.0)
+    # span=0 は 1 分とみなして /min を計算する
+    agg["tons_per_min"] = (agg["total_amount"].astype(float) / minutes).fillna(0.0)
+    agg["gold_per_min"] = (agg["total_gold"].astype(float) / minutes).fillna(0.0)
     return agg[columns].sort_values("tons_per_min", ascending=False).reset_index(drop=True)
