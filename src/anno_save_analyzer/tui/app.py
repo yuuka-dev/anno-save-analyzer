@@ -21,7 +21,7 @@ from anno_save_analyzer.trade.aggregate import filter_events
 from anno_save_analyzer.trade.models import GameTitle
 
 from .i18n import Localizer
-from .screens import OverviewScreen, TradeStatisticsScreen
+from .screens import OverviewScreen, SupplyBalanceScreen, TradeStatisticsScreen
 from .state import TuiState, load_state
 from .theme import USSR_TITLE_PREFIX, theme_css
 
@@ -103,13 +103,31 @@ class TradeApp(App[None]):
     def on_mount(self) -> None:
         self.install_screen(OverviewScreen(self._state, self._localizer), name="overview")
         self.install_screen(TradeStatisticsScreen(self._state, self._localizer), name="statistics")
+        # Supply balance は Anno 1800 限定．他 title では install しない．
+        if self._state.balance_table is not None:
+            self.install_screen(
+                SupplyBalanceScreen(self._state, self._localizer),
+                name="supply_balance",
+            )
         self.push_screen("overview")
 
     def action_switch_main_screen(self) -> None:
-        # 現在画面の type に応じてもう片方へ．switch_screen は same target なら
-        # textual 側で no-op になるためガード不要．
-        target = "statistics" if isinstance(self.screen, OverviewScreen) else "overview"
-        self.switch_screen(target)
+        # overview → statistics → supply_balance (Anno 1800 のみ) → overview の循環．
+        # Textual の ``Screen.name`` は install 時 key を自動設定しないため type で判定．
+        order: list[tuple[type, str]] = [
+            (OverviewScreen, "overview"),
+            (TradeStatisticsScreen, "statistics"),
+        ]
+        if self._state.balance_table is not None:
+            order.append((SupplyBalanceScreen, "supply_balance"))
+        current_type = type(self.screen)
+        idx = 0
+        for i, (screen_type, _) in enumerate(order):
+            if current_type is screen_type:
+                idx = i
+                break
+        target_name = order[(idx + 1) % len(order)][1]
+        self.switch_screen(target_name)
 
     def action_toggle_locale(self) -> None:
         new_code = "ja" if self._localizer.code == "en" else "en"
@@ -123,8 +141,13 @@ class TradeApp(App[None]):
         self._localizer = self._localizer.with_locale(code)
         self._apply_localized_bindings()
         self.title = self._localized_title()
-        for screen in (self.get_screen("overview"), self.get_screen("statistics")):
-            screen.set_localizer(self._localizer)
+        installed_names = ["overview", "statistics"]
+        if self._state.balance_table is not None:
+            installed_names.append("supply_balance")
+        for name in installed_names:
+            screen = self.get_screen(name)
+            if hasattr(screen, "set_localizer"):
+                screen.set_localizer(self._localizer)
             screen.refresh(recompose=True)
         self.persist_user_settings()
 
