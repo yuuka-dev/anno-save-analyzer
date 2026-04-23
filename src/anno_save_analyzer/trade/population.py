@@ -59,7 +59,10 @@ from anno_save_analyzer.parser.filedb import (
     parse_tag_section,
 )
 
+from .buildings import BuildingDictionary
+
 _AREA_MANAGER_PREFIX = "AreaManager_"
+_OBJECTS = "objects"
 _RESIDENCE7 = "Residence7"
 _CONSUMPTION_STATES = "ConsumptionStates"
 _RESIDENT_COUNT = "ResidentCount"
@@ -69,6 +72,11 @@ _AVG_SATURATION = "AverageNeedSaturation"
 _AVG_SATURATION_EX_BONUS = "AverageNeedSaturationExcludingBonusNeeds"
 _CURRENT_SAT = "CurrentSaturation"
 _AVG_SAT = "AverageSaturation"
+_GUID_ATTRIB = "guid"
+_UNKNOWN_TIER = "unknown"
+"""``BuildingDictionary`` で tier が未判定の Residence を集計するキー．Arctic
+/ Colony 系など assets.xml の internal name が ``residence_tier0N`` 命名規則
+から外れてるケースが該当する．"""
 
 
 def _i32(buf: bytes) -> int:
@@ -91,6 +99,22 @@ class ProductSaturation(BaseModel):
     model_config = {"frozen": True}
 
 
+class TierSummary(BaseModel):
+    """1 住居階層 (Farmer / Worker / ...) 分の集計．島別 tier breakdown の要素．"""
+
+    tier: str
+    """``farmer`` / ``worker`` / ``artisan`` / ``engineer`` / ``investor`` /
+    ``jornaleros`` / ``obreros`` / ``unknown``．``unknown`` は
+    ``BuildingDictionary`` で tier 判定できなかった Residence (Arctic / Colony
+    系など命名規則外)．"""
+    residence_count: int = 0
+    resident_total: int = 0
+    avg_saturation_mean: float = 0.0
+    """住居平均 ``AverageNeedSaturation`` (residents weighted)．"""
+
+    model_config = {"frozen": True}
+
+
 class ResidenceAggregate(BaseModel):
     """1 島分の住居サマリ．住居 (Residence7) 群の集計値．"""
 
@@ -104,6 +128,9 @@ class ResidenceAggregate(BaseModel):
     """住居平均 ``AverageNeedSaturation`` (residents weighted)．"""
     product_saturations: tuple[ProductSaturation, ...] = Field(default_factory=tuple)
     """島全体で観測された物資 × (current, average)．全住居の平均を取る．"""
+    tier_breakdown: tuple[TierSummary, ...] = Field(default_factory=tuple)
+    """Farmer / Worker / ... 別の内訳．``list_residence_aggregates`` に
+    ``buildings`` を渡した時のみ populate．渡さない場合は空 tuple．"""
 
     model_config = {"frozen": True}
 
@@ -122,22 +149,33 @@ class ResidenceAggregate(BaseModel):
         return (self.product_money_total + self.newspaper_money_total) / self.resident_total
 
 
-def list_residence_aggregates(inner_session: bytes) -> tuple[ResidenceAggregate, ...]:
+def list_residence_aggregates(
+    inner_session: bytes,
+    *,
+    buildings: BuildingDictionary | None = None,
+) -> tuple[ResidenceAggregate, ...]:
     """内側 Session FileDB から AreaManager 単位の住居サマリを抽出．
 
     プレイヤー島だけじゃなく Residence7 を持つ全 AreaManager を返す (NPC 都市
     含む)．プレイヤー絞り込みは上位 layer の city name 結合で行う．
+
+    ``buildings`` を渡すと親 ``objects > <1>`` の ``guid`` attrib から
+    ``BuildingEntry.tier`` を引き，``tier_breakdown`` に tier 別集計を populate
+    する．未指定なら ``tier_breakdown`` は空 tuple になり既存挙動と一致．
     """
     if not inner_session:
         return ()
     version = detect_version(inner_session)
     section = parse_tag_section(inner_session, version)
-    accums = _walk_residences(inner_session, version, section)
+    accums = _walk_residences(inner_session, version, section, buildings)
     return tuple(_freeze(acc) for acc in accums.values() if acc.residence_count > 0)
 
 
 def _walk_residences(
-    inner: bytes, version, section: TagSection
+    inner: bytes,
+    version,
+    section: TagSection,
+    buildings: BuildingDictionary | None,
 ) -> dict[str, _ResidenceAccumMutable]:
     id2name = dict(section.tags.entries)
     r7_id = next((i for i, n in id2name.items() if n == _RESIDENCE7), None)
@@ -148,6 +186,8 @@ def _walk_residences(
     stack: list[str] = []
     accums: dict[str, _ResidenceAccumMutable] = {}
     in_am: tuple[int, str] | None = None
+    in_obj_entry: int | None = None  # objects > <1> の depth
+    obj_guid: int | None = None  # 現在の object entry の ``guid`` attrib
     in_r7: int | None = None
     current_residence: dict[str, bytes] = {}
     in_cs: int | None = None
@@ -168,6 +208,15 @@ def _walk_residences(
             if name.startswith(_AREA_MANAGER_PREFIX) and in_am is None:
                 in_am = (depth, name)
                 accums.setdefault(name, _ResidenceAccumMutable(area_manager=name))
+            elif (
+                in_am is not None
+                and in_obj_entry is None
+                and name == "<1>"
+                and len(stack) >= 2
+                and stack[-2] == _OBJECTS
+            ):
+                in_obj_entry = depth
+                obj_guid = None
             elif in_am is not None and ev.id_ == r7_id and in_r7 is None:
                 in_r7 = depth
                 current_residence = {}
@@ -180,7 +229,14 @@ def _walk_residences(
             continue
 
         if ev.kind is EventKind.ATTRIB:
-            if in_r7 is not None and len(stack) == in_r7:
+            if (
+                in_obj_entry is not None
+                and in_r7 is None
+                and len(stack) == in_obj_entry
+                and ev.name == _GUID_ATTRIB
+            ):
+                obj_guid = _i32(ev.content)
+            elif in_r7 is not None and len(stack) == in_r7:
                 current_residence[ev.name or ""] = ev.content
             elif (
                 in_cs is not None
@@ -228,13 +284,34 @@ def _walk_residences(
                 acc.product_money_total += prod_money
                 acc.newspaper_money_total += newsp_money
                 acc.saturation_weighted += avg_sat * residents
+                # tier 分類．buildings が与えられている場合のみ意味がある．
+                if buildings is not None:
+                    tier_key = _resolve_tier(obj_guid, buildings)
+                    bucket = acc.tier_totals.setdefault(tier_key, [0, 0, 0.0])
+                    bucket[0] += 1  # residence_count
+                    bucket[1] += residents
+                    bucket[2] += avg_sat * residents
             in_r7 = None
             current_residence = {}
+        if in_obj_entry is not None and closing_depth == in_obj_entry:
+            in_obj_entry = None
+            obj_guid = None
         if in_am is not None and closing_depth == in_am[0]:
             in_am = None
         stack.pop()
 
     return accums
+
+
+def _resolve_tier(guid: int | None, buildings: BuildingDictionary) -> str:
+    """``BuildingDictionary`` で building_guid → tier 文字列を引く．判定不能は
+    ``"unknown"`` を返す．"""
+    if guid is None:
+        return _UNKNOWN_TIER
+    entry = buildings.get(guid)
+    if entry is None or entry.tier is None:
+        return _UNKNOWN_TIER
+    return entry.tier
 
 
 class _ResidenceAccumMutable:
@@ -246,6 +323,7 @@ class _ResidenceAccumMutable:
         "newspaper_money_total",
         "saturation_weighted",
         "product_saturation_totals",
+        "tier_totals",
     )
 
     def __init__(self, area_manager: str) -> None:
@@ -256,6 +334,9 @@ class _ResidenceAccumMutable:
         self.newspaper_money_total = 0
         self.saturation_weighted = 0.0
         self.product_saturation_totals: dict[int, list[float]] = {}
+        # key: tier name (``"farmer"`` / ``"unknown"`` 等)，
+        # value: [residence_count, resident_total, saturation_weighted]
+        self.tier_totals: dict[str, list] = {}
 
 
 def _freeze(acc: _ResidenceAccumMutable) -> ResidenceAggregate:
@@ -265,6 +346,18 @@ def _freeze(acc: _ResidenceAccumMutable) -> ResidenceAggregate:
             continue
         sats.append(ProductSaturation(product_guid=guid, current=sum_cur / n, average=sum_avg / n))
     mean_sat = acc.saturation_weighted / acc.resident_total if acc.resident_total else 0.0
+    tier_breakdown: list[TierSummary] = []
+    for tier_key in sorted(acc.tier_totals.keys()):
+        count, residents, sat_weighted = acc.tier_totals[tier_key]
+        tier_mean = sat_weighted / residents if residents else 0.0
+        tier_breakdown.append(
+            TierSummary(
+                tier=tier_key,
+                residence_count=count,
+                resident_total=residents,
+                avg_saturation_mean=tier_mean,
+            )
+        )
     return ResidenceAggregate(
         area_manager=acc.area_manager,
         residence_count=acc.residence_count,
@@ -273,6 +366,7 @@ def _freeze(acc: _ResidenceAccumMutable) -> ResidenceAggregate:
         newspaper_money_total=acc.newspaper_money_total,
         avg_saturation_mean=mean_sat,
         product_saturations=tuple(sats),
+        tier_breakdown=tuple(tier_breakdown),
     )
 
 
