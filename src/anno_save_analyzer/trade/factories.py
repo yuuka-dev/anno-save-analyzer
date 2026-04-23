@@ -1,7 +1,7 @@
 """島ごとの Factory7 抽出 (v0.4 supply-balance の供給側データ)．
 
-``factory_extraction_spike`` (docs/factory_extraction_spike.md, 2026-04-23) で
-確定した DOM を state machine で舐める．
+Factory7 を持つ建物ノードを対象に，この docstring で定義する DOM 前提を
+state machine で走査する．
 
 ## DOM 構造 (Anno 1800 / 117 共通)
 

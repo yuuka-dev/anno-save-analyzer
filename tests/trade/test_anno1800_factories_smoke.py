@@ -3,7 +3,9 @@
 書記長の ``sample_anno1800.a7s`` から全 session の工場を舐めて，件数と
 productivity の分布が実在ゲームの値に収まっていることを確認する．
 
-CI / sample なし環境では skip．``SAMPLE_ANNO1800`` env で path override 可．
+CI / sample なし環境では skip．しきい値は書記長の ``sample_anno1800.a7s`` を
+前提にしとるため，``SAMPLE_ANNO1800`` override 先も同等の canonical sample を
+想定する．
 """
 
 from __future__ import annotations
