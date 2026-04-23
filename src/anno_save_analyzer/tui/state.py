@@ -30,7 +30,12 @@ from anno_save_analyzer.trade import (
     list_trade_routes,
 )
 from anno_save_analyzer.trade.aggregate import ItemSummary, RouteSummary
+from anno_save_analyzer.trade.balance import SupplyBalanceTable, build_balance_table
+from anno_save_analyzer.trade.buildings import BuildingDictionary
+from anno_save_analyzer.trade.consumption import ConsumptionTable
 from anno_save_analyzer.trade.extract import extract_from_outer, load_outer_filedb
+from anno_save_analyzer.trade.factories import list_factory_aggregates
+from anno_save_analyzer.trade.factory_recipes import FactoryRecipeTable
 from anno_save_analyzer.trade.models import TradeEvent
 from anno_save_analyzer.trade.population import (
     CityAreaMatch,
@@ -87,6 +92,16 @@ class TuiState:
     population_by_city: dict[str, ResidenceAggregate] = field(default_factory=dict)
     # CityName ↔ AreaManager のマッチ結果．debugging / UI での「信頼度低」マーク用．
     city_area_matches: tuple[CityAreaMatch, ...] = field(default_factory=tuple)
+    # 供給/消費バランス table．Anno 1800 のみ計算 (BuildingDictionary /
+    # FactoryRecipeTable / ConsumptionTable は現状 1800 専用 YAML)．
+    # Anno 117 / 未対応 title では ``None``．
+    balance_table: SupplyBalanceTable | None = None
+    # area_manager → session locale key (例 "session.anno1800.cape_trelawney")．
+    # Supply Balance 画面の label に session 名を出すため．
+    area_manager_to_session_key: dict[str, str] = field(default_factory=dict)
+    # area_manager → city_name (プレイヤー島のみ)．Jaccard match 成功した AM のみ
+    # 登録．SupplyBalanceScreen の表示分類に使う．
+    area_manager_to_city: dict[str, str] = field(default_factory=dict)
 
 
 def build_overview(
@@ -191,9 +206,15 @@ def load_state(
     storage_by_island = _collect_storage_by_island(inner_payloads)
 
     progress("analysing population")
+    buildings = _try_load_buildings(title)
     population_by_city, city_area_matches = _collect_population_by_city(
-        inner_payloads, storage_by_island
+        inner_payloads, storage_by_island, buildings
     )
+
+    progress("computing supply balance")
+    balance_table, am_to_session_key = _try_build_balance_table(title, inner_payloads, buildings)
+    # Jaccard match 成功した AM → city_name map (label 分類用)．
+    am_to_city: dict[str, str] = {m.area_manager: m.city_name for m in city_area_matches}
 
     return TuiState(
         save_path=save_path,
@@ -211,6 +232,9 @@ def load_state(
         storage_by_island=storage_by_island,
         population_by_city=population_by_city,
         city_area_matches=city_area_matches,
+        balance_table=balance_table,
+        area_manager_to_session_key=am_to_session_key,
+        area_manager_to_city=am_to_city,
     )
 
 
@@ -279,9 +303,65 @@ def _collect_storage_by_island(
     return {name: tuple(items) for name, items in aggregated.items()}
 
 
+def _try_load_buildings(title: GameTitle) -> BuildingDictionary | None:
+    """Anno 1800 のみ BuildingDictionary を読み込む．他 title は ``None``．
+
+    ``buildings_anno1800.yaml`` が無い環境 (テスト等) では catch で None に
+    fallback して UI 全体が落ちないようにする．
+    """
+    if title is not GameTitle.ANNO_1800:
+        return None
+    try:
+        return BuildingDictionary.load()
+    except (FileNotFoundError, ValueError):  # pragma: no cover - defensive
+        return None
+
+
+def _try_build_balance_table(
+    title: GameTitle,
+    inner_payloads: list[bytes],
+    buildings: BuildingDictionary | None,
+) -> tuple[SupplyBalanceTable | None, dict[str, str]]:
+    """Anno 1800 + BuildingDictionary 有り の時だけ supply balance を算出．
+
+    返り値は ``(balance_table, area_manager → session_locale_key)`` のタプル．
+    後者は UI 側で「どの session の島か」を表示するのに使う．
+    """
+    if title is not GameTitle.ANNO_1800 or buildings is None:
+        return None, {}
+    try:
+        consumption = ConsumptionTable.load()
+        recipes = FactoryRecipeTable.load()
+    except (FileNotFoundError, ValueError):  # pragma: no cover - defensive
+        return None, {}
+    all_residences: list[ResidenceAggregate] = []
+    all_factories = []
+    am_to_session_key: dict[str, str] = {}
+    for session_idx, inner in enumerate(inner_payloads):
+        if not inner:
+            continue
+        residences = list_residence_aggregates(inner, buildings=buildings)
+        factories = list_factory_aggregates(inner)
+        all_residences.extend(residences)
+        all_factories.extend(factories)
+        locale_key = session_locale_key(title, session_idx)
+        for agg in residences:
+            am_to_session_key.setdefault(agg.area_manager, locale_key)
+        for agg in factories:
+            am_to_session_key.setdefault(agg.area_manager, locale_key)
+    table = build_balance_table(
+        residences=all_residences,
+        factories=all_factories,
+        recipes=recipes,
+        consumption=consumption,
+    )
+    return table, am_to_session_key
+
+
 def _collect_population_by_city(
     inner_payloads: list[bytes],
     storage_by_island: dict[str, tuple[IslandStorageTrend, ...]],
+    buildings: BuildingDictionary | None = None,
 ) -> tuple[dict[str, ResidenceAggregate], tuple[CityAreaMatch, ...]]:
     """各セッションで AreaManager の住居サマリを集計し，CityName に結合する．
 
@@ -289,13 +369,15 @@ def _collect_population_by_city(
     「CityName の StorageTrends nonzero 品目」と「AreaManager の Residence7
     ConsumptionStates 品目」の Jaccard overlap で bijective match する．
     低 confidence match は ``city_area_matches`` で呼び出し側に露出する．
+
+    ``buildings`` 渡すと tier_breakdown も埋まる．
     """
     all_matches: list[CityAreaMatch] = []
     population: dict[str, ResidenceAggregate] = {}
     for inner in inner_payloads:
         if not inner:
             continue
-        aggregates = list_residence_aggregates(inner)
+        aggregates = list_residence_aggregates(inner, buildings=buildings)
         if not aggregates:
             continue
         trends_in_session = list_storage_trends(inner)
