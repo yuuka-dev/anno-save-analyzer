@@ -99,9 +99,31 @@ const tiers = params.populationLevels.map((level) => ({
   })),
 }));
 
+// factories: factory template GUID ごとの生産レシピ．``guid`` は save の
+// ``objects > <1>`` の ``guid`` attrib と突合するキー．``tpmin`` は基本 cycle
+// (productivity=100% 時) あたりの出力 量/分．
+const factories = (params.factories || []).map((f) => ({
+  guid: f.guid,
+  name: f.name,
+  loca_text: f.locaText || {},
+  dlcs: f.dlcs ?? [],
+  tpmin: f.tpmin ?? null,
+  region: f.region ?? null,
+  outputs: (f.outputs || []).map((o) => ({
+    product_guid: o.Product,
+    amount: o.Amount ?? null,
+    storage_amount: o.StorageAmount ?? null,
+  })),
+  inputs: (f.inputs || []).map((i) => ({
+    product_guid: i.Product,
+    amount: i.Amount ?? null,
+  })),
+}));
+
 const payload = {
   source: { calculator_version: params.version ?? null },
   tiers,
+  factories,
 };
 
 process.stdout.write(JSON.stringify(payload, null, 2) + '\n');
