@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import typer
 
+from .state import register as register_state
 from .trade import trade_app
 from .tui import register as register_tui
 
@@ -14,6 +15,7 @@ app = typer.Typer(
 )
 app.add_typer(trade_app, name="trade")
 register_tui(app)
+register_state(app)
 
 
 if __name__ == "__main__":  # pragma: no cover
