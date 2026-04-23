@@ -96,6 +96,12 @@ class TuiState:
     # FactoryRecipeTable / ConsumptionTable は現状 1800 専用 YAML)．
     # Anno 117 / 未対応 title では ``None``．
     balance_table: SupplyBalanceTable | None = None
+    # area_manager → session locale key (例 "session.anno1800.cape_trelawney")．
+    # Supply Balance 画面の label に session 名を出すため．
+    area_manager_to_session_key: dict[str, str] = field(default_factory=dict)
+    # area_manager → city_name (プレイヤー島のみ)．Jaccard match 成功した AM のみ
+    # 登録．SupplyBalanceScreen の表示分類に使う．
+    area_manager_to_city: dict[str, str] = field(default_factory=dict)
 
 
 def build_overview(
@@ -206,7 +212,9 @@ def load_state(
     )
 
     progress("computing supply balance")
-    balance_table = _try_build_balance_table(title, inner_payloads, buildings)
+    balance_table, am_to_session_key = _try_build_balance_table(title, inner_payloads, buildings)
+    # Jaccard match 成功した AM → city_name map (label 分類用)．
+    am_to_city: dict[str, str] = {m.area_manager: m.city_name for m in city_area_matches}
 
     return TuiState(
         save_path=save_path,
@@ -225,6 +233,8 @@ def load_state(
         population_by_city=population_by_city,
         city_area_matches=city_area_matches,
         balance_table=balance_table,
+        area_manager_to_session_key=am_to_session_key,
+        area_manager_to_city=am_to_city,
     )
 
 
@@ -311,28 +321,41 @@ def _try_build_balance_table(
     title: GameTitle,
     inner_payloads: list[bytes],
     buildings: BuildingDictionary | None,
-) -> SupplyBalanceTable | None:
-    """Anno 1800 + BuildingDictionary 有り の時だけ supply balance を算出．"""
+) -> tuple[SupplyBalanceTable | None, dict[str, str]]:
+    """Anno 1800 + BuildingDictionary 有り の時だけ supply balance を算出．
+
+    返り値は ``(balance_table, area_manager → session_locale_key)`` のタプル．
+    後者は UI 側で「どの session の島か」を表示するのに使う．
+    """
     if title is not GameTitle.ANNO_1800 or buildings is None:
-        return None
+        return None, {}
     try:
         consumption = ConsumptionTable.load()
         recipes = FactoryRecipeTable.load()
     except (FileNotFoundError, ValueError):  # pragma: no cover - defensive
-        return None
+        return None, {}
     all_residences: list[ResidenceAggregate] = []
     all_factories = []
-    for inner in inner_payloads:
+    am_to_session_key: dict[str, str] = {}
+    for session_idx, inner in enumerate(inner_payloads):
         if not inner:
             continue
-        all_residences.extend(list_residence_aggregates(inner, buildings=buildings))
-        all_factories.extend(list_factory_aggregates(inner))
-    return build_balance_table(
+        residences = list_residence_aggregates(inner, buildings=buildings)
+        factories = list_factory_aggregates(inner)
+        all_residences.extend(residences)
+        all_factories.extend(factories)
+        locale_key = session_locale_key(title, session_idx)
+        for agg in residences:
+            am_to_session_key.setdefault(agg.area_manager, locale_key)
+        for agg in factories:
+            am_to_session_key.setdefault(agg.area_manager, locale_key)
+    table = build_balance_table(
         residences=all_residences,
         factories=all_factories,
         recipes=recipes,
         consumption=consumption,
     )
+    return table, am_to_session_key
 
 
 def _collect_population_by_city(

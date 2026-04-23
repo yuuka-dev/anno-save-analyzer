@@ -24,8 +24,6 @@ from textual.widgets import (
     Static,
 )
 
-from anno_save_analyzer.trade.balance import IslandBalance
-
 from ..i18n import Localizer
 from ..state import TuiState
 
@@ -104,8 +102,16 @@ class SupplyBalanceScreen(Screen):
             self._loc("balance.col.consumed"),
             self._loc("balance.col.delta"),
         )
-        # 初期は全島 select
-        sel.select_all()
+        # 初期はプレイヤー島のみ select．NPC / 未マッチ島は書記長が手動で有効化する．
+        player_ams = [
+            am for am in self._iter_area_managers() if am in self._state.area_manager_to_city
+        ]
+        if player_ams:
+            for am in player_ams:
+                sel.select(am)
+        else:
+            # マッチ 0 件環境 (テスト等) では全 select で挙動互換を確保．
+            sel.select_all()
 
     # ---------- Events ----------
 
@@ -137,20 +143,51 @@ class SupplyBalanceScreen(Screen):
     def _loc(self, key: str) -> str:
         return self._localizer.t(key)
 
+    def _iter_area_managers(self):
+        """現在の balance_table の area_manager を yield．"""
+        table = self._state.balance_table
+        if table is None:
+            return
+        for isl in table.islands:
+            yield isl.area_manager
+
     def _selection_options(self) -> list[tuple[str, str]]:
-        """``(label, value)`` のペアを返す．value=area_manager．"""
+        """``(label, value)`` のペアを返す．プレイヤー島 → NPC 島の順に並べる．
+
+        - プレイヤー島 (city_name マッチ成功): ``"岡山  [トレローニー岬]  (1,000 pop)"``
+        - NPC / 未マッチ: ``"(NPC) AreaManager_123  [トレローニー岬]  (500 pop)"``
+        """
         table = self._state.balance_table
         if table is None:
             return []
-        rows: list[tuple[str, str]] = []
+        player_rows: list[tuple[str, str]] = []
+        npc_rows: list[tuple[str, str]] = []
+        am_to_city = self._state.area_manager_to_city
         for isl in table.islands:
-            label = isl.city_name or isl.area_manager
-            rows.append((self._format_island_label(isl, label), isl.area_manager))
-        return rows
+            session_name = self._session_display(isl.area_manager)
+            city = am_to_city.get(isl.area_manager) or isl.city_name
+            if city:
+                label = self._format_label(city, session_name, isl.resident_total, is_npc=False)
+                player_rows.append((label, isl.area_manager))
+            else:
+                label = self._format_label(
+                    isl.area_manager, session_name, isl.resident_total, is_npc=True
+                )
+                npc_rows.append((label, isl.area_manager))
+        return player_rows + npc_rows
+
+    def _session_display(self, area_manager: str) -> str:
+        """area_manager から session 表示名を引く．未登録なら空文字．"""
+        key = self._state.area_manager_to_session_key.get(area_manager)
+        if not key:
+            return ""
+        return self._localizer.t(key)
 
     @staticmethod
-    def _format_island_label(isl: IslandBalance, display: str) -> str:
-        return f"{display}  ({isl.resident_total:,} pop)"
+    def _format_label(name: str, session: str, pop: int, *, is_npc: bool) -> str:
+        prefix = "(NPC) " if is_npc else ""
+        suffix_session = f"  [{session}]" if session else ""
+        return f"{prefix}{name}{suffix_session}  ({pop:,} pop)"
 
     def _refresh_table(self) -> None:
         table = self.query_one(DataTable)
