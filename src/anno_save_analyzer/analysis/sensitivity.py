@@ -90,7 +90,7 @@ def route_leave_one_out(frames: AnalysisFrames) -> pd.DataFrame:
             if location_mask.any():
                 mask &= location_mask
             for _, row in balance[mask].iterrows():
-                # 「route 除外 = 消費地に届かない」→ その分 produced が減る
+                # 「route 除外 = 消費地に届かない」→ その分 供給量が減る
                 # 近似: delta_new = delta - per_product_contribution (赤字悪化方向)
                 # ここでは route が消費地に供給する想定なので delta から引く
                 old_delta = row["delta_per_minute"]
