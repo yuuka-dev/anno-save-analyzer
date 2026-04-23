@@ -3,16 +3,26 @@
 Linux (WSL2) で Display が無くても pytest-qt が offscreen platform で起動
 できるよう環境変数を強制する．Windows CI runner では wayland/windows
 platform が自動選択されるため無害．
+
+PySide6 が install されていない環境 (通常の CI pytest job) では
+``test_main_window.py`` の collection を skip する．``pytest -m gui`` を
+走らせるなら ``pip install -e .[gui]`` で PySide6 を入れてから．
 """
 
 from __future__ import annotations
 
+import importlib.util
 import os
 from pathlib import Path
 
 import pytest
 
 os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
+
+# PySide6 未 install 環境では QMainWindow を使う test_main_window.py を除外．
+# viewmodels は Qt 非依存なのでそのまま collection 通せる．
+if importlib.util.find_spec("PySide6") is None:
+    collect_ignore_glob = ["test_main_window.py"]
 
 from anno_save_analyzer.trade import GameTitle, ItemDictionary  # noqa: E402
 from anno_save_analyzer.tui.state import TuiState, load_state  # noqa: E402
