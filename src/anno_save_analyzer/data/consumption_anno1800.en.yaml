@@ -1,0 +1,2030 @@
+source:
+  calculator_version: null
+tiers:
+- guid: 15000000
+  name: Farmers
+  full_house: 10
+  dlcs: []
+  needs:
+  - product_guid: 120020
+    tpmin: null
+    residents: 5
+    happiness: 0
+    is_bonus_need: false
+    dlcs: []
+  - product_guid: 1010200
+    tpmin: 0.0025000002
+    residents: 3
+    happiness: 0
+    is_bonus_need: false
+    dlcs: []
+  - product_guid: 1010216
+    tpmin: 0.003333336
+    residents: 0
+    happiness: 8
+    is_bonus_need: false
+    dlcs: []
+  - product_guid: 1010237
+    tpmin: 0.003076926
+    residents: 2
+    happiness: 0
+    is_bonus_need: false
+    dlcs: []
+  - product_guid: 1010349
+    tpmin: null
+    residents: 0
+    happiness: 12
+    is_bonus_need: false
+    dlcs: []
+  - product_guid: 1010235
+    tpmin: 0.0024000000000000002
+    residents: 1
+    happiness: 0
+    is_bonus_need: true
+    dlcs: []
+  - product_guid: 1010239
+    tpmin: 0.0012000000000000001
+    residents: 1
+    happiness: 0
+    is_bonus_need: true
+    dlcs: []
+  - product_guid: 133183
+    tpmin: 0.0019999998
+    residents: 2
+    happiness: 0
+    is_bonus_need: true
+    dlcs:
+    - dlc8
+    - dlc10
+  - product_guid: 535
+    tpmin: 0.001600002
+    residents: 1
+    happiness: 0
+    is_bonus_need: true
+    dlcs:
+    - dlc11
+  - product_guid: 536
+    tpmin: 0.000799998
+    residents: 1
+    happiness: 0
+    is_bonus_need: true
+    dlcs:
+    - dlc11
+  - product_guid: 2524
+    tpmin: 0.00030000000000000003
+    residents: 3
+    happiness: 0
+    is_bonus_need: true
+    dlcs:
+    - dlc11
+  - product_guid: 1010203
+    tpmin: 0.00034999998
+    residents: 1
+    happiness: 0
+    is_bonus_need: true
+    dlcs: []
+  - product_guid: 5383
+    tpmin: 0.0016999998000000003
+    residents: 2
+    happiness: 0
+    is_bonus_need: true
+    dlcs:
+    - dlc12
+  - product_guid: 114364
+    tpmin: 0.0010000001999999999
+    residents: 3
+    happiness: 0
+    is_bonus_need: true
+    dlcs:
+    - dlc6
+- guid: 15000001
+  name: Workers
+  full_house: 20
+  dlcs: []
+  needs:
+  - product_guid: 120020
+    tpmin: null
+    residents: 5
+    happiness: 0
+    is_bonus_need: false
+    dlcs: []
+  - product_guid: 1010200
+    tpmin: 0.0025000002
+    residents: 3
+    happiness: 0
+    is_bonus_need: false
+    dlcs: []
+  - product_guid: 1010216
+    tpmin: 0.003333336
+    residents: 0
+    happiness: 4
+    is_bonus_need: false
+    dlcs: []
+  - product_guid: 1010237
+    tpmin: 0.003076926
+    residents: 2
+    happiness: 0
+    is_bonus_need: false
+    dlcs: []
+  - product_guid: 1010349
+    tpmin: null
+    residents: 0
+    happiness: 6
+    is_bonus_need: false
+    dlcs: []
+  - product_guid: 1010238
+    tpmin: 0.001000002
+    residents: 3
+    happiness: 0
+    is_bonus_need: false
+    dlcs: []
+  - product_guid: 1010213
+    tpmin: 0.0009090899999999999
+    residents: 3
+    happiness: 0
+    is_bonus_need: false
+    dlcs: []
+  - product_guid: 1010350
+    tpmin: null
+    residents: 0
+    happiness: 7
+    is_bonus_need: false
+    dlcs: []
+  - product_guid: 1010203
+    tpmin: 0.000416667
+    residents: 2
+    happiness: 0
+    is_bonus_need: false
+    dlcs: []
+  - product_guid: 1010214
+    tpmin: 0.00076923
+    residents: 0
+    happiness: 3
+    is_bonus_need: false
+    dlcs: []
+  - product_guid: 1010351
+    tpmin: null
+    residents: 2
+    happiness: 0
+    is_bonus_need: false
+    dlcs: []
+  - product_guid: 1010257
+    tpmin: 0.0009999999
+    residents: 2
+    happiness: 0
+    is_bonus_need: true
+    dlcs: []
+  - product_guid: 1010245
+    tpmin: 0.00039999990000000004
+    residents: 4
+    happiness: 0
+    is_bonus_need: true
+    dlcs: []
+  - product_guid: 25506
+    tpmin: 0.0005000000999999999
+    residents: 1
+    happiness: 0
+    is_bonus_need: true
+    dlcs:
+    - dlc10
+  - product_guid: 535
+    tpmin: 0.0016250010000000003
+    residents: 2
+    happiness: 0
+    is_bonus_need: true
+    dlcs:
+    - dlc11
+  - product_guid: 536
+    tpmin: 0.000399999
+    residents: 3
+    happiness: 0
+    is_bonus_need: true
+    dlcs:
+    - dlc11
+  - product_guid: 2524
+    tpmin: 0.000375
+    residents: 5
+    happiness: 0
+    is_bonus_need: true
+    dlcs:
+    - dlc11
+  - product_guid: 1010193
+    tpmin: 0.0006249999
+    residents: 2
+    happiness: 0
+    is_bonus_need: true
+    dlcs: []
+  - product_guid: 5803
+    tpmin: 0.0005000000999999999
+    residents: 3
+    happiness: 0
+    is_bonus_need: true
+    dlcs:
+    - dlc12
+  - product_guid: 114414
+    tpmin: 0.0003333333
+    residents: 3
+    happiness: 0
+    is_bonus_need: true
+    dlcs:
+    - dlc6
+- guid: 15000002
+  name: Artisans
+  full_house: 30
+  dlcs: []
+  needs:
+  - product_guid: 1010238
+    tpmin: 0.001333334
+    residents: 6
+    happiness: 0
+    is_bonus_need: false
+    dlcs: []
+  - product_guid: 1010213
+    tpmin: 0.001212122
+    residents: 6
+    happiness: 0
+    is_bonus_need: false
+    dlcs: []
+  - product_guid: 1010350
+    tpmin: null
+    residents: 0
+    happiness: 7
+    is_bonus_need: false
+    dlcs: []
+  - product_guid: 1010203
+    tpmin: 0.000555556
+    residents: 4
+    happiness: 0
+    is_bonus_need: false
+    dlcs: []
+  - product_guid: 1010214
+    tpmin: 0.001025642
+    residents: 0
+    happiness: 3
+    is_bonus_need: false
+    dlcs: []
+  - product_guid: 1010351
+    tpmin: null
+    residents: 4
+    happiness: 0
+    is_bonus_need: false
+    dlcs: []
+  - product_guid: 1010217
+    tpmin: 0.00034188
+    residents: 4
+    happiness: 0
+    is_bonus_need: false
+    dlcs: []
+  - product_guid: 1010206
+    tpmin: 0.00095238
+    residents: 2
+    happiness: 0
+    is_bonus_need: false
+    dlcs: []
+  - product_guid: 1010352
+    tpmin: null
+    residents: 0
+    happiness: 6
+    is_bonus_need: false
+    dlcs: []
+  - product_guid: 1010257
+    tpmin: 0.001904762
+    residents: 0
+    happiness: 4
+    is_bonus_need: false
+    dlcs: []
+  - product_guid: 1010247
+    tpmin: 0.0008888879999999999
+    residents: 2
+    happiness: 0
+    is_bonus_need: false
+    dlcs: []
+  - product_guid: 1010353
+    tpmin: null
+    residents: 2
+    happiness: 0
+    is_bonus_need: false
+    dlcs: []
+  - product_guid: 1010197
+    tpmin: 0.002
+    residents: 1
+    happiness: 0
+    is_bonus_need: true
+    dlcs: []
+  - product_guid: 1010201
+    tpmin: 0.002666666
+    residents: 1
+    happiness: 0
+    is_bonus_need: true
+    dlcs: []
+  - product_guid: 117702
+    tpmin: 0.001
+    residents: 5
+    happiness: 0
+    is_bonus_need: true
+    dlcs:
+    - dlc6
+  - product_guid: 535
+    tpmin: 0.001533334
+    residents: 5
+    happiness: 0
+    is_bonus_need: true
+    dlcs:
+    - dlc11
+  - product_guid: 536
+    tpmin: 0.000366666
+    residents: 6
+    happiness: 0
+    is_bonus_need: true
+    dlcs:
+    - dlc11
+  - product_guid: 2524
+    tpmin: 0.000333334
+    residents: 14
+    happiness: 0
+    is_bonus_need: true
+    dlcs:
+    - dlc11
+  - product_guid: 5803
+    tpmin: 0.0006666665999999999
+    residents: 2
+    happiness: 0
+    is_bonus_need: true
+    dlcs:
+    - dlc12
+  - product_guid: 5388
+    tpmin: 0.00025
+    residents: 4
+    happiness: 0
+    is_bonus_need: true
+    dlcs:
+    - dlc12
+  - product_guid: 5391
+    tpmin: 0.0002166666
+    residents: 7
+    happiness: 0
+    is_bonus_need: true
+    dlcs:
+    - dlc12
+- guid: 15000003
+  name: Engineers
+  full_house: 40
+  dlcs: []
+  needs:
+  - product_guid: 1010217
+    tpmin: 0.00051282
+    residents: 12
+    happiness: 0
+    is_bonus_need: false
+    dlcs: []
+  - product_guid: 1010206
+    tpmin: 0.0014285715
+    residents: 6
+    happiness: 0
+    is_bonus_need: false
+    dlcs: []
+  - product_guid: 1010352
+    tpmin: null
+    residents: 0
+    happiness: 6
+    is_bonus_need: false
+    dlcs: []
+  - product_guid: 1010257
+    tpmin: 0.002857143
+    residents: 0
+    happiness: 4
+    is_bonus_need: false
+    dlcs: []
+  - product_guid: 1010247
+    tpmin: 0.0013333335
+    residents: 6
+    happiness: 0
+    is_bonus_need: false
+    dlcs: []
+  - product_guid: 1010353
+    tpmin: null
+    residents: 6
+    happiness: 0
+    is_bonus_need: false
+    dlcs: []
+  - product_guid: 120030
+    tpmin: 0.000222222
+    residents: 4
+    happiness: 0
+    is_bonus_need: false
+    dlcs: []
+  - product_guid: 1010245
+    tpmin: 0.0006250005000000001
+    residents: 0
+    happiness: 5
+    is_bonus_need: false
+    dlcs: []
+  - product_guid: 120032
+    tpmin: 0.0011764710000000001
+    residents: 2
+    happiness: 0
+    is_bonus_need: false
+    dlcs: []
+  - product_guid: 1010246
+    tpmin: 0.0001960785
+    residents: 0
+    happiness: 3
+    is_bonus_need: false
+    dlcs: []
+  - product_guid: 1010354
+    tpmin: null
+    residents: 2
+    happiness: 0
+    is_bonus_need: false
+    dlcs: []
+  - product_guid: 1010208
+    tpmin: 0.0003124995
+    residents: 2
+    happiness: 0
+    is_bonus_need: false
+    dlcs: []
+  - product_guid: 1010356
+    tpmin: null
+    residents: 0
+    happiness: 2
+    is_bonus_need: false
+    dlcs: []
+  - product_guid: 135108
+    tpmin: null
+    residents: 5
+    happiness: 0
+    is_bonus_need: false
+    dlcs: []
+  - product_guid: 135186
+    tpmin: 0.00013000004999999998
+    residents: 5
+    happiness: 0
+    is_bonus_need: false
+    dlcs: []
+  - product_guid: 135107
+    tpmin: null
+    residents: 5
+    happiness: 0
+    is_bonus_need: false
+    dlcs: []
+  - product_guid: 135230
+    tpmin: 0.0001999995
+    residents: 5
+    happiness: 0
+    is_bonus_need: false
+    dlcs: []
+  - product_guid: 135109
+    tpmin: null
+    residents: 4
+    happiness: 0
+    is_bonus_need: false
+    dlcs: []
+  - product_guid: 135233
+    tpmin: 7.500000000000001e-05
+    residents: 4
+    happiness: 0
+    is_bonus_need: false
+    dlcs: []
+  - product_guid: 1010203
+    tpmin: 0.0007812501
+    residents: 2
+    happiness: 0
+    is_bonus_need: true
+    dlcs: []
+  - product_guid: 1010258
+    tpmin: 0.000375
+    residents: 2
+    happiness: 0
+    is_bonus_need: true
+    dlcs: []
+  - product_guid: 133181
+    tpmin: 0.00045
+    residents: 5
+    happiness: 0
+    is_bonus_need: true
+    dlcs:
+    - dlc8
+  - product_guid: 535
+    tpmin: 0.0015625005
+    residents: 3
+    happiness: 0
+    is_bonus_need: true
+    dlcs:
+    - dlc11
+  - product_guid: 536
+    tpmin: 0.000375
+    residents: 7
+    happiness: 0
+    is_bonus_need: true
+    dlcs:
+    - dlc11
+  - product_guid: 2524
+    tpmin: 0.00030000000000000003
+    residents: 15
+    happiness: 0
+    is_bonus_need: true
+    dlcs:
+    - dlc11
+  - product_guid: 6600
+    tpmin: 0.000375
+    residents: 3
+    happiness: 0
+    is_bonus_need: true
+    dlcs:
+    - dlc12
+  - product_guid: 5382
+    tpmin: 0.00049999995
+    residents: 6
+    happiness: 0
+    is_bonus_need: true
+    dlcs:
+    - dlc12
+  - product_guid: 5397
+    tpmin: 0.00041666669999999997
+    residents: 7
+    happiness: 0
+    is_bonus_need: true
+    dlcs:
+    - dlc12
+- guid: 15000004
+  name: Investors
+  full_house: 50
+  dlcs: []
+  needs:
+  - product_guid: 120030
+    tpmin: 0.0003555552
+    residents: 16
+    happiness: 0
+    is_bonus_need: false
+    dlcs: []
+  - product_guid: 1010245
+    tpmin: 0.0009999995999999999
+    residents: 0
+    happiness: 4
+    is_bonus_need: false
+    dlcs: []
+  - product_guid: 120032
+    tpmin: 0.0018823524
+    residents: 8
+    happiness: 0
+    is_bonus_need: false
+    dlcs: []
+  - product_guid: 1010246
+    tpmin: 0.0003137256
+    residents: 0
+    happiness: 3
+    is_bonus_need: false
+    dlcs: []
+  - product_guid: 1010354
+    tpmin: null
+    residents: 8
+    happiness: 0
+    is_bonus_need: false
+    dlcs: []
+  - product_guid: 1010208
+    tpmin: 0.0005000004
+    residents: 8
+    happiness: 0
+    is_bonus_need: false
+    dlcs: []
+  - product_guid: 1010356
+    tpmin: null
+    residents: 0
+    happiness: 2
+    is_bonus_need: false
+    dlcs: []
+  - product_guid: 120016
+    tpmin: 0.0004704
+    residents: 2
+    happiness: 0
+    is_bonus_need: false
+    dlcs: []
+  - product_guid: 1010259
+    tpmin: 0.000444444
+    residents: 2
+    happiness: 0
+    is_bonus_need: false
+    dlcs: []
+  - product_guid: 1010355
+    tpmin: null
+    residents: 0
+    happiness: 5
+    is_bonus_need: false
+    dlcs: []
+  - product_guid: 1010258
+    tpmin: 0.0010666668
+    residents: 2
+    happiness: 0
+    is_bonus_need: false
+    dlcs: []
+  - product_guid: 1010250
+    tpmin: 0.00042105239999999997
+    residents: 0
+    happiness: 2
+    is_bonus_need: false
+    dlcs: []
+  - product_guid: 1010248
+    tpmin: 0.00010524
+    residents: 0
+    happiness: 4
+    is_bonus_need: false
+    dlcs: []
+  - product_guid: 1010225
+    tpmin: 0.00013333319999999998
+    residents: 4
+    happiness: 0
+    is_bonus_need: false
+    dlcs: []
+  - product_guid: 135108
+    tpmin: null
+    residents: 1
+    happiness: 0
+    is_bonus_need: false
+    dlcs: []
+  - product_guid: 135186
+    tpmin: 0.00011000003999999999
+    residents: 1
+    happiness: 0
+    is_bonus_need: false
+    dlcs: []
+  - product_guid: 135229
+    tpmin: 0.0005360004
+    residents: 1
+    happiness: 0
+    is_bonus_need: false
+    dlcs: []
+  - product_guid: 135234
+    tpmin: 0.00021999959999999998
+    residents: 1
+    happiness: 0
+    is_bonus_need: false
+    dlcs: []
+  - product_guid: 135107
+    tpmin: null
+    residents: 1
+    happiness: 0
+    is_bonus_need: false
+    dlcs: []
+  - product_guid: 135230
+    tpmin: 0.0002799996
+    residents: 1
+    happiness: 0
+    is_bonus_need: false
+    dlcs: []
+  - product_guid: 135232
+    tpmin: 0.0002600004
+    residents: 1
+    happiness: 0
+    is_bonus_need: false
+    dlcs: []
+  - product_guid: 135233
+    tpmin: 6.36e-05
+    residents: 1
+    happiness: 0
+    is_bonus_need: false
+    dlcs: []
+  - product_guid: 135109
+    tpmin: null
+    residents: 1
+    happiness: 0
+    is_bonus_need: false
+    dlcs: []
+  - product_guid: 135231
+    tpmin: 0.00011199996000000001
+    residents: 1
+    happiness: 0
+    is_bonus_need: false
+    dlcs: []
+  - product_guid: 135816
+    tpmin: null
+    residents: 100
+    happiness: 0
+    is_bonus_need: false
+    dlcs: []
+  - product_guid: 135876
+    tpmin: null
+    residents: 100
+    happiness: 0
+    is_bonus_need: false
+    dlcs: []
+  - product_guid: 135877
+    tpmin: null
+    residents: 100
+    happiness: 0
+    is_bonus_need: false
+    dlcs: []
+  - product_guid: 135878
+    tpmin: null
+    residents: 100
+    happiness: 0
+    is_bonus_need: false
+    dlcs: []
+  - product_guid: 135879
+    tpmin: null
+    residents: 100
+    happiness: 0
+    is_bonus_need: false
+    dlcs: []
+  - product_guid: 135880
+    tpmin: null
+    residents: 100
+    happiness: 0
+    is_bonus_need: false
+    dlcs: []
+  - product_guid: 135881
+    tpmin: null
+    residents: 100
+    happiness: 0
+    is_bonus_need: false
+    dlcs: []
+  - product_guid: 135882
+    tpmin: null
+    residents: 100
+    happiness: 0
+    is_bonus_need: false
+    dlcs: []
+  - product_guid: 135883
+    tpmin: null
+    residents: 100
+    happiness: 0
+    is_bonus_need: false
+    dlcs: []
+  - product_guid: 135884
+    tpmin: null
+    residents: 100
+    happiness: 0
+    is_bonus_need: false
+    dlcs: []
+  - product_guid: 135885
+    tpmin: null
+    residents: 100
+    happiness: 0
+    is_bonus_need: false
+    dlcs: []
+  - product_guid: 135886
+    tpmin: null
+    residents: 100
+    happiness: 0
+    is_bonus_need: false
+    dlcs: []
+  - product_guid: 135887
+    tpmin: null
+    residents: 100
+    happiness: 0
+    is_bonus_need: false
+    dlcs: []
+  - product_guid: 135888
+    tpmin: null
+    residents: 100
+    happiness: 0
+    is_bonus_need: false
+    dlcs: []
+  - product_guid: 135889
+    tpmin: null
+    residents: 100
+    happiness: 0
+    is_bonus_need: false
+    dlcs: []
+  - product_guid: 1010209
+    tpmin: 0.00032000004
+    residents: 3
+    happiness: 0
+    is_bonus_need: true
+    dlcs: []
+  - product_guid: 112695
+    tpmin: 0.00012999995999999999
+    residents: 6
+    happiness: 0
+    is_bonus_need: true
+    dlcs:
+    - dlc3
+  - product_guid: 114404
+    tpmin: 0.00032000004
+    residents: 4
+    happiness: 0
+    is_bonus_need: true
+    dlcs:
+    - dlc6
+  - product_guid: 535
+    tpmin: 0.0015500004
+    residents: 8
+    happiness: 0
+    is_bonus_need: true
+    dlcs:
+    - dlc11
+  - product_guid: 536
+    tpmin: 0.00038000040000000005
+    residents: 12
+    happiness: 0
+    is_bonus_need: true
+    dlcs:
+    - dlc11
+  - product_guid: 2524
+    tpmin: 0.0003
+    residents: 25
+    happiness: 0
+    is_bonus_need: true
+    dlcs:
+    - dlc11
+  - product_guid: 5388
+    tpmin: 0.00024999996
+    residents: 7
+    happiness: 0
+    is_bonus_need: true
+    dlcs:
+    - dlc12
+  - product_guid: 5395
+    tpmin: 0.0003
+    residents: 10
+    happiness: 0
+    is_bonus_need: true
+    dlcs:
+    - dlc12
+  - product_guid: 5392
+    tpmin: 0.000225
+    residents: 5
+    happiness: 0
+    is_bonus_need: true
+    dlcs:
+    - dlc12
+- guid: 15000005
+  name: Jornaleros
+  full_house: 10
+  dlcs: []
+  needs:
+  - product_guid: 120020
+    tpmin: null
+    residents: 5
+    happiness: 0
+    is_bonus_need: false
+    dlcs: []
+  - product_guid: 25546
+    tpmin: null
+    residents: 7
+    happiness: 0
+    is_bonus_need: false
+    dlcs: []
+  - product_guid: 120033
+    tpmin: 0.00285714
+    residents: 3
+    happiness: 0
+    is_bonus_need: false
+    dlcs: []
+  - product_guid: 1010257
+    tpmin: 0.00142857
+    residents: 0
+    happiness: 6
+    is_bonus_need: false
+    dlcs: []
+  - product_guid: 120043
+    tpmin: 0.0025000020000000003
+    residents: 2
+    happiness: 0
+    is_bonus_need: false
+    dlcs: []
+  - product_guid: 120050
+    tpmin: null
+    residents: 0
+    happiness: 14
+    is_bonus_need: false
+    dlcs: []
+  - product_guid: 1010216
+    tpmin: 0.003333336
+    residents: 4
+    happiness: 0
+    is_bonus_need: false
+    dlcs: []
+  - product_guid: 25506
+    tpmin: 0.00250002
+    residents: 4
+    happiness: 0
+    is_bonus_need: false
+    dlcs: []
+  - product_guid: 1010237
+    tpmin: 0.0015
+    residents: 2
+    happiness: 0
+    is_bonus_need: true
+    dlcs: []
+  - product_guid: 120044
+    tpmin: 0.00225
+    residents: 1
+    happiness: 0
+    is_bonus_need: true
+    dlcs: []
+  - product_guid: 114367
+    tpmin: 0.0016999998000000003
+    residents: 2
+    happiness: 0
+    is_bonus_need: true
+    dlcs:
+    - dlc6
+  - product_guid: 535
+    tpmin: 0.001600002
+    residents: 1
+    happiness: 0
+    is_bonus_need: true
+    dlcs:
+    - dlc11
+  - product_guid: 536
+    tpmin: 0.00034999998
+    residents: 3
+    happiness: 0
+    is_bonus_need: true
+    dlcs:
+    - dlc11
+  - product_guid: 2524
+    tpmin: 0.00030000000000000003
+    residents: 5
+    happiness: 0
+    is_bonus_need: true
+    dlcs:
+    - dlc11
+  - product_guid: 5803
+    tpmin: 0.0019999998
+    residents: 2
+    happiness: 0
+    is_bonus_need: true
+    dlcs:
+    - dlc12
+  - product_guid: 6265
+    tpmin: null
+    residents: 2
+    happiness: 0
+    is_bonus_need: true
+    dlcs:
+    - dlc12
+  - product_guid: 5830
+    tpmin: null
+    residents: 2
+    happiness: 0
+    is_bonus_need: true
+    dlcs:
+    - dlc12
+- guid: 15000006
+  name: Obreros
+  full_house: 20
+  dlcs: []
+  needs:
+  - product_guid: 120020
+    tpmin: null
+    residents: 5
+    happiness: 0
+    is_bonus_need: false
+    dlcs: []
+  - product_guid: 25546
+    tpmin: null
+    residents: 7
+    happiness: 0
+    is_bonus_need: false
+    dlcs: []
+  - product_guid: 120033
+    tpmin: 0.002857143
+    residents: 3
+    happiness: 0
+    is_bonus_need: false
+    dlcs: []
+  - product_guid: 1010257
+    tpmin: 0.001428573
+    residents: 0
+    happiness: 3
+    is_bonus_need: false
+    dlcs: []
+  - product_guid: 120043
+    tpmin: 0.002499999
+    residents: 2
+    happiness: 0
+    is_bonus_need: false
+    dlcs: []
+  - product_guid: 120050
+    tpmin: null
+    residents: 0
+    happiness: 7
+    is_bonus_need: false
+    dlcs: []
+  - product_guid: 120035
+    tpmin: 0.00142857
+    residents: 4
+    happiness: 0
+    is_bonus_need: false
+    dlcs: []
+  - product_guid: 25506
+    tpmin: 0.001428573
+    residents: 4
+    happiness: 0
+    is_bonus_need: false
+    dlcs: []
+  - product_guid: 25131
+    tpmin: 0.002857143
+    residents: 4
+    happiness: 0
+    is_bonus_need: false
+    dlcs: []
+  - product_guid: 120032
+    tpmin: 0.0005882369999999999
+    residents: 2
+    happiness: 0
+    is_bonus_need: false
+    dlcs: []
+  - product_guid: 1010348
+    tpmin: null
+    residents: 0
+    happiness: 4
+    is_bonus_need: false
+    dlcs: []
+  - product_guid: 120037
+    tpmin: 0.001333332
+    residents: 2
+    happiness: 0
+    is_bonus_need: false
+    dlcs: []
+  - product_guid: 1010214
+    tpmin: 0.001333332
+    residents: 0
+    happiness: 4
+    is_bonus_need: false
+    dlcs: []
+  - product_guid: 1010259
+    tpmin: 0.000555555
+    residents: 0
+    happiness: 2
+    is_bonus_need: false
+    dlcs: []
+  - product_guid: 1010206
+    tpmin: 0.0012500010000000002
+    residents: 2
+    happiness: 0
+    is_bonus_need: false
+    dlcs: []
+  - product_guid: 120030
+    tpmin: 0.00039999990000000004
+    residents: 1
+    happiness: 0
+    is_bonus_need: true
+    dlcs: []
+  - product_guid: 135230
+    tpmin: 0.00039999990000000004
+    residents: 5
+    happiness: 0
+    is_bonus_need: true
+    dlcs:
+    - dlc9
+  - product_guid: 117698
+    tpmin: 0.000375
+    residents: 3
+    happiness: 0
+    is_bonus_need: true
+    dlcs:
+    - dlc6
+  - product_guid: 535
+    tpmin: 0.002300001
+    residents: 4
+    happiness: 0
+    is_bonus_need: true
+    dlcs:
+    - dlc11
+  - product_guid: 536
+    tpmin: 0.000549999
+    residents: 5
+    happiness: 0
+    is_bonus_need: true
+    dlcs:
+    - dlc11
+  - product_guid: 2524
+    tpmin: 0.000500001
+    residents: 7
+    happiness: 0
+    is_bonus_need: true
+    dlcs:
+    - dlc11
+  - product_guid: 6265
+    tpmin: null
+    residents: 2
+    happiness: 0
+    is_bonus_need: true
+    dlcs:
+    - dlc12
+  - product_guid: 5831
+    tpmin: null
+    residents: 2
+    happiness: 0
+    is_bonus_need: true
+    dlcs:
+    - dlc12
+  - product_guid: 5391
+    tpmin: 0.00024999999
+    residents: 6
+    happiness: 0
+    is_bonus_need: true
+    dlcs:
+    - dlc12
+- guid: 5403
+  name: Artista
+  full_house: 40
+  dlcs:
+  - dlc12
+  needs:
+  - product_guid: 120035
+    tpmin: 0.000714285
+    residents: 5
+    happiness: 0
+    is_bonus_need: false
+    dlcs: []
+  - product_guid: 1010206
+    tpmin: 0.0006250005000000001
+    residents: 5
+    happiness: 0
+    is_bonus_need: false
+    dlcs: []
+  - product_guid: 120032
+    tpmin: 0.00029411849999999996
+    residents: 5
+    happiness: 0
+    is_bonus_need: false
+    dlcs: []
+  - product_guid: 120037
+    tpmin: 0.000666666
+    residents: 5
+    happiness: 0
+    is_bonus_need: false
+    dlcs: []
+  - product_guid: 1010214
+    tpmin: 0.001333332
+    residents: 0
+    happiness: 3
+    is_bonus_need: false
+    dlcs: []
+  - product_guid: 1010348
+    tpmin: null
+    residents: 0
+    happiness: 4
+    is_bonus_need: false
+    dlcs: []
+  - product_guid: 1010259
+    tpmin: 0.0002777775
+    residents: 0
+    happiness: 3
+    is_bonus_need: false
+    dlcs: []
+  - product_guid: 5803
+    tpmin: 0.0006250005000000001
+    residents: 3
+    happiness: 0
+    is_bonus_need: false
+    dlcs: []
+  - product_guid: 6600
+    tpmin: 0.0014285715
+    residents: 2
+    happiness: 0
+    is_bonus_need: false
+    dlcs: []
+  - product_guid: 5381
+    tpmin: 0.000825
+    residents: 2
+    happiness: 0
+    is_bonus_need: false
+    dlcs: []
+  - product_guid: 6265
+    tpmin: null
+    residents: 2
+    happiness: 0
+    is_bonus_need: false
+    dlcs: []
+  - product_guid: 5382
+    tpmin: 0.00013485
+    residents: 0
+    happiness: 4
+    is_bonus_need: false
+    dlcs: []
+  - product_guid: 5831
+    tpmin: null
+    residents: 0
+    happiness: 4
+    is_bonus_need: false
+    dlcs: []
+  - product_guid: 5388
+    tpmin: 0.0012499995
+    residents: 3
+    happiness: 0
+    is_bonus_need: false
+    dlcs: []
+  - product_guid: 5395
+    tpmin: 7.8e-05
+    residents: 3
+    happiness: 0
+    is_bonus_need: false
+    dlcs: []
+  - product_guid: 5830
+    tpmin: null
+    residents: 0
+    happiness: 6
+    is_bonus_need: false
+    dlcs: []
+  - product_guid: 5391
+    tpmin: 4.347e-05
+    residents: 5
+    happiness: 0
+    is_bonus_need: false
+    dlcs: []
+  - product_guid: 1010208
+    tpmin: 0.00049999995
+    residents: 4
+    happiness: 0
+    is_bonus_need: true
+    dlcs: []
+  - product_guid: 120016
+    tpmin: 0.00045
+    residents: 2
+    happiness: 0
+    is_bonus_need: true
+    dlcs: []
+  - product_guid: 135232
+    tpmin: 0.0001875
+    residents: 2
+    happiness: 0
+    is_bonus_need: true
+    dlcs:
+    - dlc9
+  - product_guid: 117699
+    tpmin: 0.00045
+    residents: 4
+    happiness: 0
+    is_bonus_need: true
+    dlcs:
+    - dlc6
+  - product_guid: 535
+    tpmin: 0.001875
+    residents: 4
+    happiness: 0
+    is_bonus_need: true
+    dlcs:
+    - dlc11
+  - product_guid: 536
+    tpmin: 0.00047500050000000006
+    residents: 7
+    happiness: 0
+    is_bonus_need: true
+    dlcs:
+    - dlc11
+  - product_guid: 2524
+    tpmin: 0.000375
+    residents: 12
+    happiness: 0
+    is_bonus_need: true
+    dlcs:
+    - dlc11
+  - product_guid: 120030
+    tpmin: 0.000444444
+    residents: 20
+    happiness: 0
+    is_bonus_need: false
+    dlcs: []
+  - product_guid: 1010354
+    tpmin: null
+    residents: 20
+    happiness: 0
+    is_bonus_need: false
+    dlcs: []
+  - product_guid: 1010250
+    tpmin: 0.00049999995
+    residents: 6
+    happiness: 0
+    is_bonus_need: true
+    dlcs: []
+  - product_guid: 133532
+    tpmin: 0.00049999995
+    residents: 4
+    happiness: 0
+    is_bonus_need: true
+    dlcs:
+    - dlc8
+- guid: 601379
+  name: Tourists
+  full_house: 500
+  dlcs:
+  - dlc8
+  needs:
+  - product_guid: 133891
+    tpmin: null
+    residents: 45
+    happiness: 0
+    is_bonus_need: false
+    dlcs: []
+  - product_guid: 1010213
+    tpmin: 0.00099999996
+    residents: 55
+    happiness: 0
+    is_bonus_need: false
+    dlcs: []
+  - product_guid: 133573
+    tpmin: null
+    residents: 25
+    happiness: 0
+    is_bonus_need: false
+    dlcs: []
+  - product_guid: 132751
+    tpmin: null
+    residents: 25
+    happiness: 0
+    is_bonus_need: false
+    dlcs: []
+  - product_guid: 133183
+    tpmin: 0.0020000004
+    residents: 35
+    happiness: 0
+    is_bonus_need: false
+    dlcs: []
+  - product_guid: 132755
+    tpmin: null
+    residents: 55
+    happiness: 0
+    is_bonus_need: false
+    dlcs: []
+  - product_guid: 133181
+    tpmin: 0.00099999996
+    residents: 105
+    happiness: 0
+    is_bonus_need: false
+    dlcs: []
+  - product_guid: 132754
+    tpmin: null
+    residents: 75
+    happiness: 0
+    is_bonus_need: false
+    dlcs: []
+  - product_guid: 132761
+    tpmin: null
+    residents: 80
+    happiness: 0
+    is_bonus_need: false
+    dlcs: []
+  - product_guid: 1010247
+    tpmin: 0.0020000004
+    residents: 0
+    happiness: 3
+    is_bonus_need: false
+    dlcs: []
+  - product_guid: 601485
+    tpmin: null
+    residents: 0
+    happiness: 3
+    is_bonus_need: false
+    dlcs: []
+  - product_guid: 1010250
+    tpmin: 0.0020000004
+    residents: 0
+    happiness: 5
+    is_bonus_need: false
+    dlcs: []
+  - product_guid: 133185
+    tpmin: 0.0020000004
+    residents: 0
+    happiness: 4
+    is_bonus_need: false
+    dlcs: []
+  - product_guid: 134781
+    tpmin: null
+    residents: 0
+    happiness: 3
+    is_bonus_need: false
+    dlcs: []
+  - product_guid: 133535
+    tpmin: null
+    residents: 0
+    happiness: 3
+    is_bonus_need: false
+    dlcs: []
+  - product_guid: 355
+    tpmin: null
+    residents: 0
+    happiness: 3
+    is_bonus_need: false
+    dlcs: []
+  - product_guid: 134257
+    tpmin: null
+    residents: 0
+    happiness: 3
+    is_bonus_need: false
+    dlcs: []
+  - product_guid: 133536
+    tpmin: null
+    residents: 0
+    happiness: 3
+    is_bonus_need: false
+    dlcs: []
+  - product_guid: 133532
+    tpmin: 0.0039999996
+    residents: 0
+    happiness: 4
+    is_bonus_need: false
+    dlcs: []
+  - product_guid: 137757
+    tpmin: null
+    residents: 0
+    happiness: 3
+    is_bonus_need: false
+    dlcs: []
+  - product_guid: 1010248
+    tpmin: 0.00011999999999999999
+    residents: 17
+    happiness: 0
+    is_bonus_need: true
+    dlcs: []
+  - product_guid: 120037
+    tpmin: 0.00038999999999999994
+    residents: 15
+    happiness: 0
+    is_bonus_need: true
+    dlcs: []
+  - product_guid: 114428
+    tpmin: 8.4999996e-05
+    residents: 22
+    happiness: 0
+    is_bonus_need: true
+    dlcs:
+    - dlc6
+  - product_guid: 6600
+    tpmin: 0.00034400003999999996
+    residents: 20
+    happiness: 0
+    is_bonus_need: true
+    dlcs:
+    - dlc12
+  - product_guid: 5382
+    tpmin: 0.00020000003999999999
+    residents: 25
+    happiness: 0
+    is_bonus_need: true
+    dlcs:
+    - dlc12
+  - product_guid: 5388
+    tpmin: 0.000114999996
+    residents: 26
+    happiness: 0
+    is_bonus_need: true
+    dlcs:
+    - dlc12
+- guid: 112642
+  name: Explorers
+  full_house: 10
+  dlcs:
+  - dlc3
+  needs:
+  - product_guid: 114890
+    tpmin: null
+    residents: 4
+    happiness: 0
+    is_bonus_need: false
+    dlcs: []
+  - product_guid: 112705
+    tpmin: 0.0012000000000000001
+    residents: 3
+    happiness: 0
+    is_bonus_need: false
+    dlcs: []
+  - product_guid: 112702
+    tpmin: 0.0006000000000000001
+    residents: 3
+    happiness: 0
+    is_bonus_need: false
+    dlcs: []
+  - product_guid: 112708
+    tpmin: null
+    residents: 0
+    happiness: 0
+    is_bonus_need: false
+    dlcs: []
+  - product_guid: 112701
+    tpmin: 0.0009
+    residents: 0
+    happiness: 0
+    is_bonus_need: false
+    dlcs: []
+  - product_guid: 1010216
+    tpmin: 0.0015
+    residents: 0
+    happiness: 0
+    is_bonus_need: false
+    dlcs: []
+  - product_guid: 1010213
+    tpmin: 0.0010000001999999999
+    residents: 2
+    happiness: 0
+    is_bonus_need: true
+    dlcs: []
+  - product_guid: 1010234
+    tpmin: 0.003
+    residents: 3
+    happiness: 0
+    is_bonus_need: true
+    dlcs: []
+  - product_guid: 535
+    tpmin: 0.0015
+    residents: 1
+    happiness: 0
+    is_bonus_need: true
+    dlcs:
+    - dlc11
+  - product_guid: 536
+    tpmin: 0.00049999998
+    residents: 2
+    happiness: 0
+    is_bonus_need: true
+    dlcs:
+    - dlc11
+  - product_guid: 2524
+    tpmin: 0.00049999998
+    residents: 4
+    happiness: 0
+    is_bonus_need: true
+    dlcs:
+    - dlc11
+  - product_guid: 25506
+    tpmin: 0.0019999998
+    residents: 3
+    happiness: 0
+    is_bonus_need: true
+    dlcs:
+    - dlc10
+- guid: 112643
+  name: Technicians
+  full_house: 20
+  dlcs:
+  - dlc3
+  needs:
+  - product_guid: 114890
+    tpmin: null
+    residents: 4
+    happiness: 0
+    is_bonus_need: false
+    dlcs: []
+  - product_guid: 112705
+    tpmin: 0.0012000000000000001
+    residents: 3
+    happiness: 0
+    is_bonus_need: false
+    dlcs: []
+  - product_guid: 112702
+    tpmin: 0.0006000000000000001
+    residents: 3
+    happiness: 0
+    is_bonus_need: false
+    dlcs: []
+  - product_guid: 112693
+    tpmin: null
+    residents: 3
+    happiness: 0
+    is_bonus_need: false
+    dlcs: []
+  - product_guid: 1010217
+    tpmin: 0.0006000000000000001
+    residents: 3
+    happiness: 0
+    is_bonus_need: false
+    dlcs: []
+  - product_guid: 112703
+    tpmin: 0.0009
+    residents: 4
+    happiness: 0
+    is_bonus_need: false
+    dlcs: []
+  - product_guid: 112708
+    tpmin: null
+    residents: 0
+    happiness: 0
+    is_bonus_need: false
+    dlcs: []
+  - product_guid: 112701
+    tpmin: 0.0009
+    residents: 0
+    happiness: 0
+    is_bonus_need: false
+    dlcs: []
+  - product_guid: 1010216
+    tpmin: 0.0015
+    residents: 0
+    happiness: 0
+    is_bonus_need: false
+    dlcs: []
+  - product_guid: 112700
+    tpmin: 0.0012000000000000001
+    residents: 0
+    happiness: 0
+    is_bonus_need: false
+    dlcs: []
+  - product_guid: 120032
+    tpmin: 0.0012000000000000001
+    residents: 0
+    happiness: 0
+    is_bonus_need: false
+    dlcs: []
+  - product_guid: 1010257
+    tpmin: 0.0015
+    residents: 1
+    happiness: 0
+    is_bonus_need: true
+    dlcs: []
+  - product_guid: 1010222
+    tpmin: 0.00030000000000000003
+    residents: 3
+    happiness: 0
+    is_bonus_need: true
+    dlcs: []
+  - product_guid: 535
+    tpmin: 0.0015
+    residents: 3
+    happiness: 0
+    is_bonus_need: true
+    dlcs:
+    - dlc11
+  - product_guid: 536
+    tpmin: 0.000500001
+    residents: 6
+    happiness: 0
+    is_bonus_need: true
+    dlcs:
+    - dlc11
+  - product_guid: 2524
+    tpmin: 0.000500001
+    residents: 10
+    happiness: 0
+    is_bonus_need: true
+    dlcs:
+    - dlc11
+  - product_guid: 6600
+    tpmin: 0.0006999999
+    residents: 2
+    happiness: 0
+    is_bonus_need: true
+    dlcs:
+    - dlc12
+  - product_guid: 5390
+    tpmin: 0.00075
+    residents: 5
+    happiness: 0
+    is_bonus_need: true
+    dlcs:
+    - dlc12
+- guid: 114329
+  name: Shepherds
+  full_house: 10
+  dlcs:
+  - dlc6
+  needs:
+  - product_guid: 120020
+    tpmin: null
+    residents: 3
+    happiness: 0
+    is_bonus_need: false
+    dlcs: []
+  - product_guid: 114371
+    tpmin: 0.003
+    residents: 3
+    happiness: 0
+    is_bonus_need: false
+    dlcs: []
+  - product_guid: 114401
+    tpmin: 0.0015
+    residents: 2
+    happiness: 0
+    is_bonus_need: false
+    dlcs: []
+  - product_guid: 114361
+    tpmin: null
+    residents: 0
+    happiness: 8
+    is_bonus_need: false
+    dlcs: []
+  - product_guid: 114359
+    tpmin: 0.0021000000000000003
+    residents: 2
+    happiness: 0
+    is_bonus_need: false
+    dlcs: []
+  - product_guid: 114390
+    tpmin: 0.0012000000000000001
+    residents: 0
+    happiness: 12
+    is_bonus_need: false
+    dlcs: []
+  - product_guid: 114356
+    tpmin: 0.0040000002
+    residents: 1
+    happiness: 0
+    is_bonus_need: true
+    dlcs:
+    - dlc6
+  - product_guid: 1010192
+    tpmin: 0.0008749998000000001
+    residents: 1
+    happiness: 0
+    is_bonus_need: true
+    dlcs: []
+  - product_guid: 120043
+    tpmin: 0.0031999998
+    residents: 2
+    happiness: 0
+    is_bonus_need: true
+    dlcs: []
+  - product_guid: 1010217
+    tpmin: 0.0010000001999999999
+    residents: 3
+    happiness: 0
+    is_bonus_need: true
+    dlcs: []
+  - product_guid: 25506
+    tpmin: 0.00049999998
+    residents: 2
+    happiness: 0
+    is_bonus_need: true
+    dlcs:
+    - dlc10
+  - product_guid: 133183
+    tpmin: 0.0015
+    residents: 1
+    happiness: 0
+    is_bonus_need: true
+    dlcs:
+    - dlc8
+    - dlc10
+- guid: 114330
+  name: Elders
+  full_house: 20
+  dlcs:
+  - dlc6
+  needs:
+  - product_guid: 120020
+    tpmin: null
+    residents: 3
+    happiness: 0
+    is_bonus_need: false
+    dlcs: []
+  - product_guid: 114371
+    tpmin: 0.003
+    residents: 3
+    happiness: 0
+    is_bonus_need: false
+    dlcs: []
+  - product_guid: 114401
+    tpmin: 0.0015
+    residents: 2
+    happiness: 0
+    is_bonus_need: false
+    dlcs: []
+  - product_guid: 114361
+    tpmin: null
+    residents: 0
+    happiness: 4
+    is_bonus_need: false
+    dlcs: []
+  - product_guid: 114359
+    tpmin: 0.0021000000000000003
+    residents: 2
+    happiness: 0
+    is_bonus_need: false
+    dlcs: []
+  - product_guid: 114390
+    tpmin: 0.0012000000000000001
+    residents: 0
+    happiness: 6
+    is_bonus_need: false
+    dlcs: []
+  - product_guid: 118724
+    tpmin: 0.0012000000000000001
+    residents: 2
+    happiness: 0
+    is_bonus_need: false
+    dlcs: []
+  - product_guid: 114404
+    tpmin: 0.0010500000000000002
+    residents: 0
+    happiness: 2
+    is_bonus_need: false
+    dlcs: []
+  - product_guid: 114410
+    tpmin: 0.00111
+    residents: 3
+    happiness: 0
+    is_bonus_need: false
+    dlcs: []
+  - product_guid: 114414
+    tpmin: 0.00045
+    residents: 0
+    happiness: 2
+    is_bonus_need: false
+    dlcs: []
+  - product_guid: 117698
+    tpmin: 0.00054
+    residents: 2
+    happiness: 0
+    is_bonus_need: false
+    dlcs: []
+  - product_guid: 120030
+    tpmin: 0.00035999999999999997
+    residents: 0
+    happiness: 3
+    is_bonus_need: false
+    dlcs: []
+  - product_guid: 117699
+    tpmin: 0.0009
+    residents: 3
+    happiness: 0
+    is_bonus_need: false
+    dlcs: []
+  - product_guid: 114362
+    tpmin: null
+    residents: 0
+    happiness: 3
+    is_bonus_need: false
+    dlcs: []
+  - product_guid: 1010240
+    tpmin: 0.003
+    residents: 3
+    happiness: 0
+    is_bonus_need: true
+    dlcs: []
+  - product_guid: 1010206
+    tpmin: 0.0009
+    residents: 2
+    happiness: 0
+    is_bonus_need: true
+    dlcs: []
+  - product_guid: 112697
+    tpmin: 0.00024999999
+    residents: 2
+    happiness: 0
+    is_bonus_need: true
+    dlcs:
+    - dlc3
+  - product_guid: 1010203
+    tpmin: 0.0005000000999999999
+    residents: 2
+    happiness: 0
+    is_bonus_need: true
+    dlcs: []
+  - product_guid: 5383
+    tpmin: 0.003249999
+    residents: 3
+    happiness: 0
+    is_bonus_need: true
+    dlcs:
+    - dlc12
+  - product_guid: 5386
+    tpmin: 0.0025000002
+    residents: 3
+    happiness: 0
+    is_bonus_need: true
+    dlcs:
+    - dlc12
+- guid: 118745
+  name: Scholars
+  full_house: 120
+  dlcs:
+  - dlc6
+  needs:
+  - product_guid: 1010353
+    tpmin: null
+    residents: 12
+    happiness: 0
+    is_bonus_need: false
+    dlcs: []
+  - product_guid: 1010217
+    tpmin: 0.0005
+    residents: 19
+    happiness: 0
+    is_bonus_need: false
+    dlcs: []
+  - product_guid: 114428
+    tpmin: 0.001
+    residents: 0
+    happiness: 3
+    is_bonus_need: false
+    dlcs: []
+  - product_guid: 1010257
+    tpmin: 0.0004
+    residents: 0
+    happiness: 2
+    is_bonus_need: false
+    dlcs: []
+  - product_guid: 114430
+    tpmin: 0.001375
+    residents: 23
+    happiness: 0
+    is_bonus_need: false
+    dlcs: []
+  - product_guid: 120037
+    tpmin: 0.0004
+    residents: 0
+    happiness: 3
+    is_bonus_need: false
+    dlcs: []
+  - product_guid: 114390
+    tpmin: 0.000875
+    residents: 0
+    happiness: 3
+    is_bonus_need: false
+    dlcs: []
+  - product_guid: 1010354
+    tpmin: null
+    residents: 12
+    happiness: 0
+    is_bonus_need: false
+    dlcs: []
+  - product_guid: 114410
+    tpmin: 0.00075
+    residents: 22
+    happiness: 0
+    is_bonus_need: false
+    dlcs: []
+  - product_guid: 114404
+    tpmin: 0.000625
+    residents: 0
+    happiness: 3
+    is_bonus_need: false
+    dlcs: []
+  - product_guid: 114414
+    tpmin: 0.000375
+    residents: 0
+    happiness: 3
+    is_bonus_need: false
+    dlcs: []
+  - product_guid: 114431
+    tpmin: 0.00075
+    residents: 20
+    happiness: 0
+    is_bonus_need: false
+    dlcs: []
+  - product_guid: 114425
+    tpmin: null
+    residents: 12
+    happiness: 0
+    is_bonus_need: false
+    dlcs: []
+  - product_guid: 1010248
+    tpmin: 0.00035
+    residents: 0
+    happiness: 3
+    is_bonus_need: false
+    dlcs: []
+  - product_guid: 535
+    tpmin: 0.0015
+    residents: 10
+    happiness: 0
+    is_bonus_need: true
+    dlcs:
+    - dlc11
+  - product_guid: 536
+    tpmin: 0.00075
+    residents: 15
+    happiness: 0
+    is_bonus_need: true
+    dlcs:
+    - dlc11
+  - product_guid: 2524
+    tpmin: 0.00075
+    residents: 25
+    happiness: 0
+    is_bonus_need: true
+    dlcs:
+    - dlc11
+  - product_guid: 1010232
+    tpmin: 9.166665e-05
+    residents: 4
+    happiness: 0
+    is_bonus_need: true
+    dlcs: []
+  - product_guid: 4267
+    tpmin: 0.0003333335
+    residents: 5
+    happiness: 0
+    is_bonus_need: true
+    dlcs:
+    - dlc11
+  - product_guid: 4268
+    tpmin: 0.0003333335
+    residents: 5
+    happiness: 0
+    is_bonus_need: true
+    dlcs:
+    - dlc11
+  - product_guid: 5392
+    tpmin: 0.00010416665
+    residents: 4
+    happiness: 0
+    is_bonus_need: true
+    dlcs:
+    - dlc12
+  - product_guid: 5395
+    tpmin: 8.333335e-05
+    residents: 5
+    happiness: 0
+    is_bonus_need: true
+    dlcs:
+    - dlc12
+  - product_guid: 5391
+    tpmin: 0.00010416665
+    residents: 7
+    happiness: 0
+    is_bonus_need: true
+    dlcs:
+    - dlc12
