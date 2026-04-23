@@ -72,8 +72,7 @@ def route_leave_one_out(frames: AnalysisFrames) -> pd.DataFrame:
             route_area_managers = set(
                 frames.islands.loc[
                     frames.islands["city_name"].isin(route_islands), "area_manager"
-                ]
-                .dropna()
+                ].dropna()
             )
 
         # その島 × 物資の現在 balance で「delta - tons_per_min/len(products)」を
