@@ -13,10 +13,13 @@
   集計できることを確認した．
 - **Factory 抽出は新規実装が必要**だが DOM パターンは Residence7 と同形．
   ``_walk_residences`` を ``_walk_factories`` に置き換える差分で実装できる．
-- **工場稼働率 ``CurrentProductivity`` は f32 (0.0–2.0)** で，200% バフ (取引所
-  効率アイテム等) を表現できる範囲．UI 側で ``* 100`` で % に換算する．
+- **工場稼働率 ``CurrentProductivity`` は f32**．通常 0.0–2.0 (200% バフ込み)
+  だが DLC アイテムスタッキングで 3.0 以上も実在 (書記長 save で 300% 実測)．
+  UI 側で ``* 100`` で % に換算する．
 - **建物 GUID は objects > <1> 直下の ``guid`` attrib** (i32) にあり，
-  Factory7 / Residence7 自身には乗っていない．items.yaml 参照で名前解決できる．
+  Factory7 / Residence7 自身には乗っていない．名前解決は後続 issue (#67) で
+  生成する ``buildings_anno1800.yaml`` を参照する (現行
+  ``items_anno1800.*.yaml`` は Product 専用で建物 GUID を持たない)．
 
 ## 1. 事前条件 (既存実装で確定済)
 
@@ -74,9 +77,12 @@ session 0 の最大都市 ``AreaManager_8706`` 配下で ``GameObject > objects 
 |   34 | ``... Warehouse ...`` |
 |   30 | ``... Factory7 ...`` (非電化) |
 |   27 | ``... BuffFactory ...`` (Pub / Market 類) |
-|   22 | ``... Factory7, ModuleOwner, Motorizable ...`` (石炭/原油依存) |
+|   22 | ``... Factory7, ModuleOwner, Motorizable ...`` (石炭/原油依存，Infolayer なし) |
+|   22 | ``... Factory7, ModuleOwner, Motorizable, Infolayer ...`` (石炭/原油依存，Infolayer あり) |
 
-**Factory7** は 41 + 30 + 22 + 22 = **約 115 工場** (書記長最大都市のみ)．
+**Factory7** は 41 + 30 + 22 + 22 = **115 工場** (書記長最大都市のみ．Motorizable
+の 2 行は ``Infolayer`` 子タグ有無で分岐する shape 違い．Factory7 本体としては
+同等)．session 0 全 AreaManager 合計では **250 件**確認．全 session では 1,000+ 想定．
 session 0 全 AreaManager 合計では **250 件**確認．全 session では 1,000+ 想定．
 
 派生形として:
