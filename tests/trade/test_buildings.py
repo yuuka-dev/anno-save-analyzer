@@ -148,3 +148,39 @@ def test_entries_are_frozen(tmp_path: Path) -> None:
     d = BuildingDictionary.load(data_dir=tmp_path, locales=("en",))
     with pytest.raises(Exception):  # noqa: B017
         d[100].name = "X"  # type: ignore[misc]
+
+
+def test_invalid_yaml_root_in_en_raises_value_error(tmp_path: Path) -> None:
+    """en YAML ルートが mapping でなければ ValueError."""
+    (tmp_path / "buildings_anno1800.en.yaml").write_text(
+        """
+- not
+- a
+- mapping
+""",
+        encoding="utf-8",
+    )
+    with pytest.raises(ValueError, match="buildings_anno1800.en.yaml"):
+        BuildingDictionary.load(data_dir=tmp_path, locales=("en",))
+
+
+def test_invalid_yaml_root_in_locale_raises_value_error(tmp_path: Path) -> None:
+    """locale YAML ルートが mapping でなければ ValueError."""
+    (tmp_path / "buildings_anno1800.en.yaml").write_text(
+        """
+100:
+  name: "Farm"
+  kind: farm
+  template: "FarmBuilding"
+""",
+        encoding="utf-8",
+    )
+    (tmp_path / "buildings_anno1800.ja.yaml").write_text(
+        """
+- invalid
+- root
+""",
+        encoding="utf-8",
+    )
+    with pytest.raises(ValueError, match="buildings_anno1800.ja.yaml"):
+        BuildingDictionary.load(data_dir=tmp_path, locales=("ja", "en"))

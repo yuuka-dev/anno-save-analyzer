@@ -11,6 +11,7 @@ MVP 範囲: name / kind / template / tier．workforce / inputs / outputs は
 
 from __future__ import annotations
 
+from collections.abc import Mapping
 from importlib import resources
 from pathlib import Path
 from typing import Any
@@ -138,7 +139,14 @@ def _read_yaml(filename: str, data_dir: Path | None) -> dict[Any, Any]:
         if not path.exists():
             raise FileNotFoundError(path)
         text = path.read_text(encoding="utf-8")
-    return yaml.safe_load(text) or {}
+    payload = yaml.safe_load(text)
+    if payload is None:
+        return {}
+    if not isinstance(payload, Mapping):
+        raise ValueError(
+            f"YAML root must be a mapping in {filename}, got {type(payload).__name__}"
+        )
+    return dict(payload)
 
 
 def _pick_localized_name(
