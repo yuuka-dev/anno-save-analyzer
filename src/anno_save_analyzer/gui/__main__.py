@@ -45,11 +45,31 @@ def main(argv: list[str] | None = None) -> int:
     title = GameTitle(args.title)
     state = load_state(args.save, title=title, locale=args.locale)
 
+    from PySide6.QtGui import QFont
     from PySide6.QtWidgets import QApplication
 
     from .main_window import BalanceMainWindow
 
     app = QApplication.instance() or QApplication(sys.argv)
+    # cross-platform で揃った見た目にする．Windows native テーマはボタンが
+    # 浮いて見栄えがブレるため Fusion で統一．
+    app.setStyle("Fusion")
+    # WSL2 は fontconfig のデフォルトが貧弱で日本語が豆腐 / ぼやける問題．
+    # 優先順位で CJK 対応フォントを指定．Windows ネイティブでは Meiryo UI，
+    # macOS は Hiragino，Linux は Noto Sans CJK が優先．
+    font = QFont()
+    font.setFamilies(
+        [
+            "Meiryo UI",
+            "Segoe UI",
+            "Hiragino Sans",
+            "Noto Sans CJK JP",
+            "Noto Sans CJK",
+            "Sans Serif",
+        ]
+    )
+    font.setPointSize(11)
+    app.setFont(font)
     window = BalanceMainWindow(state)
     window.show()
     return _run_qt_event_loop(app)

@@ -17,15 +17,17 @@ class TestSessionKeyFor:
     def test_returns_albion_for_anno117_index_1(self) -> None:
         assert session_key_for(GameTitle.ANNO_117, 1) == "albion"
 
-    def test_returns_cape_trelawney_for_anno1800_index_0(self) -> None:
-        # 実セーブで観測した順序 (Ubisoft 内部 asset ID 順っぽい)
-        assert session_key_for(GameTitle.ANNO_1800, 0) == "cape_trelawney"
+    def test_returns_old_world_for_anno1800_index_0(self) -> None:
+        # 書記長 2026-04-23 UI 確認で旧世界が先頭と再確認 (それ以前の spike 記録
+        # は誤り．Cape Trelawney が先頭ではない)．
+        assert session_key_for(GameTitle.ANNO_1800, 0) == "old_world"
 
     def test_anno1800_full_order(self) -> None:
-        # 書記長 2026-04-22 報告で修正した順序を固定
+        # Anno 1800 save の SessionData 並び順: Old World → Cape Trelawney →
+        # Enbesa → New World → Arctic
         assert SESSION_KEYS[GameTitle.ANNO_1800] == (
-            "cape_trelawney",
             "old_world",
+            "cape_trelawney",
             "enbesa",
             "new_world",
             "arctic",
