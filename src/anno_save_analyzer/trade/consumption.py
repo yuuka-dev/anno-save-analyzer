@@ -69,10 +69,7 @@ class ConsumptionTable(BaseModel):
 
     @cached_property
     def _localized_name_lookup(self) -> dict[str, dict[int, str]]:
-        return {
-            locale: dict(entries)
-            for locale, entries in self.localized_names
-        }
+        return {locale: dict(entries) for locale, entries in self.localized_names}
 
     def get_tier(self, guid: int) -> PopulationTier | None:
         """tier guid で 1 件返す．未登録は ``None``．"""
