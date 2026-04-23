@@ -11,6 +11,7 @@ CI の validate-supply-data job が diff 検知するため Calculator が更新
 
 from __future__ import annotations
 
+from functools import cached_property
 from importlib import resources
 from pathlib import Path
 from typing import Any
@@ -66,6 +67,13 @@ class ConsumptionTable(BaseModel):
 
     model_config = {"frozen": True}
 
+    @cached_property
+    def _localized_name_lookup(self) -> dict[str, dict[int, str]]:
+        return {
+            locale: dict(entries)
+            for locale, entries in self.localized_names
+        }
+
     def get_tier(self, guid: int) -> PopulationTier | None:
         """tier guid で 1 件返す．未登録は ``None``．"""
         for tier in self.tiers:
@@ -86,13 +94,9 @@ class ConsumptionTable(BaseModel):
     def display_name(self, tier_guid: int, locale: str = "en") -> str | None:
         """``locale`` 優先 → 英語 fallback の順で tier 表示名を返す．"""
         if locale != "en":
-            for locale_key, entries in self.localized_names:
-                if locale_key != locale:
-                    continue
-                for guid, name in entries:
-                    if guid == tier_guid:
-                        return name
-                break
+            loc = self._localized_name_lookup.get(locale, {})
+            if tier_guid in loc:
+                return loc[tier_guid]
         tier = self.get_tier(tier_guid)
         return tier.name if tier is not None else None
 
