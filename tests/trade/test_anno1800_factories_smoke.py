@@ -3,14 +3,12 @@
 書記長の ``sample_anno1800.a7s`` から全 session の工場を舐めて，件数と
 productivity の分布が実在ゲームの値に収まっていることを確認する．
 
-CI / sample なし環境では skip．しきい値は書記長の ``sample_anno1800.a7s`` を
-前提にしているため，``SAMPLE_ANNO1800`` override 先も同等の canonical sample を
-想定する．
+しきい値 (session 数 / 工場総数) は書記長の canonical sample を前提にしており，
+他 save に差し替えると fail する可能性が高い．sample 無しなら skip．
 """
 
 from __future__ import annotations
 
-import os
 from pathlib import Path
 
 import pytest
@@ -20,8 +18,7 @@ from anno_save_analyzer.parser.filedb.session import extract_sessions
 from anno_save_analyzer.parser.pipeline import extract_inner_filedb
 from anno_save_analyzer.trade.factories import list_factory_aggregates
 
-_DEFAULT_SAMPLE = Path(__file__).resolve().parents[2] / "sample_anno1800.a7s"
-SAMPLE_PATH = Path(os.environ.get("SAMPLE_ANNO1800", _DEFAULT_SAMPLE))
+SAMPLE_PATH = Path(__file__).resolve().parents[2] / "sample_anno1800.a7s"
 _HAS_SAMPLE = SAMPLE_PATH.is_file()
 
 
