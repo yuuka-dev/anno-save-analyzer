@@ -4,7 +4,7 @@
 productivity の分布が実在ゲームの値に収まっていることを確認する．
 
 CI / sample なし環境では skip．しきい値は書記長の ``sample_anno1800.a7s`` を
-前提にしとるため，``SAMPLE_ANNO1800`` override 先も同等の canonical sample を
+前提にしているため，``SAMPLE_ANNO1800`` override 先も同等の canonical sample を
 想定する．
 """
 
