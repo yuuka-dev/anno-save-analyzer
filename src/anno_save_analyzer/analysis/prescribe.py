@@ -124,12 +124,13 @@ def _strong_route_products(
     if events.empty:
         return set()
     events = events[events["island_name"].notna()].copy()
-    events["product_guid_numeric"] = pd.to_numeric(events["product_guid"], errors="coerce")
-    events = events[events["product_guid_numeric"].notna()]
+    product_guid_numeric = pd.to_numeric(events["product_guid"], errors="coerce")
+    events = events[product_guid_numeric.notna()]
+    product_guid = product_guid_numeric[product_guid_numeric.notna()].astype(int)
     return set(
         zip(
             events["island_name"].astype(str),
-            events["product_guid_numeric"].astype(int),
+            product_guid,
             strict=False,
         )
     )

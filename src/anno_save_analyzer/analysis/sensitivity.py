@@ -55,17 +55,13 @@ def route_leave_one_out(frames: AnalysisFrames) -> pd.DataFrame:
         route_name = group["route_name"].iloc[0]
         max_tick = group["timestamp_tick"].max()
         min_tick = group["timestamp_tick"].min()
-        if pd.isna(max_tick) or pd.isna(min_tick):
-            tick_span = 0.0
-        else:
-            tick_delta = max_tick - min_tick
-            tick_span = 0.0 if pd.isna(tick_delta) else float(tick_delta)
+        tick_span = 0.0 if pd.isna(max_tick) or pd.isna(min_tick) else float(max_tick - min_tick)
         minutes = max(1.0, tick_span / TICKS_PER_MINUTE)
         tons_per_min = float(group["amount"].sum()) / minutes
 
         # route が運んでる unique products
         products = group["product_guid"].unique().tolist()
-        route_islands = set(group["island_name"].dropna().astype(str))
+        route_islands = set(group["island_name"].dropna())
         route_area_managers: set[str] = set()
         if (
             route_islands
@@ -78,7 +74,6 @@ def route_leave_one_out(frames: AnalysisFrames) -> pd.DataFrame:
                     frames.islands["city_name"].isin(route_islands), "area_manager"
                 ]
                 .dropna()
-                .astype(str)
             )
 
         # その島 × 物資の現在 balance で「delta - tons_per_min/len(products)」を
