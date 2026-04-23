@@ -16,7 +16,14 @@
   ``productivity × recipe.tpmin × output.amount``
 - **消費量 (ton/min)** = Σ over tier × needs of
   ``tier.resident_total × need.tpmin``
-  (``is_bonus_need`` の物資は通常消費に含めない)
+  - ``is_bonus_need`` の物資は通常消費に含めない
+  - **unlock 未達の物資は除外**．Calculator の ``tier.needs`` は tier の
+    潜在的な全 need 候補．書記長の島で実際 unlock されてるかは
+    ``ResidenceAggregate.product_saturations`` (save の ``ConsumptionStates``
+    観測値) で判定し，観測されてない need は加算しない (「ビスケット
+    要求されてないのに消費加算される」問題の修正)．observe ゼロの島は
+    tier.needs を素直に使う (都市再建直後など tier breakdown だけで推定
+    したいフォールバック)．
 - **delta** = produced - consumed
 
 複数島の集計は ``SupplyBalanceTable.aggregate`` で area_manager 集合を指定
@@ -213,6 +220,13 @@ def _consumed_for_island(
 ) -> dict[int, float]:
     if consumption is None or not residence.tier_breakdown:
         return {}
+    # 観測済 need で filter．``product_saturations`` に登録されている物資が
+    # save の ``ConsumptionStates`` で実際消費記録のある need = unlock 済．
+    # None (観測ゼロ) の場合は tier.needs を素直に加算 (既存互換の fallback)．
+    observed: set[int] | None = None
+    if residence.product_saturations:
+        observed = {ps.product_guid for ps in residence.product_saturations}
+
     totals: dict[int, float] = {}
     # 事前に consumption の tier を英語名で index して繰り返し linear search を回避
     tier_by_name: dict[str, PopulationTier] = {t.name: t for t in consumption.tiers}
@@ -227,6 +241,8 @@ def _consumed_for_island(
             if need.tpmin is None:
                 continue
             if need.is_bonus_need and not include_bonus_needs:
+                continue
+            if observed is not None and need.product_guid not in observed:
                 continue
             totals[need.product_guid] = (
                 totals.get(need.product_guid, 0.0) + ts.resident_total * need.tpmin

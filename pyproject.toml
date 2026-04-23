@@ -21,22 +21,26 @@ dependencies = [
 [project.optional-dependencies]
 optimizer = ["ortools>=9.0"]
 tui = ["textual>=0.80", "textual-plotext>=0.2"]
+gui = ["PySide6>=6.6"]
 web = ["fastapi", "uvicorn"]
 viz = ["duckdb"]
 notebook = ["jupyterlab>=4.0"]
 
 [project.scripts]
 anno-save-analyzer = "anno_save_analyzer.cli.__main__:app"
+anno-save-analyzer-gui = "anno_save_analyzer.gui.__main__:main"
 
 [dependency-groups]
 dev = [
     "pytest>=8.0",
     "pytest-cov>=5.0",
     "pytest-asyncio>=0.24",
+    "pytest-qt>=4.4",
     "ruff>=0.5",
     "mypy>=1.10",
     "textual>=0.80",
     "textual-plotext>=0.2",
+    "PySide6>=6.6",
 ]
 
 [tool.hatch.build.targets.wheel]
@@ -49,6 +53,9 @@ asyncio_mode = "auto"
 addopts = [
     "-ra",
     "--strict-markers",
+    # GUI tests (pytest-qt + PySide6) は default で除外．書記長が手動で
+    # ``pytest -m gui`` を打つ or Windows CI job でのみ実行する．
+    "-m", "not gui",
 ]
 markers = [
     # 実 save を舐める / 大きい fixture を走査する重いテスト．

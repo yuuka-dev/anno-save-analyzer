@@ -13,14 +13,13 @@ from .models import GameTitle
 # locale yaml の `session.<title>.<key>` を引いて display 名を得る．
 SESSION_KEYS: dict[GameTitle, tuple[str, ...]] = {
     GameTitle.ANNO_117: ("latium", "albion"),
-    # Anno 1800 は book 1 から DLC を時系列で解放する順に作られる内部 index と
-    # 思っとったが **実セーブで実測したら違った** (書記長報告 2026-04-22)．
-    # FileDB の ``SessionData > BinaryData`` が並ぶ順は「Cape Trelawney, Old World,
-    # Enbesa, New World, Arctic」やった．世界地図の章立て順でも年代順でもない，
-    # Ubisoft 内部の asset ID 順っぽい．実セーブ起点で固定する．
+    # Anno 1800 の ``SessionData > BinaryData`` が save 内に並ぶ順．
+    # 2026-04-23 に書記長 UI 確認で「旧世界とトレローニー岬が逆」の指摘があり，
+    # 当初 spike の記録 (Cape Trelawney 先) は誤りだったと判明．正しい順は
+    # 「Old World, Cape Trelawney, Enbesa, New World, Arctic」．
     GameTitle.ANNO_1800: (
-        "cape_trelawney",
         "old_world",
+        "cape_trelawney",
         "enbesa",
         "new_world",
         "arctic",

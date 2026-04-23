@@ -23,7 +23,11 @@ from anno_save_analyzer.trade.factory_recipes import (
     FactoryRecipeTable,
     RecipeOutput,
 )
-from anno_save_analyzer.trade.population import ResidenceAggregate, TierSummary
+from anno_save_analyzer.trade.population import (
+    ProductSaturation,
+    ResidenceAggregate,
+    TierSummary,
+)
 
 # ---------- fixtures ----------
 
@@ -32,12 +36,16 @@ def _mk_residence(
     am: str = "AreaManager_1",
     residents: int = 0,
     tier_breakdown: tuple[TierSummary, ...] = (),
+    observed_products: tuple[int, ...] = (),
 ) -> ResidenceAggregate:
     return ResidenceAggregate(
         area_manager=am,
         residence_count=sum(ts.residence_count for ts in tier_breakdown),
         resident_total=residents,
         tier_breakdown=tier_breakdown,
+        product_saturations=tuple(
+            ProductSaturation(product_guid=g, current=0.9, average=0.9) for g in observed_products
+        ),
     )
 
 
@@ -179,6 +187,68 @@ def test_tier_not_in_map_is_skipped() -> None:
     ]
     table = build_balance_table(residences=residences, consumption=consumption)
     assert table.islands[0].products == ()
+
+
+# ---------- observed need filter (unlock 未達の除外) ----------
+
+
+def test_unlock_not_met_need_excluded_when_not_observed() -> None:
+    """``product_saturations`` に無い need は unlock 未達と見なし加算しない．
+
+    Calculator の Farmer tier には Fish と Biscuits 両方が候補として並ぶが
+    書記長の save で Biscuits が要求されてない (ConsumptionStates に未登録)
+    場合は消費に乗らない．
+    """
+    consumption = _mk_consumption(
+        PopulationTier(
+            guid=15000000,
+            name="Farmers",
+            needs=(
+                TierNeed(product_guid=200, tpmin=0.01),  # Fish: 観測済
+                TierNeed(product_guid=400, tpmin=0.02),  # Biscuits: 未観測 = unlock 外
+            ),
+        )
+    )
+    residences = [
+        _mk_residence(
+            residents=100,
+            tier_breakdown=(TierSummary(tier="farmer", residence_count=10, resident_total=100),),
+            observed_products=(200,),  # Fish のみ観測
+        )
+    ]
+    table = build_balance_table(residences=residences, consumption=consumption)
+    guids = {p.product_guid for p in table.islands[0].products}
+    assert 200 in guids
+    assert 400 not in guids
+
+
+def test_no_observed_products_falls_back_to_all_needs() -> None:
+    """``product_saturations`` 空なら tier.needs を全加算 (既存互換 fallback)．
+
+    都市再建直後など save に tier_breakdown だけあって ConsumptionStates が
+    populate されてないケースで 0 加算にならないようにする．
+    """
+    consumption = _mk_consumption(
+        PopulationTier(
+            guid=15000000,
+            name="Farmers",
+            needs=(
+                TierNeed(product_guid=200, tpmin=0.01),
+                TierNeed(product_guid=400, tpmin=0.02),
+            ),
+        )
+    )
+    residences = [
+        _mk_residence(
+            residents=100,
+            tier_breakdown=(TierSummary(tier="farmer", residence_count=10, resident_total=100),),
+            observed_products=(),  # 観測ゼロ
+        )
+    ]
+    table = build_balance_table(residences=residences, consumption=consumption)
+    guids = {p.product_guid for p in table.islands[0].products}
+    # fallback: 両方の need が加算される
+    assert guids == {200, 400}
 
 
 # ---------- 混合 (生産 + 消費) ----------
