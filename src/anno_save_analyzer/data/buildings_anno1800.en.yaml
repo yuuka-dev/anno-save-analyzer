@@ -1,0 +1,1366 @@
+# Anno 1800 — building dictionary (en, canonical).
+# Auto-generated from maindata/dataN.rda (latest)/assets.xml + texts_english.xml
+# by scripts/generate_buildings_anno1800.py. Re-run after game updates.
+
+406:
+  name: "Skyline Tower"
+  kind: residence
+  template: "ResidenceBuilding-Unique"
+2397:
+  name: "Furnace"
+  kind: factory
+  template: "HeavyFactoryBuilding"
+2399:
+  name: "Coal Mine"
+  kind: factory
+  template: "SlotFactoryBuilding7"
+2400:
+  name: "Iron Mine"
+  kind: factory
+  template: "SlotFactoryBuilding7"
+2533:
+  name: "Old Nate's Harbour"
+  kind: warehouse
+  template: "HarborWarehouse7"
+2632:
+  name: "Unpopulated Island"
+  kind: warehouse
+  template: "HarborWarehouseSlot7"
+5405:
+  name: "Artista Residence"
+  kind: residence
+  template: "ResidenceBuilding7_Colony"
+5457:
+  name: "Nandu Farm"
+  kind: farm
+  template: "FarmBuilding_Electrifiable"
+5458:
+  name: "Jalea Kitchen"
+  kind: factory
+  template: "FactoryBuilding7"
+5459:
+  name: "Ice Cream Factory"
+  kind: factory
+  template: "FactoryBuilding7"
+5463:
+  name: "Herb Garden"
+  kind: farm
+  template: "FarmBuilding"
+5464:
+  name: "Herbs"
+  kind: farmfield
+  template: "Farmfield"
+5657:
+  name: "Perfume Mixer"
+  kind: factory
+  template: "FactoryBuilding7"
+5658:
+  name: "Scooter Factory"
+  kind: factory
+  template: "FactoryBuilding7"
+5659:
+  name: "Motor Assembly Plant"
+  kind: factory
+  template: "FactoryBuilding7"
+5814:
+  name: "Orchid Farm"
+  kind: farm
+  template: "FarmBuilding"
+5815:
+  name: "Orchids"
+  kind: farmfield
+  template: "Farmfield"
+5840:
+  name: "Samba School"
+  kind: buff_factory
+  template: "BuffFactory"
+5862:
+  name: "Fan Factory"
+  kind: factory
+  template: "FactoryBuilding7"
+5879:
+  name: "Ball Manufactory"
+  kind: factory
+  template: "FactoryBuilding7"
+5920:
+  name: "Margaret Hunt's Harbour"
+  kind: warehouse
+  template: "HarborWarehouse7"
+5921:
+  name: "Yaosca's Harbour"
+  kind: warehouse
+  template: "HarborWarehouse7"
+5922:
+  name: "Malching's Harbour"
+  kind: warehouse
+  template: "HarborWarehouse7"
+5923:
+  name: "DaSilva's Harbour"
+  kind: warehouse
+  template: "HarborWarehouse7"
+5924:
+  name: "Palomas's Airfield"
+  kind: warehouse
+  template: "HarborWarehouse7"
+5933:
+  name: "Costume Shop"
+  kind: factory
+  template: "FactoryBuilding7"
+5988:
+  name: "Concrete Works"
+  kind: factory
+  template: "HeavyFactoryBuilding"
+5989:
+  name: "Cement Mine"
+  kind: factory
+  template: "SlotFactoryBuilding7"
+6018:
+  name: "Cinema"
+  kind: buff_factory
+  template: "BuffFactory"
+6080:
+  name: "Furnace"
+  kind: factory
+  template: "HeavyFactoryBuilding"
+6083:
+  name: "Sewing Machine Factory"
+  kind: factory
+  template: "FactoryBuilding7"
+6086:
+  name: "Hacienda Artista Quarters"
+  kind: residence
+  template: "ResidenceBuilding7_Colony"
+6264:
+  name: "Beach"
+  kind: buff_factory
+  template: "BuffFactory"
+6279:
+  name: "Cable Factory"
+  kind: factory
+  template: "FactoryBuilding7"
+6594:
+  name: "Mezcal Bar"
+  kind: factory
+  template: "FactoryBuilding7"
+7314:
+  name: "Loading Crane"
+  kind: buff_factory
+  template: "BuffFactory"
+7319:
+  name: "Sea Salt Factory"
+  kind: factory
+  template: "FactoryBuilding7"
+7919:
+  name: "Calamari Fishery"
+  kind: factory
+  template: "FactoryBuilding7"
+13991:
+  name: "animal_colony02_01_module (Watusi Module)"
+  kind: farmfield
+  template: "Farmfield"
+13992:
+  name: "animal_colony02_02_module (Goat Module)"
+  kind: farmfield
+  template: "Farmfield"
+24055:
+  name: "Fish"
+  kind: factory
+  template: "FactoryBuilding7"
+24110:
+  name: "Poncho"
+  kind: factory
+  template: "FactoryBuilding7"
+24116:
+  name: "Burrito"
+  kind: factory
+  template: "FactoryBuilding7"
+24117:
+  name: "Tools"
+  kind: factory
+  template: "FactoryBuilding7"
+24118:
+  name: "Drip Coffee Pot"
+  kind: factory
+  template: "FactoryBuilding7"
+24119:
+  name: "Steel"
+  kind: factory
+  template: "FactoryBuilding7"
+24120:
+  name: "Coal Burner"
+  kind: factory
+  template: "FactoryBuilding7"
+24121:
+  name: "Carbon"
+  kind: factory
+  template: "FactoryBuilding7"
+24122:
+  name: "Fedora"
+  kind: factory
+  template: "FactoryBuilding7"
+24123:
+  name: "Atole"
+  kind: factory
+  template: "FactoryBuilding7"
+24124:
+  name: "Concrete Factory"
+  kind: factory
+  template: "FactoryBuilding7"
+24125:
+  name: "Cement Mine"
+  kind: factory
+  template: "FactoryBuilding7"
+24126:
+  name: "Cement Mine Groundstation"
+  kind: factory
+  template: "FactoryBuilding7"
+24127:
+  name: "Iron Mine"
+  kind: factory
+  template: "FactoryBuilding7"
+24128:
+  name: "Iron Mine Groundstation"
+  kind: factory
+  template: "FactoryBuilding7"
+24129:
+  name: "Copper Mine"
+  kind: factory
+  template: "FactoryBuilding7"
+24130:
+  name: "Coal Mine"
+  kind: factory
+  template: "FactoryBuilding7"
+24133:
+  name: "Forestation"
+  kind: factory
+  template: "FactoryBuilding7"
+24134:
+  name: "Aquafarm"
+  kind: factory
+  template: "FactoryBuilding7"
+24135:
+  name: "Water Purification"
+  kind: factory
+  template: "FactoryBuilding7"
+24136:
+  name: "Pump House"
+  kind: factory
+  template: "FactoryBuilding7"
+24137:
+  name: "Dam"
+  kind: factory
+  template: "FactoryBuilding7"
+24652:
+  name: "Fishery"
+  kind: factory
+  template: "FactoryBuilding7_BuildPermit"
+24658:
+  name: "Pig Farm"
+  kind: farm
+  template: "FarmBuilding_BuildPermit"
+24792:
+  name: "Hacienda Jornalero Quarters"
+  kind: residence
+  template: "ResidenceBuilding7_Colony"
+24793:
+  name: "Hacienda Obrera Quarters"
+  kind: residence
+  template: "ResidenceBuilding7_Colony"
+24794:
+  name: "Hacienda Farm"
+  kind: farm
+  template: "RecipeFarm"
+24798:
+  name: "Hacienda Sugar Cane Farm"
+  kind: farm
+  template: "RecipeFarm"
+24805:
+  name: "Hacienda Fertiliser Works"
+  kind: buff_factory
+  template: "BuffFactoryCulture"
+24820:
+  name: "Coal Coking Furnace"
+  kind: factory
+  template: "FactoryBuilding7"
+24825:
+  name: "Chewing Gum Factory"
+  kind: factory
+  template: "FactoryBuilding7"
+24836:
+  name: "factory_Scenario02_Fuel"
+  kind: farm
+  template: "FarmBuilding"
+24844:
+  name: "Cyanide Leacher"
+  kind: farm
+  template: "FarmBuilding"
+24845:
+  name: "Oxidation Pool"
+  kind: buff_factory
+  template: "BuffFactoryModule"
+24856:
+  name: "Silver Smelter"
+  kind: factory
+  template: "FactoryBuilding7"
+24857:
+  name: "Royal Mint"
+  kind: factory
+  template: "FactoryBuilding7"
+24861:
+  name: "Ammonia Plant"
+  kind: buff_factory
+  template: "BuffFactoryModule"
+25003:
+  name: "Hacienda Corn Farm"
+  kind: farm
+  template: "RecipeFarm"
+25005:
+  name: "Hacienda Coffee Farm"
+  kind: farm
+  template: "RecipeFarm"
+25006:
+  name: "Hacienda Caoutchouc Plantation"
+  kind: farm
+  template: "RecipeFarm"
+25009:
+  name: "Hacienda Cocoa Farm"
+  kind: farm
+  template: "RecipeFarm"
+25019:
+  name: "Hacienda Potato Farm"
+  kind: farm
+  template: "RecipeFarm"
+25020:
+  name: "Hacienda Spice Farm"
+  kind: farm
+  template: "RecipeFarm"
+25128:
+  name: "Hacienda Grain Farm"
+  kind: farm
+  template: "RecipeFarm"
+25240:
+  name: "Fertiliser Silo"
+  kind: buff_factory
+  template: "BuffFactoryModule"
+25241:
+  name: "Fertiliser Silo"
+  kind: buff_factory
+  template: "BuffFactoryModule"
+25242:
+  name: "Fertiliser Silo"
+  kind: buff_factory
+  template: "BuffFactoryModule"
+25547:
+  name: "Tractor Barn"
+  kind: buff_factory
+  template: "BuffFactoryModule"
+25548:
+  name: "Tractor Barn"
+  kind: buff_factory
+  template: "BuffFactoryModule"
+25549:
+  name: "Silo"
+  kind: buff_factory
+  template: "BuffFactoryModule"
+25890:
+  name: "Spice Field"
+  kind: farmfield
+  template: "Farmfield"
+100416:
+  name: "Clay Pit"
+  kind: factory
+  template: "SlotFactoryBuilding7"
+100429:
+  name: "Public Mooring"
+  kind: pier
+  template: "VisitorPier"
+100451:
+  name: "Sawmill"
+  kind: factory
+  template: "FactoryBuilding7"
+100510:
+  name: "Medium Trading Post"
+  kind: warehouse
+  template: "HarborWarehouse7"
+100511:
+  name: "Large Trading Post"
+  kind: warehouse
+  template: "HarborWarehouse7"
+100514:
+  name: "Medium Trading Post"
+  kind: warehouse
+  template: "HarborWarehouse7"
+100515:
+  name: "Large Trading Post"
+  kind: warehouse
+  template: "HarborWarehouse7"
+100516:
+  name: "Medium Warehouse"
+  kind: warehouse
+  template: "Warehouse"
+100517:
+  name: "Large Warehouse"
+  kind: warehouse
+  template: "Warehouse"
+100654:
+  name: "Red Pepper Farm"
+  kind: farm
+  template: "FarmBuilding"
+100655:
+  name: "Vineyard"
+  kind: farm
+  template: "FarmBuilding"
+100656:
+  name: "Pepper Crop"
+  kind: farmfield
+  template: "Farmfield"
+100657:
+  name: "Vines"
+  kind: farmfield
+  template: "Farmfield"
+100659:
+  name: "Champagne Cellar"
+  kind: factory
+  template: "FactoryBuilding7"
+100680:
+  name: "Archibald Blake's Harbour"
+  kind: warehouse
+  template: "HarborWarehouse7"
+100681:
+  name: "Anne Harlow's Harbour"
+  kind: warehouse
+  template: "HarborWarehouse7"
+100682:
+  name: "Jean La Fortune's Harbour"
+  kind: warehouse
+  template: "HarborWarehouse7"
+100683:
+  name: "Isabel Sarmento's Harbour"
+  kind: warehouse
+  template: "HarborWarehouse7"
+100685:
+  name: "Eli Bleakworth's Harbour"
+  kind: warehouse
+  template: "HarborWarehouse7"
+100686:
+  name: "Madame Kahina's Harbour"
+  kind: warehouse
+  template: "HarborWarehouse7"
+100767:
+  name: "Edvard's Church"
+  kind: public_service
+  template: "PublicServiceBuilding"
+100781:
+  name: "Coal Harbour"
+  kind: warehouse
+  template: "HarborWarehouseStrategic"
+100783:
+  name: "Small Oil Harbour"
+  kind: warehouse
+  template: "HarborWarehouseStrategic"
+101117:
+  name: "Old Nate's Harbour"
+  kind: warehouse
+  template: "HarborWarehouse7"
+101122:
+  name: "Dynamite Shop"
+  kind: factory
+  template: "FactoryBuilding7"
+101250:
+  name: "Spectacle Factory"
+  kind: factory
+  template: "FactoryBuilding7"
+101251:
+  name: "Coffee Plantation"
+  kind: farm
+  template: "FarmBuilding"
+101252:
+  name: "Coffee Roaster"
+  kind: factory
+  template: "FactoryBuilding7"
+101253:
+  name: "Coffee Crop"
+  kind: farmfield
+  template: "Farmfield"
+101254:
+  name: "Jornalero Residence"
+  kind: residence
+  template: "ResidenceBuilding7_Colony"
+101255:
+  name: "Obrero Residence"
+  kind: residence
+  template: "ResidenceBuilding7_Colony"
+101258:
+  name: "Chapel"
+  kind: public_service
+  template: "PublicServiceBuilding"
+101262:
+  name: "Fish Oil Factory"
+  kind: factory
+  template: "FactoryBuilding7"
+101263:
+  name: "Plantain Plantation"
+  kind: farm
+  template: "FarmBuilding"
+101264:
+  name: "Fried Plantain Kitchen"
+  kind: factory
+  template: "FactoryBuilding7"
+101266:
+  name: "Poncho Darner"
+  kind: factory
+  template: "FactoryBuilding7"
+101269:
+  name: "Cattle Farm"
+  kind: farm
+  template: "FarmBuilding_Electrifiable"
+101270:
+  name: "Corn Farm"
+  kind: farm
+  template: "FarmBuilding"
+101271:
+  name: "Tortilla Maker"
+  kind: factory
+  template: "FactoryBuilding7"
+101272:
+  name: "Alpaca Farm"
+  kind: farm
+  template: "FarmBuilding_Electrifiable"
+101273:
+  name: "Bombín Weaver"
+  kind: factory
+  template: "FactoryBuilding7"
+101280:
+  name: "Plantain Grove"
+  kind: farmfield
+  template: "Farmfield"
+101282:
+  name: "Cornfield"
+  kind: farmfield
+  template: "Farmfield"
+101331:
+  name: "Oil Refinery"
+  kind: farm
+  template: "FarmBuilding"
+101403:
+  name: "Medium Oil Harbour"
+  kind: warehouse
+  template: "HarborWarehouseStrategic"
+101404:
+  name: "Large Oil Harbour"
+  kind: warehouse
+  template: "HarborWarehouseStrategic"
+101407:
+  name: "Packet Steamer Office"
+  kind: warehouse
+  template: "HarborWarehouse7"
+101415:
+  name: "Felt Producer"
+  kind: factory
+  template: "FactoryBuilding7"
+101629:
+  name: "Unpopulated Island"
+  kind: warehouse
+  template: "HarborWarehouseSlot7"
+102284:
+  name: "Public Mooring"
+  kind: pier
+  template: "VisitorPierColony"
+112091:
+  name: "Explorer Shelter"
+  kind: residence
+  template: "ResidenceBuilding7_Arctic"
+112652:
+  name: "Technician Shelter"
+  kind: residence
+  template: "ResidenceBuilding7_Arctic"
+112666:
+  name: "Whaling Station"
+  kind: factory
+  template: "FactoryBuilding7_Arctic"
+112668:
+  name: "Pemmican Cookhouse"
+  kind: factory
+  template: "FactoryBuilding7_Arctic"
+112672:
+  name: "Parka Factory"
+  kind: factory
+  template: "FactoryBuilding7_Arctic"
+112674:
+  name: "Seal Hunting Docks"
+  kind: factory
+  template: "FactoryBuilding7_Arctic"
+112675:
+  name: "Sleeping Bag Factory"
+  kind: factory
+  template: "FactoryBuilding7_Arctic"
+112676:
+  name: "Goose Farm"
+  kind: farm
+  template: "FarmBuilding_Arctic"
+112677:
+  name: "Goose Pen"
+  kind: farmfield
+  template: "Farmfield"
+112679:
+  name: "Oil Lamp Factory"
+  kind: factory
+  template: "FactoryBuilding7_Arctic"
+112680:
+  name: "Husky Sled Factory"
+  kind: factory
+  template: "FactoryBuilding7_Arctic"
+112681:
+  name: "Sled Frame Factory"
+  kind: factory
+  template: "FactoryBuilding7_Arctic"
+112682:
+  name: "Husky Farm"
+  kind: farm
+  template: "FarmBuilding_Arctic"
+112683:
+  name: "Husky Run"
+  kind: farmfield
+  template: "Farmfield"
+112684:
+  name: "Post Office"
+  kind: public_service
+  template: "PublicServiceBuilding"
+112690:
+  name: "Arctic Gas Mine"
+  kind: farm
+  template: "FarmBuilding_Arctic"
+112863:
+  name: "Unpopulated Island"
+  kind: warehouse
+  template: "HarborWarehouseSlot7"
+114436:
+  name: "Shepherd Residence"
+  kind: residence
+  template: "ResidenceBuilding7_Colony"
+114437:
+  name: "Elder Residence"
+  kind: residence
+  template: "ResidenceBuilding7_Colony"
+114439:
+  name: "Sanga Farm"
+  kind: farm
+  template: "FarmBuilding"
+114440:
+  name: "Salt Works"
+  kind: factory
+  template: "FactoryBuilding7"
+114441:
+  name: "Linen Mill"
+  kind: factory
+  template: "FactoryBuilding7"
+114444:
+  name: "Dry-House"
+  kind: factory
+  template: "FactoryBuilding7"
+114445:
+  name: "Scholar Residence"
+  kind: residence
+  template: "ResidenceBuilding7_BuildPermit"
+  tier: investor
+114447:
+  name: "Hibiscus Farm"
+  kind: farm
+  template: "FarmBuilding"
+114448:
+  name: "Linseed Farm"
+  kind: farm
+  template: "FarmBuilding"
+114450:
+  name: "Teff Farm"
+  kind: farm
+  template: "FarmBuilding"
+114451:
+  name: "Indigo Farm"
+  kind: farm
+  template: "FarmBuilding"
+114452:
+  name: "Spice Farm"
+  kind: farm
+  template: "FarmBuilding"
+114453:
+  name: "Apiary"
+  kind: farm
+  template: "FarmBuilding"
+114456:
+  name: "Goat Farm"
+  kind: farm
+  template: "FarmBuilding"
+114459:
+  name: "Teff Mill"
+  kind: factory
+  template: "FactoryBuilding7"
+114461:
+  name: "Chandler"
+  kind: factory
+  template: "FactoryBuilding7"
+114464:
+  name: "Lanternsmith"
+  kind: factory
+  template: "FactoryBuilding7"
+114466:
+  name: "Embroiderer"
+  kind: factory
+  template: "FactoryBuilding7"
+114467:
+  name: "Brick Dry-House"
+  kind: factory
+  template: "FactoryBuilding7"
+114468:
+  name: "Tea Spicer"
+  kind: factory
+  template: "FactoryBuilding7"
+114469:
+  name: "Tapestry Looms"
+  kind: factory
+  template: "FactoryBuilding7"
+114470:
+  name: "Luminer"
+  kind: factory
+  template: "FactoryBuilding7"
+114471:
+  name: "Wat Kitchen"
+  kind: factory
+  template: "FactoryBuilding7"
+114472:
+  name: "Pipe Maker"
+  kind: factory
+  template: "FactoryBuilding7"
+114488:
+  name: "Hibiscus Field"
+  kind: farmfield
+  template: "Farmfield"
+114489:
+  name: "Wanza Field"
+  kind: farmfield
+  template: "Farmfield"
+114490:
+  name: "Flax Field"
+  kind: farmfield
+  template: "Farmfield"
+114492:
+  name: "Teff Grass Field"
+  kind: farmfield
+  template: "Farmfield"
+114494:
+  name: "Indigo Field"
+  kind: farmfield
+  template: "Farmfield"
+114495:
+  name: "Spice Field"
+  kind: farmfield
+  template: "Farmfield"
+114496:
+  name: "Apiary Field"
+  kind: farmfield
+  template: "Farmfield"
+114498:
+  name: "Goat Pen"
+  kind: farmfield
+  template: "Farmfield"
+114499:
+  name: "Sanga Field"
+  kind: farmfield
+  template: "Farmfield"
+114518:
+  name: "Marketplace"
+  kind: market
+  template: "Market"
+114519:
+  name: "Musicians' Court"
+  kind: public_service
+  template: "PublicServiceBuilding"
+114520:
+  name: "Monastery"
+  kind: public_service
+  template: "PublicServiceBuilding"
+114704:
+  name: "Sawmill"
+  kind: factory
+  template: "FactoryBuilding7_Arctic"
+114758:
+  name: "Unpopulated Island"
+  kind: warehouse
+  template: "HarborWarehouseSlot7"
+114775:
+  name: "Unpopulated Island"
+  kind: warehouse
+  template: "HarborWarehouseSlot7"
+114889:
+  name: "Canteen"
+  kind: market
+  template: "Market"
+116029:
+  name: "Deep Gold Mine"
+  kind: factory
+  template: "SlotFactoryBuilding7_Arctic"
+116035:
+  name: "Inuit Trading Post"
+  kind: warehouse
+  template: "HarborWarehouse7"
+117743:
+  name: "Clay Collector"
+  kind: factory
+  template: "SlotFactoryBuilding7"
+117744:
+  name: "Paper Mill"
+  kind: factory
+  template: "SlotFactoryBuilding7"
+118571:
+  name: "Fuel Station"
+  kind: factory
+  template: "FactoryBuilding7"
+118725:
+  name: "Ceramics Workshop"
+  kind: factory
+  template: "FactoryBuilding7"
+118729:
+  name: "Lobster Fishery"
+  kind: factory
+  template: "FactoryBuilding7"
+118733:
+  name: "Bootmakers"
+  kind: factory
+  template: "FactoryBuilding7"
+118734:
+  name: "Tailor's Shop"
+  kind: factory
+  template: "FactoryBuilding7"
+118735:
+  name: "Telephone Manufacturer"
+  kind: factory
+  template: "FactoryBuilding7"
+118736:
+  name: "Radio Tower"
+  kind: public_service
+  template: "PublicServiceBuilding"
+119025:
+  name: "Silo"
+  kind: buff_factory
+  template: "BuffFactoryModule"
+119026:
+  name: "Tractor Barn"
+  kind: buff_factory
+  template: "BuffFactoryModule"
+119027:
+  name: "Tractor Barn"
+  kind: buff_factory
+  template: "BuffFactoryModule"
+119028:
+  name: "Fuel Station"
+  kind: factory
+  template: "FactoryBuilding7"
+119259:
+  name: "Grand Oil Harbour"
+  kind: warehouse
+  template: "HarborWarehouseStrategic"
+119404:
+  name: "Kidusi Anitoni Trading Post"
+  kind: warehouse
+  template: "HarborWarehouse7"
+119408:
+  name: "Waha Desher Trading Post"
+  kind: warehouse
+  template: "HarborWarehouse7"
+119409:
+  name: "Ketema's Harbour"
+  kind: warehouse
+  template: "HarborWarehouse7"
+119425:
+  name: "Blake's Enbesan Harbour"
+  kind: warehouse
+  template: "HarborWarehouse7"
+123720:
+  name: "Angereb Trading Post"
+  kind: warehouse
+  template: "HarborWarehouse7"
+124737:
+  name: "Advanced Rum Distillery"
+  kind: factory
+  template: "FactoryBuilding7_BuildPermit"
+124738:
+  name: "Advanced Coffee Roaster"
+  kind: factory
+  template: "FactoryBuilding7_BuildPermit"
+124739:
+  name: "Advanced Cotton Mill"
+  kind: factory
+  template: "FactoryBuilding7_BuildPermit"
+131065:
+  name: "Nomad Harbour"
+  kind: warehouse
+  template: "HarborWarehouse7"
+269837:
+  name: "Tractor Barn"
+  kind: buff_factory
+  template: "BuffFactoryModule"
+269839:
+  name: "Tractor Barn"
+  kind: buff_factory
+  template: "BuffFactoryModule"
+269840:
+  name: "Fuel Station"
+  kind: factory
+  template: "FactoryBuilding7"
+269848:
+  name: "Tractor Barn"
+  kind: buff_factory
+  template: "BuffFactoryModule"
+269849:
+  name: "Tractor Barn"
+  kind: buff_factory
+  template: "BuffFactoryModule"
+269850:
+  name: "Grain Farm (GASOLINE TEST)"
+  kind: farm
+  template: "FarmBuilding"
+269851:
+  name: "Grain Farm LESS MODULES"
+  kind: farm
+  template: "FarmBuilding"
+269867:
+  name: "Grand Trading Post"
+  kind: warehouse
+  template: "HarborWarehouse7"
+269869:
+  name: "Grand Warehouse"
+  kind: warehouse
+  template: "Warehouse"
+269879:
+  name: "Grand Trading Post"
+  kind: warehouse
+  template: "HarborWarehouse7"
+269957:
+  name: "Silo"
+  kind: buff_factory
+  template: "BuffFactoryModule"
+269958:
+  name: "Silo"
+  kind: buff_factory
+  template: "BuffFactoryModule"
+270041:
+  name: "Tractor Barn (Gasoline Good)"
+  kind: buff_factory
+  template: "BuffFactoryModule"
+270044:
+  name: "Fuel Station (GASOLINE TEST)"
+  kind: factory
+  template: "FactoryBuilding7"
+601445:
+  name: "Hotel"
+  kind: residence
+  template: "ResidenceBuilding7_Hotel"
+601882:
+  name: "Investor Skyscraper: Level 1"
+  kind: residence
+  template: "ResidenceBuilding"
+  tier: investor
+601883:
+  name: "Investor Skyscraper: Level 2"
+  kind: residence
+  template: "ResidenceBuilding"
+  tier: investor
+601884:
+  name: "Investor Skyscraper: Level 3"
+  kind: residence
+  template: "ResidenceBuilding"
+  tier: investor
+601886:
+  name: "Investor Skyscraper: Level 4"
+  kind: residence
+  template: "ResidenceBuilding"
+  tier: investor
+601888:
+  name: "Engineer Skyscraper: Level 1"
+  kind: residence
+  template: "ResidenceBuilding"
+  tier: engineer
+601889:
+  name: "Engineer Skyscraper: Level 2"
+  kind: residence
+  template: "ResidenceBuilding"
+  tier: engineer
+601890:
+  name: "Engineer Skyscraper: Level 3"
+  kind: residence
+  template: "ResidenceBuilding"
+  tier: engineer
+601891:
+  name: "Investor Skyscraper: Level 5"
+  kind: residence
+  template: "ResidenceBuilding"
+  tier: investor
+1000254:
+  name: "Unpopulated Island"
+  kind: warehouse
+  template: "HarborWarehouseSlot7"
+1010262:
+  name: "Grain Farm"
+  kind: farm
+  template: "FarmBuilding"
+1010263:
+  name: "Cattle Farm"
+  kind: farm
+  template: "FarmBuilding"
+1010264:
+  name: "Hop Farm"
+  kind: farm
+  template: "FarmBuilding"
+1010265:
+  name: "Potato Farm"
+  kind: farm
+  template: "FarmBuilding"
+1010267:
+  name: "Sheep Farm"
+  kind: farm
+  template: "FarmBuilding"
+1010269:
+  name: "Pig Farm"
+  kind: farm
+  template: "FarmBuilding"
+1010270:
+  name: "Grain Field"
+  kind: farmfield
+  template: "Farmfield"
+1010271:
+  name: "Pasture"
+  kind: farmfield
+  template: "Farmfield"
+1010272:
+  name: "Hop Field"
+  kind: farmfield
+  template: "Farmfield"
+1010273:
+  name: "Potato Field"
+  kind: farmfield
+  template: "Farmfield"
+1010274:
+  name: "Forest"
+  kind: farmfield
+  template: "Farmfield"
+1010275:
+  name: "Sheepfold"
+  kind: farmfield
+  template: "Farmfield"
+1010277:
+  name: "Pig Sty"
+  kind: farmfield
+  template: "Farmfield"
+1010278:
+  name: "Fishery"
+  kind: factory
+  template: "FactoryBuilding7"
+1010280:
+  name: "Concrete Factory"
+  kind: factory
+  template: "FactoryBuilding7"
+1010281:
+  name: "Soap Factory"
+  kind: factory
+  template: "FactoryBuilding7"
+1010282:
+  name: "Brass Smeltery"
+  kind: factory
+  template: "HeavyFactoryBuilding"
+1010283:
+  name: "Brick Factory"
+  kind: factory
+  template: "FactoryBuilding7"
+1010284:
+  name: "Sewing Machine Factory"
+  kind: factory
+  template: "FactoryBuilding7"
+1010285:
+  name: "Window Makers"
+  kind: factory
+  template: "FactoryBuilding7"
+1010286:
+  name: "Light Bulb Factory"
+  kind: factory
+  template: "FactoryBuilding7"
+1010288:
+  name: "Sailmakers"
+  kind: factory
+  template: "FactoryBuilding7"
+1010289:
+  name: "Coachmakers"
+  kind: factory
+  template: "FactoryBuilding7"
+1010291:
+  name: "Bakery"
+  kind: factory
+  template: "FactoryBuilding7"
+1010292:
+  name: "Brewery"
+  kind: factory
+  template: "FactoryBuilding7"
+1010293:
+  name: "Artisanal Kitchen"
+  kind: factory
+  template: "FactoryBuilding7"
+1010294:
+  name: "Schnapps Distillery"
+  kind: factory
+  template: "FactoryBuilding7"
+1010295:
+  name: "Cannery"
+  kind: factory
+  template: "FactoryBuilding7"
+1010296:
+  name: "Steelworks"
+  kind: factory
+  template: "HeavyFactoryBuilding"
+1010297:
+  name: "Furnace"
+  kind: factory
+  template: "HeavyFactoryBuilding"
+1010299:
+  name: "Weapon Factory"
+  kind: factory
+  template: "HeavyFactoryBuilding"
+1010300:
+  name: "Dynamite Factory"
+  kind: factory
+  template: "FactoryBuilding7"
+1010301:
+  name: "Heavy Weapons Factory"
+  kind: factory
+  template: "HeavyFactoryBuilding"
+1010302:
+  name: "Motor Assembly Line"
+  kind: factory
+  template: "HeavyFactoryBuilding"
+1010303:
+  name: "Cab Assembly Line"
+  kind: factory
+  template: "HeavyFactoryBuilding"
+1010304:
+  name: "Coal Mine"
+  kind: factory
+  template: "SlotFactoryBuilding7"
+1010305:
+  name: "Iron Mine"
+  kind: factory
+  template: "SlotFactoryBuilding7"
+1010307:
+  name: "Zinc Mine"
+  kind: factory
+  template: "SlotFactoryBuilding7"
+1010308:
+  name: "Copper Mine"
+  kind: factory
+  template: "SlotFactoryBuilding7"
+1010309:
+  name: "Limestone Quarry"
+  kind: factory
+  template: "SlotFactoryBuilding7"
+1010310:
+  name: "Saltpetre Works"
+  kind: factory
+  template: "FactoryBuilding7"
+1010311:
+  name: "Mineral Mine"
+  kind: factory
+  template: "SlotFactoryBuilding7"
+1010312:
+  name: "Rendering Works"
+  kind: factory
+  template: "FactoryBuilding7"
+1010313:
+  name: "Flour Mill"
+  kind: factory
+  template: "FactoryBuilding7"
+1010314:
+  name: "Malthouse"
+  kind: factory
+  template: "FactoryBuilding7"
+1010315:
+  name: "Framework Knitters"
+  kind: factory
+  template: "FactoryBuilding7"
+1010316:
+  name: "Slaughterhouse"
+  kind: factory
+  template: "FactoryBuilding7"
+1010317:
+  name: "Sugar Refinery"
+  kind: factory
+  template: "FactoryBuilding7"
+1010318:
+  name: "Cotton Mill"
+  kind: factory
+  template: "FactoryBuilding7"
+1010319:
+  name: "Glassmakers"
+  kind: factory
+  template: "FactoryBuilding7"
+1010320:
+  name: "Marquetry Workshop"
+  kind: factory
+  template: "FactoryBuilding7"
+1010321:
+  name: "Filament Factory"
+  kind: factory
+  template: "FactoryBuilding7"
+1010323:
+  name: "Bicycle Factory"
+  kind: factory
+  template: "FactoryBuilding7"
+1010324:
+  name: "Clockmakers"
+  kind: factory
+  template: "FactoryBuilding7"
+1010325:
+  name: "Fur Dealer"
+  kind: factory
+  template: "FactoryBuilding7"
+1010326:
+  name: "Gramophone Factory"
+  kind: factory
+  template: "FactoryBuilding7"
+1010327:
+  name: "Goldsmiths"
+  kind: factory
+  template: "FactoryBuilding7"
+1010328:
+  name: "Jewellers"
+  kind: factory
+  template: "FactoryBuilding7"
+1010329:
+  name: "Sugar Cane Plantation"
+  kind: farm
+  template: "FarmBuilding"
+1010330:
+  name: "Tobacco Plantation"
+  kind: farm
+  template: "FarmBuilding"
+1010331:
+  name: "Cotton Plantation"
+  kind: farm
+  template: "FarmBuilding"
+1010332:
+  name: "Cocoa Plantation"
+  kind: farm
+  template: "FarmBuilding"
+1010333:
+  name: "Caoutchouc Plantation"
+  kind: farm
+  template: "FarmBuilding"
+1010334:
+  name: "Sugar Cane Crop"
+  kind: farmfield
+  template: "Farmfield"
+1010335:
+  name: "Tobacco Field"
+  kind: farmfield
+  template: "Farmfield"
+1010336:
+  name: "Cotton Field"
+  kind: farmfield
+  template: "Farmfield"
+1010337:
+  name: "Cocoa Grove"
+  kind: farmfield
+  template: "Farmfield"
+1010338:
+  name: "Caoutchouc Grove"
+  kind: farmfield
+  template: "Farmfield"
+1010339:
+  name: "Pearl Farm"
+  kind: factory
+  template: "FactoryBuilding7"
+1010340:
+  name: "Rum Distillery"
+  kind: factory
+  template: "FactoryBuilding7"
+1010341:
+  name: "Chocolate Factory"
+  kind: factory
+  template: "FactoryBuilding7"
+1010342:
+  name: "Cigar Factory"
+  kind: factory
+  template: "FactoryBuilding7"
+1010343:
+  name: "Farmer Residence"
+  kind: residence
+  template: "ResidenceBuilding"
+  tier: farmer
+1010344:
+  name: "Worker Residence"
+  kind: residence
+  template: "ResidenceBuilding"
+  tier: worker
+1010345:
+  name: "Artisan Residence"
+  kind: residence
+  template: "ResidenceBuilding"
+  tier: artisan
+1010346:
+  name: "Engineer Residence"
+  kind: residence
+  template: "ResidenceBuilding"
+  tier: engineer
+1010347:
+  name: "Investor Residence"
+  kind: residence
+  template: "ResidenceBuilding"
+  tier: investor
+1010358:
+  name: "Pub"
+  kind: public_service
+  template: "PublicServiceBuilding"
+1010359:
+  name: "Church"
+  kind: public_service
+  template: "PublicServiceBuildingWithMusicInfluencer"
+1010360:
+  name: "School"
+  kind: public_service
+  template: "PublicServiceBuilding"
+1010361:
+  name: "Variety Theatre"
+  kind: public_service
+  template: "PublicServiceBuildingWithBus"
+1010362:
+  name: "University"
+  kind: public_service
+  template: "PublicServiceBuilding"
+1010364:
+  name: "Members Club"
+  kind: public_service
+  template: "PublicServiceBuilding"
+1010365:
+  name: "Bank"
+  kind: public_service
+  template: "PublicServiceBuilding"
+1010371:
+  name: "Small Warehouse"
+  kind: warehouse
+  template: "Warehouse"
+1010372:
+  name: "Marketplace"
+  kind: market
+  template: "Market"
+1010517:
+  name: "Small Trading Post"
+  kind: warehouse
+  template: "HarborWarehouse7"
+1010540:
+  name: "Small Trading Post"
+  kind: warehouse
+  template: "HarborWarehouse7"
+1010559:
+  name: "Hunting Grounds"
+  kind: farmfield
+  template: "Farmfield"
+1010560:
+  name: "Sand Mine"
+  kind: factory
+  template: "FactoryBuilding7"
