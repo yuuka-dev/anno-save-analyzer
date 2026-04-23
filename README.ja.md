@@ -139,6 +139,78 @@ anno-save-analyzer trade diff before.a8s after.a8s --title anno117
 
 ---
 
+## 分析 (v0.5 preview)
+
+v0.5 で **pandas ベースの SCM 分析層**を追加．書記長の Decision Matrix に
+沿って 7 個の analyzer が並ぶ：「どこが不足か / 慢性か / どのルートが弱いか
+/ 何をすべきか」．
+
+### 全 state を JSON に (notebook 用 one-liner)
+
+```bash
+anno-save-analyzer state sample_anno1800.a7s --title anno1800 --locale ja \
+    --out state.json
+```
+
+overview + islands + tier breakdown + balance + 全 TradeEvent を 1 JSON に
+ダンプ．書記長の岡山帝国サイズで `~970 KB`．`pandas.read_json` /
+`pandas.json_normalize` で即分析可能．
+
+### DataFrame 層 (Python)
+
+```python
+from anno_save_analyzer.analysis import to_frames
+from anno_save_analyzer.tui.state import load_state
+from anno_save_analyzer.trade.models import GameTitle
+
+state = load_state("sample_anno1800.a7s", title=GameTitle.ANNO_1800, locale="ja")
+f = to_frames(state)
+
+# 島別 赤字物資数ランキング
+f.islands[["city_name", "deficit_count", "resident_total"]] \
+    .sort_values("deficit_count", ascending=False).head(10)
+
+# tier ピボット (島 × tier の人口マトリクス)
+f.tiers.pivot_table(values="resident_total", index="city_name",
+                    columns="tier", fill_value=0)
+```
+
+### Decision Matrix (書記長本命の処方箋エンジン)
+
+```python
+from anno_save_analyzer.analysis.prescribe import diagnose, Thresholds
+
+rx = diagnose(f, storage_by_island=state.storage_by_island)
+
+print(rx["category"].value_counts())
+# increase_production    慢性 deficit × 高満足度 × 航路あり → 生産増一択
+# rebalance_mix          航路強いのに delta<0 → 商品構成見直し
+# trade_flex             一過性 deficit × 低相関 × 航路弱い → 取引・融通
+# ok                     黒字
+# monitor                rule 適用外 → 継続観察
+
+# 岡山の処方箋
+rx[rx["city_name"] == "大都会岡山"] \
+    [["product_name", "category", "action", "rationale"]].head(20)
+```
+
+閾値チューニング: `diagnose(f, thresholds=Thresholds(high_saturation=0.60))`．
+
+### 他の analyzer
+
+| module | function | 用途 |
+|---|---|---|
+| `analysis.deficit` | `deficit_heatmap`, `pareto` | 島×物資マトリクス + ABC/Pareto |
+| `analysis.correlation` | `saturation_vs_deficit` | 物資別 Pearson + Spearman |
+| `analysis.routes` | `rank_routes` | route ごと tons/min, gold/min |
+| `analysis.persistence` | `classify_deficit` | chronic / transient / stable |
+| `analysis.sensitivity` | `route_leave_one_out` | 「船 1 隻減らすならどこ？」 |
+| `analysis.forecast` | `consumption_forecast`, `population_capacity_proxy` | 短期線形投影 |
+
+全 analyzer が **Anno 117 / Anno 1800 両対応** (title 非依存 pandas in/out)．
+
+---
+
 ## 機能一覧 (v0.4.2)
 
 ### Textual TUI

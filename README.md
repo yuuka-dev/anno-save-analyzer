@@ -139,6 +139,79 @@ All sub-commands print JSON to stdout, so you can pipe to `jq`, pandas, DuckDB, 
 
 ---
 
+## Analytics (v0.5 preview)
+
+v0.5 adds a **pandas-native SCM analytics layer** on top of the save parser.
+You get seven analyzers that line up with Secretary-General's own decision
+matrix: *where is the deficit? is it chronic? which route is weak? what
+should I do?*
+
+### Full state → JSON (one-liner for notebooks)
+
+```bash
+anno-save-analyzer state sample_anno1800.a7s --title anno1800 --locale ja \
+    --out state.json
+```
+
+Dumps overview + islands + tier breakdown + balance + full TradeEvent ledger
+as a single JSON. `~970 KB` on a typical Anno 1800 save. Load it with
+`pandas.read_json` / `pandas.json_normalize` and you are analysis-ready.
+
+### DataFrame layer (Python)
+
+```python
+from anno_save_analyzer.analysis import to_frames
+from anno_save_analyzer.tui.state import load_state
+from anno_save_analyzer.trade.models import GameTitle
+
+state = load_state("sample_anno1800.a7s", title=GameTitle.ANNO_1800, locale="ja")
+f = to_frames(state)
+
+# deficit ranking by island
+f.islands[["city_name", "deficit_count", "resident_total"]] \
+    .sort_values("deficit_count", ascending=False).head(10)
+
+# tier pivot
+f.tiers.pivot_table(values="resident_total", index="city_name",
+                    columns="tier", fill_value=0)
+```
+
+### Decision Matrix (Secretary-General's prescription engine)
+
+```python
+from anno_save_analyzer.analysis.prescribe import diagnose, Thresholds
+
+rx = diagnose(f, storage_by_island=state.storage_by_island)
+
+print(rx["category"].value_counts())
+# increase_production    (chronic deficit + high saturation + route present)
+# rebalance_mix          (route strong but delta < 0)
+# trade_flex             (transient deficit + low correlation + weak route)
+# ok                     (surplus)
+# monitor                (rule-out fallback)
+
+# Okayama's prescriptions
+rx[rx["city_name"] == "大都会岡山"] \
+    [["product_name", "category", "action", "rationale"]].head(20)
+```
+
+Tune thresholds: `diagnose(f, thresholds=Thresholds(high_saturation=0.60))`.
+
+### Other analyzers
+
+| module | function | purpose |
+|---|---|---|
+| `analysis.deficit` | `deficit_heatmap`, `pareto` | island × product matrix + ABC/Pareto |
+| `analysis.correlation` | `saturation_vs_deficit` | Pearson + Spearman per product |
+| `analysis.routes` | `rank_routes` | tons/min, gold/min per route |
+| `analysis.persistence` | `classify_deficit` | chronic / transient / stable |
+| `analysis.sensitivity` | `route_leave_one_out` | "remove one ship — which island breaks?" |
+| `analysis.forecast` | `consumption_forecast`, `population_capacity_proxy` | short-term projection |
+
+All analyzers work on both **Anno 117** and **Anno 1800** (title-agnostic pandas in/out).
+
+---
+
 ## Feature list (v0.4.2)
 
 ### Textual TUI
