@@ -27,7 +27,7 @@ import yaml
 
 _LOCALE_EN = "english"
 _LOCALE_JA = "japanese"
-_ZERO_WIDTH = "​"
+_ZERO_WIDTH = "\u200b"
 
 
 def _run_node(calc_dir: Path) -> dict[str, Any]:

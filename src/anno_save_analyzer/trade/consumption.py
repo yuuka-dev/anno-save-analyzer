@@ -59,9 +59,10 @@ class ConsumptionTable(BaseModel):
     """Tier 群の集合と locale 名 override．``load`` で YAML から構築する．"""
 
     tiers: tuple[PopulationTier, ...] = Field(default_factory=tuple)
-    localized_names: dict[str, dict[int, str]] = Field(default_factory=dict)
-    """``{locale: {tier_guid: 名前}}``．``localized_names.get("ja", {}).get(guid)``
-    のように引く．英語は ``tier.name`` に入っているので格納しない．"""
+    localized_names: tuple[tuple[str, tuple[tuple[int, str], ...]], ...] = Field(
+        default_factory=tuple
+    )
+    """``((locale, ((tier_guid, 名前), ...)), ...)``．英語は ``tier.name`` を使う．"""
 
     model_config = {"frozen": True}
 
@@ -85,9 +86,13 @@ class ConsumptionTable(BaseModel):
     def display_name(self, tier_guid: int, locale: str = "en") -> str | None:
         """``locale`` 優先 → 英語 fallback の順で tier 表示名を返す．"""
         if locale != "en":
-            loc = self.localized_names.get(locale, {})
-            if tier_guid in loc:
-                return loc[tier_guid]
+            for locale_key, entries in self.localized_names:
+                if locale_key != locale:
+                    continue
+                for guid, name in entries:
+                    if guid == tier_guid:
+                        return name
+                break
         tier = self.get_tier(tier_guid)
         return tier.name if tier is not None else None
 
@@ -109,14 +114,19 @@ class ConsumptionTable(BaseModel):
         ja_payload = yaml.safe_load(ja_text) if ja_text else None
 
         tiers = tuple(_tier_from_dict(t) for t in en_payload.get("tiers", []))
-        localized: dict[str, dict[int, str]] = {}
+        localized: list[tuple[str, tuple[tuple[int, str], ...]]] = []
         if ja_payload:
-            localized["ja"] = {
-                int(entry["guid"]): str(entry["name"])
-                for entry in ja_payload.get("tiers", [])
-                if "guid" in entry and "name" in entry
-            }
-        return cls(tiers=tiers, localized_names=localized)
+            localized.append(
+                (
+                    "ja",
+                    tuple(
+                        (int(entry["guid"]), str(entry["name"]))
+                        for entry in ja_payload.get("tiers", [])
+                        if "guid" in entry and "name" in entry
+                    ),
+                )
+            )
+        return cls(tiers=tiers, localized_names=tuple(localized))
 
 
 def _read_packaged(filename: str) -> str:

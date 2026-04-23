@@ -114,3 +114,12 @@ def test_pydantic_models_are_frozen() -> None:
     tier = PopulationTier(guid=1, name="x")
     with pytest.raises(Exception):  # noqa: B017
         tier.name = "y"  # type: ignore[misc]
+
+    table = ConsumptionTable(
+        tiers=(tier,),
+        localized_names=(("ja", ((1, "えっくす"),)),),
+    )
+    with pytest.raises(Exception):  # noqa: B017
+        table.localized_names = ()  # type: ignore[misc]
+    with pytest.raises(TypeError):
+        table.localized_names[0][1][0] = (1, "x")  # type: ignore[index]
