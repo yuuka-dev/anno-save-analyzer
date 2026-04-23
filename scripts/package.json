@@ -1,0 +1,9 @@
+{
+  "name": "anno-save-analyzer-scripts",
+  "description": "Build-time helpers for anno-save-analyzer (not part of the Python package).",
+  "private": true,
+  "type": "module",
+  "dependencies": {
+    "json5": "^2.2.3"
+  }
+}

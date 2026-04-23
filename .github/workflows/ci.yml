@@ -72,3 +72,53 @@ jobs:
         run: ruff check src tests
       - name: ruff format check
         run: ruff format --check src tests
+
+  validate-supply-data:
+    name: validate supply YAML (regenerate from Calculator)
+    runs-on: ubuntu-latest
+    env:
+      CALCULATOR_REPO: NiHoel/Anno1800Calculator
+      CALCULATOR_REF: 61ab6df27af3338a01fde759dd51d4c795ed73c2
+    steps:
+      - name: Checkout anno-save-analyzer
+        uses: actions/checkout@v4
+
+      - name: Checkout Anno1800Calculator (pinned)
+        uses: actions/checkout@v4
+        with:
+          repository: ${{ env.CALCULATOR_REPO }}
+          ref: ${{ env.CALCULATOR_REF }}
+          path: external/calculator
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Install Python deps
+        run: pip install pyyaml
+
+      - name: Install Node deps
+        working-directory: scripts
+        run: npm ci --no-audit --no-fund
+
+      - name: Regenerate consumption YAML
+        run: |
+          python scripts/generate_supply_data_anno1800.py \
+            --calculator-dir external/calculator \
+            --data-dir src/anno_save_analyzer/data
+
+      - name: Fail if committed YAML is stale
+        run: |
+          if ! git diff --exit-code \
+              src/anno_save_analyzer/data/consumption_anno1800.en.yaml \
+              src/anno_save_analyzer/data/consumption_anno1800.ja.yaml; then
+            echo "::error::consumption_anno1800.*.yaml is stale. Run scripts/generate_supply_data_anno1800.py and commit the diff."
+            exit 1
+          fi
