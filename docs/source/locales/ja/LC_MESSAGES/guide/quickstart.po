@@ -9,7 +9,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: anno-save-analyzer 0.1\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-04-24 21:04+0900\n"
+"POT-Creation-Date: 2026-04-25 01:06+0900\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: ja\n"
@@ -73,37 +73,59 @@ msgid ""
 "Copy a ``.a7s`` (Anno 1800) or ``.a8s`` (Anno 117) file somewhere "
 "convenient. The tool is **read-only** — it never modifies your save."
 msgstr ""
-"``.a7s`` (Anno 1800) または ``.a8s`` (Anno 117) をどこか作業ディレクトリに"
-"コピーしてください．本ツールは **読み取り専用** ─ セーブを書き換えません．"
+"``.a7s`` (Anno 1800) または ``.a8s`` (Anno 117) をどこか作業ディレクトリにコピーしてください．本ツールは"
+" **読み取り専用** ─ セーブを書き換えません．"
 
 #: ../../source/guide/quickstart.md:27
+msgid "Auto-pick the latest save via `.env` (optional)"
+msgstr "`.env` で最新 save を自動選択 (任意)"
+
+#: ../../source/guide/quickstart.md:29
+msgid ""
+"If you do not want to type the save path every time, drop a ``.env`` in "
+"the repo root pointing at your save directories. The CLI / GUI will pick "
+"the **most recently modified** ``.a7s`` / ``.a8s`` under the directory "
+"matching ``--title``."
+msgstr ""
+"毎回 save のパスを打つのが面倒なら，repo root に ``.env`` を置いて save "
+"ディレクトリを指定してください．CLI / GUI は ``--title`` に対応するディレクトリ"
+"配下から **最新 mtime** の ``.a7s`` / ``.a8s`` を自動で選びます．"
+
+#: ../../source/guide/quickstart.md:40
+msgid "With that in place, the save argument becomes optional:"
+msgstr "これを設定しておけば，save 引数は省略可能になります："
+
+#: ../../source/guide/quickstart.md:50
+msgid "An explicit save path always wins over the ``.env`` lookup."
+msgstr "save パスを明示的に渡した場合は，常に ``.env`` より優先されます．"
+
+#: ../../source/guide/quickstart.md:52
 msgid "Launch the TUI"
 msgstr "TUI を起動"
 
-#: ../../source/guide/quickstart.md:33
+#: ../../source/guide/quickstart.md:58
 msgid ""
 "Use ``Ctrl+T`` to switch screens (Overview → Trade Statistics → Supply "
 "Balance). ``Ctrl+L`` toggles English/Japanese."
 msgstr ""
-"``Ctrl+T`` で画面切替 (Overview → Trade Statistics → Supply Balance)．"
-"``Ctrl+L`` で英日切替．"
+"``Ctrl+T`` で画面切替 (Overview → Trade Statistics → Supply "
+"Balance)．``Ctrl+L`` で英日切替．"
 
-#: ../../source/guide/quickstart.md:36
+#: ../../source/guide/quickstart.md:61
 msgid "Export the full state as JSON"
 msgstr "全 state を JSON エクスポート"
 
-#: ../../source/guide/quickstart.md:43
+#: ../../source/guide/quickstart.md:68
 #, python-brace-format
 msgid ""
 "The JSON contains overview + islands + tier breakdown + balance + every "
 "TradeEvent. Load it with `pandas.read_json` / `pandas.json_normalize` and"
 " you are analysis-ready (see {doc}`scm-analytics`)."
 msgstr ""
-"出力 JSON には概要・島情報・tier 別内訳・需給バランス・全 TradeEvent が含"
-"まれます．`pandas.read_json` / `pandas.json_normalize` で読み込めば即分析"
-"可能です ({doc}`scm-analytics` を参照)．"
+"出力 JSON には概要・島情報・tier 別内訳・需給バランス・全 TradeEvent が含まれます．`pandas.read_json` /"
+" `pandas.json_normalize` で読み込めば即分析可能です ({doc}`scm-analytics` を参照)．"
 
-#: ../../source/guide/quickstart.md:47
+#: ../../source/guide/quickstart.md:72
 msgid "One-liner Python API"
 msgstr "Python API (ワンライナー)"
 

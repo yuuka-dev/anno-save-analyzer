@@ -9,7 +9,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: anno-save-analyzer 0.1\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-04-24 21:04+0900\n"
+"POT-Creation-Date: 2026-04-25 01:06+0900\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: ja\n"
@@ -48,68 +48,262 @@ msgid ""
 msgstr ""
 
 #: anno_save_analyzer.analysis.frames:7 of
-msgid "## DataFrames"
+msgid "``islands`` — 1 row = 1 island (AreaManager)．"
 msgstr ""
 
-#: anno_save_analyzer.analysis.frames:9 of
-msgid "### ``islands`` 1 row = 1 island (AreaManager)．"
-msgstr ""
-
-#: anno_save_analyzer.analysis.frames:12 anno_save_analyzer.analysis.frames:27
-#: anno_save_analyzer.analysis.frames:39 anno_save_analyzer.analysis.frames:53
+#: anno_save_analyzer.analysis.frames:13 anno_save_analyzer.analysis.frames:50
+#: anno_save_analyzer.analysis.frames:78 anno_save_analyzer.analysis.frames:112
 #: of
-msgid "column | 型 | 説明 |"
+msgid "column"
 msgstr ""
 
-#: anno_save_analyzer.analysis.frames:13 of
-msgid ""
-"|---|---|---| | ``area_manager`` | str | ``AreaManager_<N>`` タグ名 (join "
-"キー) | | ``city_name`` | str/None | プレイヤー島なら設定．NPC は None | | "
-"``is_player`` | bool | ``city_name`` の有無で判定 | | ``session_key`` | "
-"str/None | ``session.anno1800.cape_trelawney`` など | | ``session_display``"
-" | str/None | Localizer 解決後 (「トレローニー岬」) | | ``resident_total`` | int | "
-"島の全人口 | | ``residence_count`` | int | 住居総数 | | ``avg_saturation_mean`` | "
-"float | 平均需要満足度 (residents-weighted) | | ``deficit_count`` | int | "
-"balance table で赤字の物資数 |"
+#: anno_save_analyzer.analysis.frames:14 anno_save_analyzer.analysis.frames:51
+#: anno_save_analyzer.analysis.frames:79 anno_save_analyzer.analysis.frames:113
+#: of
+msgid "type"
+msgstr ""
+
+#: anno_save_analyzer.analysis.frames:15 anno_save_analyzer.analysis.frames:52
+#: anno_save_analyzer.analysis.frames:80 anno_save_analyzer.analysis.frames:114
+#: of
+msgid "description"
+msgstr ""
+
+#: anno_save_analyzer.analysis.frames:16 anno_save_analyzer.analysis.frames:53
+#: anno_save_analyzer.analysis.frames:81 of
+msgid "``area_manager``"
+msgstr ""
+
+#: anno_save_analyzer.analysis.frames:17 anno_save_analyzer.analysis.frames:54
+#: anno_save_analyzer.analysis.frames:60 anno_save_analyzer.analysis.frames:82
+#: anno_save_analyzer.analysis.frames:91 anno_save_analyzer.analysis.frames:122
+#: anno_save_analyzer.analysis.frames:149 of
+msgid "str"
+msgstr ""
+
+#: anno_save_analyzer.analysis.frames:18 of
+msgid "``AreaManager_<N>`` タグ名 (join キー)"
+msgstr ""
+
+#: anno_save_analyzer.analysis.frames:19 anno_save_analyzer.analysis.frames:56
+#: anno_save_analyzer.analysis.frames:84 of
+msgid "``city_name``"
+msgstr ""
+
+#: anno_save_analyzer.analysis.frames:20 anno_save_analyzer.analysis.frames:26
+#: anno_save_analyzer.analysis.frames:29 anno_save_analyzer.analysis.frames:57
+#: anno_save_analyzer.analysis.frames:85 anno_save_analyzer.analysis.frames:131
+#: anno_save_analyzer.analysis.frames:134
+#: anno_save_analyzer.analysis.frames:137
+#: anno_save_analyzer.analysis.frames:140
+#: anno_save_analyzer.analysis.frames:143
+#: anno_save_analyzer.analysis.frames:146 of
+msgid "str / None"
+msgstr ""
+
+#: anno_save_analyzer.analysis.frames:21 of
+msgid "プレイヤー島なら設定．NPC は None"
+msgstr ""
+
+#: anno_save_analyzer.analysis.frames:22 of
+msgid "``is_player``"
+msgstr ""
+
+#: anno_save_analyzer.analysis.frames:23 anno_save_analyzer.analysis.frames:103
+#: of
+msgid "bool"
 msgstr ""
 
 #: anno_save_analyzer.analysis.frames:24 of
-msgid "### ``tiers`` 1 row = 1 (island, tier)．"
+msgid "``city_name`` の有無で判定"
+msgstr ""
+
+#: anno_save_analyzer.analysis.frames:25 of
+msgid "``session_key``"
+msgstr ""
+
+#: anno_save_analyzer.analysis.frames:27 of
+msgid "``session.anno1800.cape_trelawney`` など"
 msgstr ""
 
 #: anno_save_analyzer.analysis.frames:28 of
-msgid ""
-"|---|---|---| | ``area_manager`` | str | join キー | | ``city_name`` | "
-"str/None | | | ``tier`` | str | ``farmer`` / ``worker`` / ... / "
-"``unknown`` | | ``residence_count`` | int | | | ``resident_total`` | int "
-"| | | ``avg_saturation_mean`` | float | tier 単位の saturation |"
+msgid "``session_display``"
+msgstr ""
+
+#: anno_save_analyzer.analysis.frames:30 of
+msgid "Localizer 解決後 (「トレローニー岬」)"
+msgstr ""
+
+#: anno_save_analyzer.analysis.frames:31 anno_save_analyzer.analysis.frames:65
+#: of
+msgid "``resident_total``"
+msgstr ""
+
+#: anno_save_analyzer.analysis.frames:32 anno_save_analyzer.analysis.frames:35
+#: anno_save_analyzer.analysis.frames:41 anno_save_analyzer.analysis.frames:63
+#: anno_save_analyzer.analysis.frames:66 anno_save_analyzer.analysis.frames:88
+#: anno_save_analyzer.analysis.frames:119
+#: anno_save_analyzer.analysis.frames:125
+#: anno_save_analyzer.analysis.frames:128 of
+msgid "int"
+msgstr ""
+
+#: anno_save_analyzer.analysis.frames:33 of
+msgid "島の全人口"
+msgstr ""
+
+#: anno_save_analyzer.analysis.frames:34 anno_save_analyzer.analysis.frames:62
+#: of
+msgid "``residence_count``"
 msgstr ""
 
 #: anno_save_analyzer.analysis.frames:36 of
-msgid "### ``balance`` 1 row = 1 (island, product)．島の供給消費バランス．"
+msgid "住居総数"
+msgstr ""
+
+#: anno_save_analyzer.analysis.frames:37 anno_save_analyzer.analysis.frames:68
+#: of
+msgid "``avg_saturation_mean``"
+msgstr ""
+
+#: anno_save_analyzer.analysis.frames:38 anno_save_analyzer.analysis.frames:69
+#: anno_save_analyzer.analysis.frames:94 anno_save_analyzer.analysis.frames:97
+#: anno_save_analyzer.analysis.frames:100 of
+msgid "float"
+msgstr ""
+
+#: anno_save_analyzer.analysis.frames:39 of
+msgid "平均需要満足度 (residents-weighted)"
 msgstr ""
 
 #: anno_save_analyzer.analysis.frames:40 of
-msgid ""
-"|---|---|---| | ``area_manager`` | str | | | ``city_name`` | str/None | |"
-" | ``product_guid`` | int | | | ``product_name`` | str | locale 適用後 | | "
-"``produced_per_minute`` | float | | | ``consumed_per_minute`` | float | |"
-" | ``delta_per_minute`` | float | 負=赤字 | | ``is_deficit`` | bool | |"
+msgid "``deficit_count``"
 msgstr ""
 
-#: anno_save_analyzer.analysis.frames:50 of
-msgid "### ``trade_events`` 1 row = 1 TradeEvent．時系列分析の入力．"
+#: anno_save_analyzer.analysis.frames:42 of
+msgid "balance table で赤字の物資数"
 msgstr ""
 
-#: anno_save_analyzer.analysis.frames:54 of
-msgid ""
-"|---|---|---| | ``timestamp_tick`` | Int64 | nullable integer．分単位変換は後続 | "
-"| ``product_guid`` | int | | | ``product_name`` | str | | | ``amount`` | "
-"int | | | ``total_price`` | int | | | ``session_id`` | str/None | | | "
-"``island_name`` | str/None | | | ``route_id`` | str/None | ``str`` 化して "
-"``route:123`` 形式で統一 | | ``route_name`` | str/None | | | ``partner_id`` | "
-"str/None | | | ``partner_kind`` | str/None | ``route`` / ``passive`` / "
-"``unknown`` | | ``source_method`` | str | ``history`` 等 |"
+#: anno_save_analyzer.analysis.frames:44 of
+msgid "``tiers`` — 1 row = 1 (island, tier)．"
+msgstr ""
+
+#: anno_save_analyzer.analysis.frames:55 of
+msgid "join キー"
+msgstr ""
+
+#: anno_save_analyzer.analysis.frames:59 of
+msgid "``tier``"
+msgstr ""
+
+#: anno_save_analyzer.analysis.frames:61 of
+msgid "``farmer`` / ``worker`` / ... / ``unknown``"
+msgstr ""
+
+#: anno_save_analyzer.analysis.frames:70 of
+msgid "tier 単位の saturation"
+msgstr ""
+
+#: anno_save_analyzer.analysis.frames:72 of
+msgid "``balance`` — 1 row = 1 (island, product)．島の供給消費バランス．"
+msgstr ""
+
+#: anno_save_analyzer.analysis.frames:87 anno_save_analyzer.analysis.frames:118
+#: of
+msgid "``product_guid``"
+msgstr ""
+
+#: anno_save_analyzer.analysis.frames:90 anno_save_analyzer.analysis.frames:121
+#: of
+msgid "``product_name``"
+msgstr ""
+
+#: anno_save_analyzer.analysis.frames:92 of
+msgid "locale 適用後"
+msgstr ""
+
+#: anno_save_analyzer.analysis.frames:93 of
+msgid "``produced_per_minute``"
+msgstr ""
+
+#: anno_save_analyzer.analysis.frames:96 of
+msgid "``consumed_per_minute``"
+msgstr ""
+
+#: anno_save_analyzer.analysis.frames:99 of
+msgid "``delta_per_minute``"
+msgstr ""
+
+#: anno_save_analyzer.analysis.frames:101 of
+msgid "負=赤字"
+msgstr ""
+
+#: anno_save_analyzer.analysis.frames:102 of
+msgid "``is_deficit``"
+msgstr ""
+
+#: anno_save_analyzer.analysis.frames:106 of
+msgid "``trade_events`` — 1 row = 1 TradeEvent．時系列分析の入力．"
+msgstr ""
+
+#: anno_save_analyzer.analysis.frames:115 of
+msgid "``timestamp_tick``"
+msgstr ""
+
+#: anno_save_analyzer.analysis.frames:116 of
+msgid "Int64"
+msgstr ""
+
+#: anno_save_analyzer.analysis.frames:117 of
+msgid "nullable integer．分単位変換は後続"
+msgstr ""
+
+#: anno_save_analyzer.analysis.frames:124 of
+msgid "``amount``"
+msgstr ""
+
+#: anno_save_analyzer.analysis.frames:127 of
+msgid "``total_price``"
+msgstr ""
+
+#: anno_save_analyzer.analysis.frames:130 of
+msgid "``session_id``"
+msgstr ""
+
+#: anno_save_analyzer.analysis.frames:133 of
+msgid "``island_name``"
+msgstr ""
+
+#: anno_save_analyzer.analysis.frames:136 of
+msgid "``route_id``"
+msgstr ""
+
+#: anno_save_analyzer.analysis.frames:138 of
+msgid "``str`` 化して ``route:123`` 形式で統一"
+msgstr ""
+
+#: anno_save_analyzer.analysis.frames:139 of
+msgid "``route_name``"
+msgstr ""
+
+#: anno_save_analyzer.analysis.frames:142 of
+msgid "``partner_id``"
+msgstr ""
+
+#: anno_save_analyzer.analysis.frames:145 of
+msgid "``partner_kind``"
+msgstr ""
+
+#: anno_save_analyzer.analysis.frames:147 of
+msgid "``route`` / ``passive`` / ``unknown``"
+msgstr ""
+
+#: anno_save_analyzer.analysis.frames:148 of
+msgid "``source_method``"
+msgstr ""
+
+#: anno_save_analyzer.analysis.frames:150 of
+msgid "``history`` 等"
 msgstr ""
 
 #: anno_save_analyzer.analysis.frames.AnalysisFrames:1 of
@@ -406,22 +600,79 @@ msgstr ""
 #: anno_save_analyzer.analysis.prescribe:3 of
 msgid ""
 "B-G の全分析 (balance / persistence / correlation / routes) を合成し， 書記長の 3 分類を "
-"rule-based で判定する:"
+"rule-based で判定する．"
 msgstr ""
 
-#: anno_save_analyzer.analysis.prescribe:6 of
-msgid "観測 | 判定 | action |"
+#: anno_save_analyzer.analysis.prescribe:10 of
+msgid "観測パターン"
 msgstr ""
 
-#: anno_save_analyzer.analysis.prescribe:7 of
-msgid ""
-"|---|---|---| | 慢性 deficit × 高満足度 × 航路あり | 生産増一択 | "
-"``increase_production`` | | 一過性 deficit × 低相関 × 航路弱い | 取引・融通 | "
-"``trade_flex`` | | 航路強いのに deficit 残る | 商品構成見直し | ``rebalance_mix`` | | 黒字"
-" / deficit 解決済 | — | ``ok`` | | データ不足 | — | ``monitor`` |"
+#: anno_save_analyzer.analysis.prescribe:11 of
+msgid "判定"
+msgstr ""
+
+#: anno_save_analyzer.analysis.prescribe:12 of
+msgid "action"
+msgstr ""
+
+#: anno_save_analyzer.analysis.prescribe:13 of
+msgid "慢性 deficit × 高満足度 × 航路あり"
 msgstr ""
 
 #: anno_save_analyzer.analysis.prescribe:14 of
+msgid "生産増一択"
+msgstr ""
+
+#: anno_save_analyzer.analysis.prescribe:15 of
+msgid "``increase_production``"
+msgstr ""
+
+#: anno_save_analyzer.analysis.prescribe:16 of
+msgid "一過性 deficit × 低相関 × 航路弱い"
+msgstr ""
+
+#: anno_save_analyzer.analysis.prescribe:17 of
+msgid "取引・融通"
+msgstr ""
+
+#: anno_save_analyzer.analysis.prescribe:18 of
+msgid "``trade_flex``"
+msgstr ""
+
+#: anno_save_analyzer.analysis.prescribe:19 of
+msgid "航路強いのに deficit 残る"
+msgstr ""
+
+#: anno_save_analyzer.analysis.prescribe:20 of
+msgid "商品構成見直し"
+msgstr ""
+
+#: anno_save_analyzer.analysis.prescribe:21 of
+msgid "``rebalance_mix``"
+msgstr ""
+
+#: anno_save_analyzer.analysis.prescribe:22 of
+msgid "黒字 / deficit 解決済"
+msgstr ""
+
+#: anno_save_analyzer.analysis.prescribe:23
+#: anno_save_analyzer.analysis.prescribe:26 of
+msgid "—"
+msgstr ""
+
+#: anno_save_analyzer.analysis.prescribe:24 of
+msgid "``ok``"
+msgstr ""
+
+#: anno_save_analyzer.analysis.prescribe:25 of
+msgid "データ不足"
+msgstr ""
+
+#: anno_save_analyzer.analysis.prescribe:27 of
+msgid "``monitor``"
+msgstr ""
+
+#: anno_save_analyzer.analysis.prescribe:29 of
 msgid "Rule threshold は module 定数で公開して書記長がチューニングできるように．"
 msgstr ""
 
@@ -619,4 +870,100 @@ msgstr ""
 #: anno_save_analyzer.analysis.optimize.optimize_routes:7 of
 msgid ":sphinx_autodoc_typehints_type:`\\:py\\:class\\:\\`\\~anno\\_save\\_analyzer.analysis.optimize.OptimizedPlan\\``"
 msgstr ""
+
+#~ msgid "## DataFrames"
+#~ msgstr ""
+
+#~ msgid "### ``islands`` 1 row = 1 island (AreaManager)．"
+#~ msgstr ""
+
+#~ msgid "column | 型 | 説明 |"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "|---|---|---| | ``area_manager`` | str |"
+#~ " ``AreaManager_<N>`` タグ名 (join キー) | "
+#~ "| ``city_name`` | str/None | "
+#~ "プレイヤー島なら設定．NPC は None | | ``is_player``"
+#~ " | bool | ``city_name`` の有無で判定 | "
+#~ "| ``session_key`` | str/None | "
+#~ "``session.anno1800.cape_trelawney`` など | | "
+#~ "``session_display`` | str/None | Localizer "
+#~ "解決後 (「トレローニー岬」) | | ``resident_total`` |"
+#~ " int | 島の全人口 | | ``residence_count``"
+#~ " | int | 住居総数 | | "
+#~ "``avg_saturation_mean`` | float | 平均需要満足度 "
+#~ "(residents-weighted) | | ``deficit_count`` "
+#~ "| int | balance table で赤字の物資数 |"
+#~ msgstr ""
+
+#~ msgid "### ``tiers`` 1 row = 1 (island, tier)．"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "|---|---|---| | ``area_manager`` | str |"
+#~ " join キー | | ``city_name`` | "
+#~ "str/None | | | ``tier`` | str "
+#~ "| ``farmer`` / ``worker`` / ... /"
+#~ " ``unknown`` | | ``residence_count`` | "
+#~ "int | | | ``resident_total`` | int"
+#~ " | | | ``avg_saturation_mean`` | "
+#~ "float | tier 単位の saturation |"
+#~ msgstr ""
+
+#~ msgid "### ``balance`` 1 row = 1 (island, product)．島の供給消費バランス．"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "|---|---|---| | ``area_manager`` | str |"
+#~ " | | ``city_name`` | str/None | "
+#~ "| | ``product_guid`` | int | | "
+#~ "| ``product_name`` | str | locale "
+#~ "適用後 | | ``produced_per_minute`` | float"
+#~ " | | | ``consumed_per_minute`` | "
+#~ "float | | | ``delta_per_minute`` | "
+#~ "float | 負=赤字 | | ``is_deficit`` |"
+#~ " bool | |"
+#~ msgstr ""
+
+#~ msgid "### ``trade_events`` 1 row = 1 TradeEvent．時系列分析の入力．"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "|---|---|---| | ``timestamp_tick`` | Int64 "
+#~ "| nullable integer．分単位変換は後続 | | "
+#~ "``product_guid`` | int | | | "
+#~ "``product_name`` | str | | | "
+#~ "``amount`` | int | | | "
+#~ "``total_price`` | int | | | "
+#~ "``session_id`` | str/None | | | "
+#~ "``island_name`` | str/None | | | "
+#~ "``route_id`` | str/None | ``str`` 化して"
+#~ " ``route:123`` 形式で統一 | | ``route_name`` "
+#~ "| str/None | | | ``partner_id`` |"
+#~ " str/None | | | ``partner_kind`` |"
+#~ " str/None | ``route`` / ``passive`` /"
+#~ " ``unknown`` | | ``source_method`` | "
+#~ "str | ``history`` 等 |"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "B-G の全分析 (balance / persistence / "
+#~ "correlation / routes) を合成し， 書記長の 3 "
+#~ "分類を rule-based で判定する:"
+#~ msgstr ""
+
+#~ msgid "観測 | 判定 | action |"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "|---|---|---| | 慢性 deficit × 高満足度 "
+#~ "× 航路あり | 生産増一択 | ``increase_production``"
+#~ " | | 一過性 deficit × 低相関 × "
+#~ "航路弱い | 取引・融通 | ``trade_flex`` | |"
+#~ " 航路強いのに deficit 残る | 商品構成見直し | "
+#~ "``rebalance_mix`` | | 黒字 / deficit "
+#~ "解決済 | — | ``ok`` | | データ不足"
+#~ " | — | ``monitor`` |"
+#~ msgstr ""
 
