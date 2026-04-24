@@ -81,3 +81,8 @@ refs/
 notebooks/out/
 notebooks/.ipynb_checkpoints/
 *.ipynb_checkpoints/
+
+# local .env (copied from .env.example)
+.env
+docs/_build/
+*.mo

@@ -14,6 +14,7 @@ import argparse
 import sys
 from pathlib import Path
 
+from anno_save_analyzer.latest_save import resolve_save
 from anno_save_analyzer.trade.models import GameTitle
 from anno_save_analyzer.tui.state import load_state
 
@@ -28,7 +29,16 @@ def _run_qt_event_loop(app) -> int:
 
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("save", type=Path, help="Anno save file (.a7s / .a8s)")
+    parser.add_argument(
+        "save",
+        type=Path,
+        nargs="?",
+        default=None,
+        help=(
+            "Anno save file (.a7s / .a8s). Omit to auto-select the newest save "
+            "from config.toml ([paths] anno1800_save_dir / anno117_save_dir)."
+        ),
+    )
     parser.add_argument(
         "--title",
         choices=[t.value for t in GameTitle],
@@ -38,12 +48,23 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--locale", default="en", help="UI locale (en / ja)")
     args = parser.parse_args(argv)
 
-    if not args.save.is_file():
-        print(f"ERROR: save file not found: {args.save}", file=sys.stderr)
+    title = GameTitle(args.title)
+    resolved = resolve_save(args.save, title)
+    if resolved is None:
+        field = "anno1800_save_dir" if title is GameTitle.ANNO_1800 else "anno117_save_dir"
+        print(
+            f"ERROR: save not specified and [paths] {field} is unset or empty. "
+            "Pass the save path or set it in your config.toml.",
+            file=sys.stderr,
+        )
+        return 2
+    if args.save is None:
+        print(f"Auto-selected latest save: {resolved}", file=sys.stderr)
+    if not resolved.is_file():
+        print(f"ERROR: save file not found: {resolved}", file=sys.stderr)
         return 2
 
-    title = GameTitle(args.title)
-    state = load_state(args.save, title=title, locale=args.locale)
+    state = load_state(resolved, title=title, locale=args.locale)
 
     from PySide6.QtGui import QFont
     from PySide6.QtWidgets import QApplication

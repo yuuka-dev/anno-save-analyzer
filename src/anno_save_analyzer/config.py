@@ -12,6 +12,10 @@
     chart_window = "120m"
     recent_window_minutes = 120
 
+    [paths]
+    anno1800_save_dir = "C:\\Users\\<you>\\Documents\\Anno 1800\\accounts\\<id>\\savegame"
+    anno117_save_dir = "C:\\Users\\<you>\\Documents\\Anno 117 - Pax Romana\\accounts\\<id>\\savegame"
+
 - 破損 TOML / 未知キー / ファイル無しは default に倒し stderr に warning．
   CLI 起動を止めない (書記長が混乱する)．
 - 環境変数 ``ANNO_SAVE_ANALYZER_CONFIG`` で完全 override (test / 1 回限りの
@@ -70,10 +74,22 @@ class UiConfig(BaseModel):
     model_config = {"frozen": True, "extra": "ignore"}
 
 
+class PathsConfig(BaseModel):
+    """save ディレクトリの永続化．installed (``uv tool install``) 環境では
+    repo root の ``.env`` が読めないため，XDG config に置く．
+    """
+
+    anno1800_save_dir: str | None = None
+    anno117_save_dir: str | None = None
+
+    model_config = {"frozen": True, "extra": "ignore"}
+
+
 class UserConfig(BaseModel):
     """書記長のユーザー設定一式．拡張は sub-section (``[section]``) 追加で．"""
 
     ui: UiConfig = Field(default_factory=UiConfig)
+    paths: PathsConfig = Field(default_factory=PathsConfig)
 
     model_config = {"frozen": True, "extra": "ignore"}
 
@@ -153,7 +169,7 @@ def save_config(cfg: UserConfig, path: Path | None = None) -> Path | None:
 
 
 def _render_toml(cfg: UserConfig) -> str:
-    """UiConfig を TOML 文字列にシリアライズ．手書き (tomli-w を増やさない)．"""
+    """UserConfig を TOML 文字列にシリアライズ．手書き (tomli-w を増やさない)．"""
     ui = cfg.ui
     lines: list[str] = ["[ui]"]
     lines.append(f'locale = "{_quote(ui.locale)}"')
@@ -164,6 +180,18 @@ def _render_toml(cfg: UserConfig) -> str:
         lines.append("# recent_window_minutes = 60   # コメントアウト = 全期間")
     else:
         lines.append(f"recent_window_minutes = {ui.recent_window_minutes}")
+
+    paths = cfg.paths
+    lines.append("")
+    lines.append("[paths]")
+    if paths.anno1800_save_dir is None:
+        lines.append('# anno1800_save_dir = "C:\\\\Users\\\\<you>\\\\Documents\\\\Anno 1800\\\\accounts\\\\<id>\\\\savegame"')
+    else:
+        lines.append(f'anno1800_save_dir = "{_quote(paths.anno1800_save_dir)}"')
+    if paths.anno117_save_dir is None:
+        lines.append('# anno117_save_dir = "C:\\\\Users\\\\<you>\\\\Documents\\\\Anno 117 - Pax Romana\\\\accounts\\\\<id>\\\\savegame"')
+    else:
+        lines.append(f'anno117_save_dir = "{_quote(paths.anno117_save_dir)}"')
     return "\n".join(lines) + "\n"
 
 
