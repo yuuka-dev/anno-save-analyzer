@@ -1,0 +1,22 @@
+/* Minor furo overrides — keep it subtle, avoid default Sphinx boring look. */
+
+.sidebar-brand-text {
+    font-weight: 600;
+    letter-spacing: -0.01em;
+}
+
+/* Monospace columns in autosummary table — readability for GUIDs. */
+.py.class .sig-name, .py.function .sig-name, .py.method .sig-name {
+    font-weight: 600;
+}
+
+/* Footer icon alignment. */
+.footer-icons svg {
+    height: 20px;
+    width: 20px;
+}
+
+/* Admonition accent — leans red on the Anno warning vibe. */
+.admonition.note {
+    border-left-color: var(--color-brand-primary);
+}

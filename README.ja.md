@@ -5,7 +5,7 @@
 [![release](https://img.shields.io/github/v/release/yuuka-dev/anno-save-analyzer?include_prereleases)](https://github.com/yuuka-dev/anno-save-analyzer/releases/latest)
 [![Python 3.12+](https://img.shields.io/badge/python-3.12%2B-blue)](https://www.python.org/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
-[![Status: alpha](https://img.shields.io/badge/status-alpha-orange)](docs/ROADMAP.ja.md)
+[![Status: alpha](https://img.shields.io/badge/status-alpha-orange)](docs/source/ja/roadmap.md)
 
 > **一言で説明**: Anno 1800 / Anno 117: Pax Romana のセーブファイルを開いて，ゲーム内 UI に出てこない**貿易履歴**と**島ごとの在庫推移**をターミナルで見られるようにするツールです．
 
@@ -273,7 +273,7 @@ sample_anno117.a8s  (RDA V2.2 コンテナ)
       └─ meta / header / gamesetup.a7s  (RDAArchive 層)
 ```
 
-詳細は [docs/rda_format_spec.md](docs/rda_format_spec.md) / [docs/filedb_format_investigation.md](docs/filedb_format_investigation.md) を参照．
+詳細は [docs/source/reference/rda_format_spec.md](docs/source/reference/rda_format_spec.md) / [docs/source/reference/filedb_format_investigation.md](docs/source/reference/filedb_format_investigation.md) を参照．
 
 ---
 
@@ -292,7 +292,7 @@ sample_anno117.a8s  (RDA V2.2 コンテナ)
 | v0.6 | DOM 全域の Pydantic 型化 (Island / Building / Population) | 計画中 |
 | v1.0 | PyPI 配信，英語ドキュメント完備，API 安定化 | 計画中 |
 
-詳細は [docs/ROADMAP.ja.md](docs/ROADMAP.ja.md) / [docs/ROADMAP.md](docs/ROADMAP.md) と [GitHub Milestones](https://github.com/yuuka-dev/anno-save-analyzer/milestones)．
+詳細は [docs/source/ja/roadmap.md](docs/source/ja/roadmap.md) / [docs/source/roadmap.md](docs/source/roadmap.md) と [GitHub Milestones](https://github.com/yuuka-dev/anno-save-analyzer/milestones)．
 
 ---
 

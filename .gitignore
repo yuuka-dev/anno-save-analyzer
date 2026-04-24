@@ -82,7 +82,10 @@ notebooks/out/
 notebooks/.ipynb_checkpoints/
 *.ipynb_checkpoints/
 
-# local .env (copied from .env.example)
+# 個人の local 用 .env (旧 ANNO_*_SAVE_DIR 仕様の名残．現在は config.toml
+# 経由が正規だが，書記長環境などで .env を残す可能性があるので除外継続)
 .env
+
+# Sphinx ビルド成果物
 docs/_build/
 *.mo
