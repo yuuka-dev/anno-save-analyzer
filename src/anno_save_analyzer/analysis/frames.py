@@ -4,66 +4,150 @@
 後続の analyzer (deficit map / correlation / route ranking / forecast /
 MILP) は全てこの DataFrame 表現を入力に取る．
 
-## DataFrames
+``islands`` — 1 row = 1 island (AreaManager)．
 
-### ``islands``
-1 row = 1 island (AreaManager)．
+.. list-table::
+   :header-rows: 1
+   :widths: 25 15 60
 
-| column | 型 | 説明 |
-|---|---|---|
-| ``area_manager`` | str | ``AreaManager_<N>`` タグ名 (join キー) |
-| ``city_name`` | str/None | プレイヤー島なら設定．NPC は None |
-| ``is_player`` | bool | ``city_name`` の有無で判定 |
-| ``session_key`` | str/None | ``session.anno1800.cape_trelawney`` など |
-| ``session_display`` | str/None | Localizer 解決後 (「トレローニー岬」) |
-| ``resident_total`` | int | 島の全人口 |
-| ``residence_count`` | int | 住居総数 |
-| ``avg_saturation_mean`` | float | 平均需要満足度 (residents-weighted) |
-| ``deficit_count`` | int | balance table で赤字の物資数 |
+   * - column
+     - type
+     - description
+   * - ``area_manager``
+     - str
+     - ``AreaManager_<N>`` タグ名 (join キー)
+   * - ``city_name``
+     - str / None
+     - プレイヤー島なら設定．NPC は None
+   * - ``is_player``
+     - bool
+     - ``city_name`` の有無で判定
+   * - ``session_key``
+     - str / None
+     - ``session.anno1800.cape_trelawney`` など
+   * - ``session_display``
+     - str / None
+     - Localizer 解決後 (「トレローニー岬」)
+   * - ``resident_total``
+     - int
+     - 島の全人口
+   * - ``residence_count``
+     - int
+     - 住居総数
+   * - ``avg_saturation_mean``
+     - float
+     - 平均需要満足度 (residents-weighted)
+   * - ``deficit_count``
+     - int
+     - balance table で赤字の物資数
 
-### ``tiers``
-1 row = 1 (island, tier)．
+``tiers`` — 1 row = 1 (island, tier)．
 
-| column | 型 | 説明 |
-|---|---|---|
-| ``area_manager`` | str | join キー |
-| ``city_name`` | str/None | |
-| ``tier`` | str | ``farmer`` / ``worker`` / ... / ``unknown`` |
-| ``residence_count`` | int | |
-| ``resident_total`` | int | |
-| ``avg_saturation_mean`` | float | tier 単位の saturation |
+.. list-table::
+   :header-rows: 1
+   :widths: 25 15 60
 
-### ``balance``
-1 row = 1 (island, product)．島の供給消費バランス．
+   * - column
+     - type
+     - description
+   * - ``area_manager``
+     - str
+     - join キー
+   * - ``city_name``
+     - str / None
+     -
+   * - ``tier``
+     - str
+     - ``farmer`` / ``worker`` / ... / ``unknown``
+   * - ``residence_count``
+     - int
+     -
+   * - ``resident_total``
+     - int
+     -
+   * - ``avg_saturation_mean``
+     - float
+     - tier 単位の saturation
 
-| column | 型 | 説明 |
-|---|---|---|
-| ``area_manager`` | str | |
-| ``city_name`` | str/None | |
-| ``product_guid`` | int | |
-| ``product_name`` | str | locale 適用後 |
-| ``produced_per_minute`` | float | |
-| ``consumed_per_minute`` | float | |
-| ``delta_per_minute`` | float | 負=赤字 |
-| ``is_deficit`` | bool | |
+``balance`` — 1 row = 1 (island, product)．島の供給消費バランス．
 
-### ``trade_events``
-1 row = 1 TradeEvent．時系列分析の入力．
+.. list-table::
+   :header-rows: 1
+   :widths: 25 15 60
 
-| column | 型 | 説明 |
-|---|---|---|
-| ``timestamp_tick`` | Int64 | nullable integer．分単位変換は後続 |
-| ``product_guid`` | int | |
-| ``product_name`` | str | |
-| ``amount`` | int | |
-| ``total_price`` | int | |
-| ``session_id`` | str/None | |
-| ``island_name`` | str/None | |
-| ``route_id`` | str/None | ``str`` 化して ``route:123`` 形式で統一 |
-| ``route_name`` | str/None | |
-| ``partner_id`` | str/None | |
-| ``partner_kind`` | str/None | ``route`` / ``passive`` / ``unknown`` |
-| ``source_method`` | str | ``history`` 等 |
+   * - column
+     - type
+     - description
+   * - ``area_manager``
+     - str
+     -
+   * - ``city_name``
+     - str / None
+     -
+   * - ``product_guid``
+     - int
+     -
+   * - ``product_name``
+     - str
+     - locale 適用後
+   * - ``produced_per_minute``
+     - float
+     -
+   * - ``consumed_per_minute``
+     - float
+     -
+   * - ``delta_per_minute``
+     - float
+     - 負=赤字
+   * - ``is_deficit``
+     - bool
+     -
+
+``trade_events`` — 1 row = 1 TradeEvent．時系列分析の入力．
+
+.. list-table::
+   :header-rows: 1
+   :widths: 25 15 60
+
+   * - column
+     - type
+     - description
+   * - ``timestamp_tick``
+     - Int64
+     - nullable integer．分単位変換は後続
+   * - ``product_guid``
+     - int
+     -
+   * - ``product_name``
+     - str
+     -
+   * - ``amount``
+     - int
+     -
+   * - ``total_price``
+     - int
+     -
+   * - ``session_id``
+     - str / None
+     -
+   * - ``island_name``
+     - str / None
+     -
+   * - ``route_id``
+     - str / None
+     - ``str`` 化して ``route:123`` 形式で統一
+   * - ``route_name``
+     - str / None
+     -
+   * - ``partner_id``
+     - str / None
+     -
+   * - ``partner_kind``
+     - str / None
+     - ``route`` / ``passive`` / ``unknown``
+   * - ``source_method``
+     - str
+     - ``history`` 等
 """
 
 from __future__ import annotations
