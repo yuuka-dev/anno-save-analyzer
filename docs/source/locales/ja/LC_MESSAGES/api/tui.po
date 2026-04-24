@@ -1,0 +1,150 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) 2026, Proletariat Yuuka
+# This file is distributed under the same license as the anno-save-analyzer
+# package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2026.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: anno-save-analyzer 0.1\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-04-24 21:04+0900\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language: ja\n"
+"Language-Team: ja <LL@li.org>\n"
+"Plural-Forms: nplurals=1; plural=0;\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.18.0\n"
+
+#: ../../source/api/tui.rst:2
+msgid "tui — Textual TUI"
+msgstr ""
+
+#: anno_save_analyzer.tui.state:1 of
+msgid "TUI が消費する事前計算済み状態．純粋データ層に閉じ込めて UI と切り離す．"
+msgstr ""
+
+#: anno_save_analyzer.tui.state:3 of
+msgid ""
+"これにより TUI 描画は副作用なし純粋関数の出力を表示するだけになり， テストは UI を起動せず ``TuiState`` "
+"を直接組み立てて検証できる．"
+msgstr ""
+
+#: anno_save_analyzer.tui.state.OverviewSnapshot:1 of
+msgid "Overview 画面が表示する固定値．"
+msgstr ""
+
+#: ../../source/api/tui.rst
+msgid "Parameters"
+msgstr ""
+
+#: anno_save_analyzer.tui.state.TuiState:1 of
+msgid "全画面共通で参照する事前計算済み state．"
+msgstr ""
+
+#: ../../source/api/tui.rst
+msgid "Return type"
+msgstr ""
+
+#: anno_save_analyzer.tui.state.build_overview:1 of
+msgid ":sphinx_autodoc_typehints_type:`\\:py\\:class\\:\\`\\~anno\\_save\\_analyzer.tui.state.OverviewSnapshot\\``"
+msgstr ""
+
+#: anno_save_analyzer.tui.state.load_state:1 of
+msgid "セーブを読み込み，TUI 用 state を構築する．"
+msgstr ""
+
+#: anno_save_analyzer.tui.state.load_state:3 of
+msgid ""
+"``progress`` callback を渡すと各ステージ開始時にラベルを通知する (CLI "
+"側でプログレスバーを描画する用)．``items`` を渡せば辞書ロードを スキップできる．"
+msgstr ""
+
+#: anno_save_analyzer.tui.state.load_state:7 of
+msgid ""
+"オーケストレーション本体．outer 解凍や集計は private helper に委譲し， "
+"この関数はステージの連結とステート組み立てだけに責任を持つ．"
+msgstr ""
+
+#: anno_save_analyzer.tui.state.load_state:10 of
+msgid ":sphinx_autodoc_typehints_type:`\\:py\\:class\\:\\`\\~anno\\_save\\_analyzer.tui.state.TuiState\\``"
+msgstr ""
+
+#: anno_save_analyzer.tui.app:1 of
+msgid "``TradeApp`` — Textual app entry．"
+msgstr ""
+
+#: anno_save_analyzer.tui.app.TradeApp:1 of
+msgid "nano-flavored binding 契約をもつトップレベル App．"
+msgstr ""
+
+#: anno_save_analyzer.tui.app.TradeApp.ENABLE_COMMAND_PALETTE:1 of
+msgid ""
+"Should the [command palette][textual.command.CommandPalette] be enabled "
+"for the application?"
+msgstr ""
+
+#: anno_save_analyzer.tui.app.TradeApp.BINDINGS:1 of
+msgid "The default key bindings."
+msgstr ""
+
+#: anno_save_analyzer.tui.app.TradeApp.CSS:1 of
+msgid ""
+"Inline CSS, useful for quick scripts. This is loaded after CSS_PATH, and "
+"therefore takes priority in the event of a specificity clash."
+msgstr ""
+
+#: anno_save_analyzer.tui.app.TradeApp.from_save:1 of
+msgid ":sphinx_autodoc_typehints_type:`\\:py\\:class\\:\\`\\~anno\\_save\\_analyzer.tui.app.TradeApp\\``"
+msgstr ""
+
+#: anno_save_analyzer.tui.app.TradeApp.action_export:9
+#: anno_save_analyzer.tui.app.TradeApp.action_show_help:1
+#: anno_save_analyzer.tui.app.TradeApp.action_switch_main_screen:1
+#: anno_save_analyzer.tui.app.TradeApp.action_toggle_locale:1
+#: anno_save_analyzer.tui.app.TradeApp.on_mount:1
+#: anno_save_analyzer.tui.app.TradeApp.persist_user_settings:7
+#: anno_save_analyzer.tui.app.TradeApp.switch_locale:5 of
+msgid ":sphinx_autodoc_typehints_type:`\\:py\\:obj\\:\\`None\\``"
+msgstr ""
+
+#: anno_save_analyzer.tui.app.TradeApp.switch_locale:1 of
+msgid ""
+"Live locale switching．installed screens の localizer を差し替え， "
+"``refresh(recompose=True)`` で再描画する．screen を uninstall するのは active stack "
+"中はエラーになるため避ける．"
+msgstr ""
+
+#: anno_save_analyzer.tui.app.TradeApp.persist_user_settings:1 of
+msgid "現在の UI 設定を ``config.toml`` に保存．``persist_settings=False`` なら no-op．"
+msgstr ""
+
+#: anno_save_analyzer.tui.app.TradeApp.persist_user_settings:3 of
+msgid ""
+"Statistics 画面から chart_window / recent_window_minutes を読み出し， app レベルの "
+"locale / theme と合わせて ``UserConfig`` を組み立てて書く． IO エラーは ``save_config`` 側で "
+"warning に落ちるので crash しない．"
+msgstr ""
+
+#: anno_save_analyzer.tui.app.TradeApp.action_export:1 of
+msgid "nano 風 ^O: 現在画面の内容を CSV にエクスポート．"
+msgstr ""
+
+#: anno_save_analyzer.tui.app.TradeApp.action_export:3 of
+msgid "Overview: items + routes + ledger 3 枚同時書き出し"
+msgstr ""
+
+#: anno_save_analyzer.tui.app.TradeApp.action_export:4 of
+msgid "Statistics: 現在画面時と同じく 3 枚同時 (タブ切替しても全量出す方が作業が楽)"
+msgstr ""
+
+#: anno_save_analyzer.tui.app.TradeApp.action_export:6 of
+msgid ""
+"書き出し先は現在 working directory．ファイル名は "
+"``<save_basename>_<kind>_<YYYYMMDD_HHMMSS>.csv``．"
+msgstr ""
+

@@ -1,0 +1,109 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) 2026, Proletariat Yuuka
+# This file is distributed under the same license as the anno-save-analyzer
+# package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2026.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: anno-save-analyzer 0.1\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-04-24 21:04+0900\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language: ja\n"
+"Language-Team: ja <LL@li.org>\n"
+"Plural-Forms: nplurals=1; plural=0;\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.18.0\n"
+
+#: ../../source/guide/quickstart.md:1
+msgid "Quickstart"
+msgstr "クイックスタート"
+
+#: ../../source/guide/quickstart.md:3
+msgid "Install, open a save, and get analysis-ready data in under 5 minutes."
+msgstr "インストールからセーブを開いて分析可能状態までを 5 分以内で．"
+
+#: ../../source/guide/quickstart.md:5
+msgid "Install"
+msgstr "インストール"
+
+#: ../../source/guide/quickstart.md:7
+msgid "Install with the extras you need:"
+msgstr "必要な extra を選んでインストール："
+
+#: ../../source/guide/quickstart.md:17
+msgid "Locate your save"
+msgstr "セーブファイルの場所"
+
+#: ../../source/guide/quickstart.md
+msgid "Game"
+msgstr "ゲーム"
+
+#: ../../source/guide/quickstart.md
+msgid "Default save folder (Windows)"
+msgstr "デフォルトのセーブフォルダ (Windows)"
+
+#: ../../source/guide/quickstart.md
+msgid "Anno 1800"
+msgstr "Anno 1800"
+
+#: ../../source/guide/quickstart.md
+msgid "``%USERPROFILE%\\Documents\\Anno 1800\\accounts\\<id>\\savegame\\``"
+msgstr "``%USERPROFILE%\\Documents\\Anno 1800\\accounts\\<id>\\savegame\\``"
+
+#: ../../source/guide/quickstart.md
+msgid "Anno 117"
+msgstr "Anno 117"
+
+#: ../../source/guide/quickstart.md
+msgid ""
+"``%USERPROFILE%\\Documents\\Anno 117 - Pax "
+"Romana\\accounts\\<id>\\savegame\\``"
+msgstr ""
+"``%USERPROFILE%\\Documents\\Anno 117 - Pax "
+"Romana\\accounts\\<id>\\savegame\\``"
+
+#: ../../source/guide/quickstart.md:24
+msgid ""
+"Copy a ``.a7s`` (Anno 1800) or ``.a8s`` (Anno 117) file somewhere "
+"convenient. The tool is **read-only** — it never modifies your save."
+msgstr ""
+"``.a7s`` (Anno 1800) または ``.a8s`` (Anno 117) をどこか作業ディレクトリに"
+"コピーしてください．本ツールは **読み取り専用** ─ セーブを書き換えません．"
+
+#: ../../source/guide/quickstart.md:27
+msgid "Launch the TUI"
+msgstr "TUI を起動"
+
+#: ../../source/guide/quickstart.md:33
+msgid ""
+"Use ``Ctrl+T`` to switch screens (Overview → Trade Statistics → Supply "
+"Balance). ``Ctrl+L`` toggles English/Japanese."
+msgstr ""
+"``Ctrl+T`` で画面切替 (Overview → Trade Statistics → Supply Balance)．"
+"``Ctrl+L`` で英日切替．"
+
+#: ../../source/guide/quickstart.md:36
+msgid "Export the full state as JSON"
+msgstr "全 state を JSON エクスポート"
+
+#: ../../source/guide/quickstart.md:43
+#, python-brace-format
+msgid ""
+"The JSON contains overview + islands + tier breakdown + balance + every "
+"TradeEvent. Load it with `pandas.read_json` / `pandas.json_normalize` and"
+" you are analysis-ready (see {doc}`scm-analytics`)."
+msgstr ""
+"出力 JSON には概要・島情報・tier 別内訳・需給バランス・全 TradeEvent が含"
+"まれます．`pandas.read_json` / `pandas.json_normalize` で読み込めば即分析"
+"可能です ({doc}`scm-analytics` を参照)．"
+
+#: ../../source/guide/quickstart.md:47
+msgid "One-liner Python API"
+msgstr "Python API (ワンライナー)"
+

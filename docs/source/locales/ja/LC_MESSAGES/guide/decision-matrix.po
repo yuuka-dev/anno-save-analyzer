@@ -1,0 +1,176 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) 2026, Proletariat Yuuka
+# This file is distributed under the same license as the anno-save-analyzer
+# package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2026.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: anno-save-analyzer 0.1\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-04-24 21:04+0900\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language: ja\n"
+"Language-Team: ja <LL@li.org>\n"
+"Plural-Forms: nplurals=1; plural=0;\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.18.0\n"
+
+#: ../../source/guide/decision-matrix.md:1
+msgid "Decision Matrix"
+msgstr "Decision Matrix"
+
+#: ../../source/guide/decision-matrix.md:3
+msgid ""
+"A rule-based prescription engine that classifies every (island, product) "
+"deficit into one of five categories and explains why."
+msgstr ""
+"島 × 物資の赤字を 5 つのカテゴリに分類し理由を添えて返す rule-based の"
+"処方箋エンジン．"
+
+#: ../../source/guide/decision-matrix.md:6
+msgid "Categories"
+msgstr "カテゴリ"
+
+#: ../../source/guide/decision-matrix.md
+msgid "category"
+msgstr "カテゴリ"
+
+#: ../../source/guide/decision-matrix.md
+msgid "trigger"
+msgstr "発火条件"
+
+#: ../../source/guide/decision-matrix.md
+msgid "suggested action"
+msgstr "推奨アクション"
+
+#: ../../source/guide/decision-matrix.md
+msgid "``increase_production``"
+msgstr "``increase_production``"
+
+#: ../../source/guide/decision-matrix.md
+msgid "chronic deficit + high satisfaction + strong route"
+msgstr "慢性 deficit + 高満足度 + 強い航路"
+
+#: ../../source/guide/decision-matrix.md
+msgid "Build more factories of this product."
+msgstr "この物資の工場を増やす．"
+
+#: ../../source/guide/decision-matrix.md
+msgid "``trade_flex``"
+msgstr "``trade_flex``"
+
+#: ../../source/guide/decision-matrix.md
+msgid "transient deficit + weak correlation + weak route"
+msgstr "一過性 deficit + 低相関 + 弱い航路"
+
+#: ../../source/guide/decision-matrix.md
+msgid "Short-term trading or small route tweak."
+msgstr "短期融通 or ルート微調整．"
+
+#: ../../source/guide/decision-matrix.md
+msgid "``rebalance_mix``"
+msgstr "``rebalance_mix``"
+
+#: ../../source/guide/decision-matrix.md
+msgid "strong route but still deficit"
+msgstr "強い航路があるのに deficit 残存"
+
+#: ../../source/guide/decision-matrix.md
+msgid "Rewrite the route's loadout, don't add ships."
+msgstr "船を増やさず積載構成を見直す．"
+
+#: ../../source/guide/decision-matrix.md
+msgid "``ok``"
+msgstr "``ok``"
+
+#: ../../source/guide/decision-matrix.md
+msgid "surplus"
+msgstr "黒字"
+
+#: ../../source/guide/decision-matrix.md
+msgid "Nothing to do."
+msgstr "対応不要．"
+
+#: ../../source/guide/decision-matrix.md
+msgid "``monitor``"
+msgstr "``monitor``"
+
+#: ../../source/guide/decision-matrix.md
+msgid "rule didn't fire"
+msgstr "rule 適用外"
+
+#: ../../source/guide/decision-matrix.md
+msgid "Keep an eye on it."
+msgstr "継続観察推奨．"
+
+#: ../../source/guide/decision-matrix.md:16
+msgid "Usage"
+msgstr "使い方"
+
+#: ../../source/guide/decision-matrix.md:31
+msgid "Tuning thresholds"
+msgstr "閾値チューニング"
+
+#: ../../source/guide/decision-matrix.md:33
+#, python-brace-format
+msgid ""
+"All rule thresholds live in "
+"{class}`~anno_save_analyzer.analysis.prescribe.Thresholds`."
+msgstr ""
+"全閾値は {class}`~anno_save_analyzer.analysis.prescribe.Thresholds` で管理．"
+
+#: ../../source/guide/decision-matrix.md:45
+msgid ""
+"The ``rationale`` column is human-readable; filter on it to audit the "
+"rule chain."
+msgstr ""
+"``rationale`` 列は人間可読．フィルタして rule chain の判定根拠を確認できる．"
+
+#: ../../source/guide/decision-matrix.md:48
+msgid "What the rules look like"
+msgstr "rule の中身"
+
+#: ../../source/guide/decision-matrix.md:50
+msgid ""
+"**Rule 1** — `persistence == \"chronic\"` ∧ `saturation >= "
+"high_saturation` ∧ `(city_name, product) ∈ strong_pairs`  →  "
+"``increase_production``"
+msgstr ""
+"**Rule 1** — `persistence == \"chronic\"` ∧ `saturation >= "
+"high_saturation` ∧ `(city_name, product) ∈ strong_pairs`  →  "
+"``increase_production``"
+
+#: ../../source/guide/decision-matrix.md:52
+msgid ""
+"**Rule 2** — `persistence == \"transient\"` ∧ `|correlation| < "
+"low_correlation` ∧ *not* in strong_pairs  →  ``trade_flex``"
+msgstr ""
+"**Rule 2** — `persistence == \"transient\"` ∧ `|correlation| < "
+"low_correlation` ∧ strong_pairs に *含まれない*  →  ``trade_flex``"
+
+#: ../../source/guide/decision-matrix.md:54
+msgid "**Rule 3** — strong_pairs ∧ `delta < 0`  →  ``rebalance_mix``"
+msgstr "**Rule 3** — strong_pairs ∧ `delta < 0`  →  ``rebalance_mix``"
+
+#: ../../source/guide/decision-matrix.md:55
+msgid "**Fallback** — anything else unfinished → ``monitor``."
+msgstr "**フォールバック** — 上記に当てはまらないケース → ``monitor``．"
+
+#: ../../source/guide/decision-matrix.md:57
+#, python-brace-format
+msgid ""
+"Persistence, correlation, and strong-pair computation are all pure "
+"functions defined in the respective analyzer modules — see "
+"{func}`~anno_save_analyzer.analysis.persistence.classify_deficit` and "
+"{func}`~anno_save_analyzer.analysis.correlation.saturation_vs_deficit`."
+msgstr ""
+"持続性・相関・強い pair の計算はすべて各 analyzer モジュールの純関数として"
+"実装されています．詳細は "
+"{func}`~anno_save_analyzer.analysis.persistence.classify_deficit` と "
+"{func}`~anno_save_analyzer.analysis.correlation.saturation_vs_deficit` を参照．"
+

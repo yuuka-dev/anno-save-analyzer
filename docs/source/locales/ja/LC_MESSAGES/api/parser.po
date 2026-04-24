@@ -1,0 +1,400 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) 2026, Proletariat Yuuka
+# This file is distributed under the same license as the anno-save-analyzer
+# package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2026.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: anno-save-analyzer 0.1\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-04-24 21:04+0900\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language: ja\n"
+"Language-Team: ja <LL@li.org>\n"
+"Plural-Forms: nplurals=1; plural=0;\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.18.0\n"
+
+#: ../../source/api/parser.rst:2
+msgid "parser — RDA / FileDB binary parser"
+msgstr ""
+
+#: ../../source/api/parser.rst:4
+msgid "Pure-Python RDA V2.2 container and FileDB V3 streaming DOM."
+msgstr ""
+
+#: ../../source/api/parser.rst:7
+msgid "Pipeline"
+msgstr ""
+
+#: anno_save_analyzer.parser.pipeline:1 of
+msgid "セーブデータ解析の薄い pipeline API．"
+msgstr ""
+
+#: anno_save_analyzer.parser.pipeline:3 of
+msgid ""
+"v0.1.0 時点では RDA → inner zlib 解凍までを提供する． FileDB 解析 / XML 化 / SessionData "
+"解読は後続のマイルストーンで追加．"
+msgstr ""
+
+#: anno_save_analyzer.parser.pipeline.extract_inner_filedb:1 of
+msgid "``.a7s`` RDA コンテナから ``data.a7s`` を取り出し zlib 解凍まで行う．"
+msgstr ""
+
+#: anno_save_analyzer.parser.pipeline.extract_inner_filedb:3 of
+msgid "返り値は FileDB (V1/V2/V3) 形式の生バイナリ． ``dest`` を指定するとそのパスに書き出す．"
+msgstr ""
+
+#: ../../source/api/parser.rst
+msgid "Return type"
+msgstr ""
+
+#: anno_save_analyzer.parser.pipeline.extract_inner_filedb:6
+#: anno_save_analyzer.parser.rda.archive.RDAArchive.read:3 of
+msgid ":sphinx_autodoc_typehints_type:`\\:py\\:class\\:\\`bytes\\``"
+msgstr ""
+
+#: ../../source/api/parser.rst
+msgid "Parameters"
+msgstr ""
+
+#: ../../source/api/parser.rst:13
+msgid "RDA archive"
+msgstr ""
+
+#: anno_save_analyzer.parser.rda:1 of
+msgid "RDA アーカイブパーサ (clean-room port of lysannschlegel/RDAExplorer)．"
+msgstr ""
+
+#: anno_save_analyzer.parser.rda.archive.RDAArchive:1 of
+msgid "RDA (.a7s / .a8s 外殻) の読取専用アーカイブ．"
+msgstr ""
+
+#: anno_save_analyzer.parser.rda.archive.RDAArchive:4 of
+msgid "Example"
+msgstr ""
+
+#: anno_save_analyzer.parser.rda.archive.RDAArchive:5 of
+msgid "with RDAArchive(Path(\"sample.a7s\")) as rda:"
+msgstr ""
+
+#: anno_save_analyzer.parser.rda.archive.RDAArchive:6 of
+msgid "for e in rda.entries:"
+msgstr ""
+
+#: anno_save_analyzer.parser.rda.archive.RDAArchive:7 of
+msgid "print(e.filename, e.uncompressed_size)"
+msgstr ""
+
+#: anno_save_analyzer.parser.rda.archive.RDAArchive:8 of
+msgid "data = rda.read(\"data.a7s\")"
+msgstr ""
+
+#: anno_save_analyzer.parser.rda.archive.RDAArchive.open:1 of
+msgid "ファイルを開いて header と block chain を走査する．"
+msgstr ""
+
+#: anno_save_analyzer.parser.rda.archive.RDAArchive.close:1
+#: anno_save_analyzer.parser.rda.archive.RDAArchive.open:3 of
+msgid ":sphinx_autodoc_typehints_type:`\\:py\\:obj\\:\\`None\\``"
+msgstr ""
+
+#: anno_save_analyzer.parser.rda.RDAArchive.entries:1 of
+msgid "ブロックチェーン走査済みの全ファイルエントリ（順序保持）．"
+msgstr ""
+
+#: anno_save_analyzer.parser.rda.archive.RDAArchive.entry_names:1 of
+msgid ""
+":sphinx_autodoc_typehints_type:`\\:py\\:class\\:\\`list\\`\\\\ "
+"\\\\\\[\\:py\\:class\\:\\`str\\`\\]`"
+msgstr ""
+
+#: anno_save_analyzer.parser.rda.archive.RDAArchive.get_entry:1 of
+msgid "指定ファイル名のエントリを返す．重複時は最初のもの．"
+msgstr ""
+
+#: anno_save_analyzer.parser.rda.archive.RDAArchive.get_entry:3 of
+msgid ":sphinx_autodoc_typehints_type:`\\:py\\:class\\:\\`\\~anno\\_save\\_analyzer.parser.rda.archive.RDAEntry\\``"
+msgstr ""
+
+#: anno_save_analyzer.parser.rda.archive.RDAArchive.read:1 of
+msgid "指定ファイルを解凍済み bytes として返す．"
+msgstr ""
+
+#: anno_save_analyzer.parser.rda.archive.RDAArchive.extract:1 of
+msgid "指定ファイルを dest へ書き出す．dest が既存ディレクトリなら同名で作成．"
+msgstr ""
+
+#: anno_save_analyzer.parser.rda.archive.RDAArchive.extract:3 of
+msgid ":sphinx_autodoc_typehints_type:`\\:py\\:class\\:\\`\\~pathlib.Path\\``"
+msgstr ""
+
+#: anno_save_analyzer.parser.rda.archive.RDAArchive.extract_all:1 of
+msgid "全エントリを dest_dir 以下に書き出す．内部パス区切りは ``/``．"
+msgstr ""
+
+#: anno_save_analyzer.parser.rda.archive.RDAArchive.extract_all:3 of
+msgid ""
+":sphinx_autodoc_typehints_type:`\\:py\\:class\\:\\`list\\`\\\\ "
+"\\\\\\[\\:py\\:class\\:\\`\\~pathlib.Path\\`\\]`"
+msgstr ""
+
+#: anno_save_analyzer.parser.rda.archive.RDAEntry:1 of
+msgid "ユーザが触る公開版のファイルエントリ．"
+msgstr ""
+
+#: anno_save_analyzer.parser.rda.block.BlockInfo:1 of
+msgid "ブロックチェーンの 1 ノード．directory 位置は block_offset から逆算する．"
+msgstr ""
+
+#: anno_save_analyzer.parser.rda.block.DirEntry:1 of
+msgid "ブロックの directory 内 1 エントリ．ファイル本体の位置とサイズを指す．"
+msgstr ""
+
+#: anno_save_analyzer.parser.rda.header.FileHeader:1 of
+msgid "RDA ファイルのヘッダ情報．"
+msgstr ""
+
+#: anno_save_analyzer.parser.rda.FileHeader.header_size:1 of
+msgid "magic + unknown + firstBlockOffset の合計バイト数．"
+msgstr ""
+
+#: anno_save_analyzer.parser.rda.header.RDAVersion:1 of
+msgid "RDA コンテナのバージョン．本実装では V2_2 のみ完全対応．"
+msgstr ""
+
+#: anno_save_analyzer.parser.rda.exceptions.RDAParseError:1 of
+msgid "RDA ファイルの構造破損や仕様違反を検出したときに送出する汎用例外．"
+msgstr ""
+
+#: anno_save_analyzer.parser.rda.exceptions.UnsupportedVersionError:1 of
+msgid "magic は読めたが本実装が対応していないバージョンだった場合に送出．"
+msgstr ""
+
+#: anno_save_analyzer.parser.rda.exceptions.EncryptedBlockError:1 of
+msgid "Encrypted flag の付いたブロックに遭遇した場合に送出．v0.1.0 では未対応．"
+msgstr ""
+
+#: ../../source/api/parser.rst:19
+msgid "FileDB"
+msgstr ""
+
+#: anno_save_analyzer.parser.filedb:1 of
+msgid "FileDB (BBDom) V3 parser — clean-room port of anno-mods/FileDBReader．"
+msgstr ""
+
+#: anno_save_analyzer.parser.filedb:3 of
+msgid "公開 API:"
+msgstr ""
+
+#: anno_save_analyzer.parser.filedb:5 of
+msgid "``FileDBVersion`` : V1 / V2 / V3 列挙"
+msgstr ""
+
+#: anno_save_analyzer.parser.filedb:6 of
+msgid "``detect_version(data: bytes)`` : 末尾マジックから version 判定"
+msgstr ""
+
+#: anno_save_analyzer.parser.filedb:7 of
+msgid "``TagDictionary`` : tag / attrib name 辞書"
+msgstr ""
+
+#: anno_save_analyzer.parser.filedb:8 of
+msgid "``parse_tag_section(data, version)`` : 末尾からの辞書ペア取り出し"
+msgstr ""
+
+#: anno_save_analyzer.parser.filedb:9 of
+msgid ""
+"``iter_dom(data, version)`` : streaming iterator（Tag / Attrib / "
+"Terminator イベント）"
+msgstr ""
+
+#: anno_save_analyzer.parser.filedb:10 of
+msgid "``build_xml(data)`` : lxml ``Element`` ツリー構築（ワンショット．将来的に streaming 対応予定）"
+msgstr ""
+
+#: anno_save_analyzer.parser.filedb.version.FileDBVersion:1 of
+msgid "FileDB ドキュメントのバージョン．"
+msgstr ""
+
+#: anno_save_analyzer.parser.filedb.FileDBVersion.offset_to_offsets:1 of
+msgid "末尾から辞書オフセットブロックまでの距離．"
+msgstr ""
+
+#: anno_save_analyzer.parser.filedb.FileDBVersion.block_size:1 of
+msgid "Attrib content の padding 単位（V2/V3=8, V1=0）．"
+msgstr ""
+
+#: anno_save_analyzer.parser.filedb.FileDBVersion.uses_attrib_blocks:1 of
+msgid "Attrib content が block アラインされるか．V1 は False．"
+msgstr ""
+
+#: anno_save_analyzer.parser.filedb.version.detect_version:1 of
+msgid "FileDB バイト列の末尾マジックからバージョンを判定する．"
+msgstr ""
+
+#: anno_save_analyzer.parser.filedb.version.detect_version:3 of
+msgid "V2 / V3 にマッチしなければ V1 として扱う（上流実装と同じ挙動）． ただし最低限 ``OffsetToOffsets`` バイトは必要．"
+msgstr ""
+
+#: anno_save_analyzer.parser.filedb.version.detect_version:6 of
+msgid ":sphinx_autodoc_typehints_type:`\\:py\\:class\\:\\`\\~anno\\_save\\_analyzer.parser.filedb.version.FileDBVersion\\``"
+msgstr ""
+
+#: anno_save_analyzer.parser.filedb.dictionary.TagDictionary:1 of
+msgid "ID → 名前 の辞書．Tag 用と Attrib 用で別インスタンスを作る．"
+msgstr ""
+
+#: anno_save_analyzer.parser.filedb.dictionary.TagDictionary.get:1 of
+msgid ""
+":sphinx_autodoc_typehints_type:`\\:py\\:class\\:\\`str\\` \\| "
+"\\:py\\:obj\\:\\`None\\``"
+msgstr ""
+
+#: anno_save_analyzer.parser.filedb.dictionary.TagSection:1 of
+msgid "FileDB ドキュメント 1 本分の tag / attrib 辞書ペア．"
+msgstr ""
+
+#: anno_save_analyzer.parser.filedb.dictionary.parse_tag_section:1 of
+msgid "末尾の offset ペアから tag / attrib 辞書を decode する．"
+msgstr ""
+
+#: anno_save_analyzer.parser.filedb.dictionary.parse_tag_section:3 of
+msgid "V1 は attrib 辞書を持たない形式のためサポート外．"
+msgstr ""
+
+#: anno_save_analyzer.parser.filedb.dictionary.parse_tag_section:5 of
+msgid ":sphinx_autodoc_typehints_type:`\\:py\\:class\\:\\`\\~anno\\_save\\_analyzer.parser.filedb.dictionary.TagSection\\``"
+msgstr ""
+
+#: anno_save_analyzer.parser.filedb.dom.iter_dom:1 of
+msgid "DOM セクションを streaming で走査し ``DomEvent`` を yield する．"
+msgstr ""
+
+#: anno_save_analyzer.parser.filedb.dom.iter_dom:3 of
+msgid ""
+"``dom_end`` を指定しないときは ``TagsOffset`` まで（= DOM の終端）を 自動計算する．引数 ``data`` "
+"は全体バッファを想定．"
+msgstr ""
+
+#: anno_save_analyzer.parser.filedb.dom.iter_dom:6 of
+msgid ""
+":sphinx_autodoc_typehints_type:`\\:py\\:class\\:\\`\\~collections.abc.Iterator\\`\\\\"
+" "
+"\\\\\\[\\:py\\:class\\:\\`\\~anno\\_save\\_analyzer.parser.filedb.dom.DomEvent\\`\\]`"
+msgstr ""
+
+#: anno_save_analyzer.parser.filedb.dom.DomEvent:1 of
+msgid "DOM ストリーム中の 1 イベント．"
+msgstr ""
+
+#: anno_save_analyzer.parser.filedb.dom.DomEvent:3 of
+msgid "``kind`` に応じて以下のフィールドを使い分ける:"
+msgstr ""
+
+#: anno_save_analyzer.parser.filedb.dom.DomEvent:5 of
+msgid "TAG: ``id_`` （open）．``name`` は ``tag_section`` 指定時に解決される．"
+msgstr ""
+
+#: anno_save_analyzer.parser.filedb.dom.DomEvent:6 of
+msgid "ATTRIB: ``id_`` / ``content`` （生バイト）．"
+msgstr ""
+
+#: anno_save_analyzer.parser.filedb.dom.DomEvent:7 of
+msgid "TERMINATOR: 閉じイベント．``id_=0`` / ``content=b\"\"``．"
+msgstr ""
+
+#: anno_save_analyzer.parser.filedb.dom.EventKind:1 of
+msgid "DOM イベントの種別．"
+msgstr ""
+
+#: anno_save_analyzer.parser.filedb.dom.Attrib:1
+#: anno_save_analyzer.parser.filedb.dom.Tag:1
+#: anno_save_analyzer.parser.filedb.dom.Terminator:1 of
+msgid ":sphinx_autodoc_typehints_type:`\\:py\\:class\\:\\`\\~anno\\_save\\_analyzer.parser.filedb.dom.DomEvent\\``"
+msgstr ""
+
+#: anno_save_analyzer.parser.filedb.xml.build_xml:1 of
+msgid "FileDB バイト列から一発で lxml ``Element`` を作るワンショット API．"
+msgstr ""
+
+#: anno_save_analyzer.parser.filedb.xml.build_xml:3 of
+msgid "辞書解決つき．メモリ上にツリー全体を構築するため巨大ファイルには向かない （その場合は ``iter_dom`` を直接使う）．"
+msgstr ""
+
+#: anno_save_analyzer.parser.filedb.xml.build_xml:6 of
+msgid ":sphinx_autodoc_typehints_type:`\\:py\\:class\\:\\`\\~lxml.etree.\\_Element\\``"
+msgstr ""
+
+#: anno_save_analyzer.parser.filedb.session.extract_sessions:1 of
+msgid "外側 FileDB の DOM を走査し ``<SessionData><BinaryData>`` の content を全件返す．"
+msgstr ""
+
+#: anno_save_analyzer.parser.filedb.session.extract_sessions:3 of
+msgid "``version`` / ``tag_section`` を呼び出し側で既に取得済なら引数で渡せる（再計算を避ける）．"
+msgstr ""
+
+#: anno_save_analyzer.parser.filedb.session.extract_sessions:5 of
+msgid ""
+":sphinx_autodoc_typehints_type:`\\:py\\:class\\:\\`list\\`\\\\ "
+"\\\\\\[\\:py\\:class\\:\\`bytes\\`\\]`"
+msgstr ""
+
+#: anno_save_analyzer.parser.filedb.session.list_inner_area_managers:1 of
+msgid "内側 Session FileDB の tag 辞書から ``AreaManager_<N>`` の N（int）を昇順で返す．"
+msgstr ""
+
+#: anno_save_analyzer.parser.filedb.session.list_inner_area_managers:3 of
+msgid ""
+"Anno のセーブでは各島が 1 つの ``AreaManager`` で管理される．辞書を見るだけで DOM "
+"走査は不要なため，書記長のセーブ規模でもほぼ瞬時．"
+msgstr ""
+
+#: anno_save_analyzer.parser.filedb.session.list_inner_area_managers:6 of
+msgid ""
+":sphinx_autodoc_typehints_type:`\\:py\\:class\\:\\`tuple\\`\\\\ "
+"\\\\\\[\\:py\\:class\\:\\`int\\`\\, "
+"\\:py\\:data\\:\\`...\\<Ellipsis\\>\\`\\]`"
+msgstr ""
+
+#: anno_save_analyzer.parser.filedb.session.list_player_islands:1 of
+msgid "内側 Session DOM から「プレイヤー保有島」のリストを抽出する．"
+msgstr ""
+
+#: anno_save_analyzer.parser.filedb.session.list_player_islands:3 of
+msgid ""
+"判別基準: ``GameSessionManager > AreaInfo > <1>`` 配下に ``CityName`` attrib "
+"が存在するエントリ．Anno 117 では命名 = 保有のため，これでプレイヤー所有島 と未命名（NPC / 空島）を区別できる．書記長の "
+"sample 例: 大阪民国 / ジョウト地方 等．"
+msgstr ""
+
+#: anno_save_analyzer.parser.filedb.session.list_player_islands:8 of
+msgid ""
+":sphinx_autodoc_typehints_type:`\\:py\\:class\\:\\`tuple\\`\\\\ "
+"\\\\\\[\\:py\\:class\\:\\`\\~anno\\_save\\_analyzer.parser.filedb.session.PlayerIsland\\`\\,"
+" \\:py\\:data\\:\\`...\\<Ellipsis\\>\\`\\]`"
+msgstr ""
+
+#: anno_save_analyzer.parser.filedb.session.PlayerIsland:1 of
+msgid "プレイヤー命名済（= 保有）の島メタ．"
+msgstr ""
+
+#: anno_save_analyzer.parser.filedb.session.PlayerIsland:3 of
+msgid ""
+"``city_name`` はゲーム内で書記長が手動入力した名前（例: \"大阪民国\"）． 今後 owner profile / "
+"area_manager_id / 人口 等を追加する余地あり．"
+msgstr ""
+
+#: anno_save_analyzer.parser.filedb.exceptions.FileDBParseError:1 of
+msgid "FileDB バイナリの構造破損や仕様違反を検出したとき送出する汎用例外．"
+msgstr ""
+
+#: anno_save_analyzer.parser.filedb.exceptions.UnsupportedFileDBVersion:1 of
+msgid "magic から判定したバージョンが実装対象外のとき送出する例外．"
+msgstr ""
+

@@ -1,0 +1,286 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) 2026, Proletariat Yuuka
+# This file is distributed under the same license as the anno-save-analyzer
+# package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2026.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: anno-save-analyzer 0.1\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-04-24 21:04+0900\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language: ja\n"
+"Language-Team: ja <LL@li.org>\n"
+"Plural-Forms: nplurals=1; plural=0;\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.18.0\n"
+
+#: ../../source/reference/session_binary_investigation.md:1
+msgid "SessionData / BinaryData Investigation Result"
+msgstr ""
+
+#: ../../source/reference/session_binary_investigation.md:3
+msgid ""
+"調査日: 2026-04-19．対象: ``sample.a7s`` を FileDB V3 parser で走査し， "
+"``<SessionData>`` 配下の ``<BinaryData>`` Attrib content を抽出して解析．"
+msgstr ""
+
+#: ../../source/reference/session_binary_investigation.md:6
+msgid "TL;DR"
+msgstr ""
+
+#: ../../source/reference/session_binary_investigation.md:8
+msgid ""
+"**仮説 1（再帰 FileDB V3）が確定．** 外側 FileDB 内の 5 個の ``<BinaryData>`` は， "
+"いずれも**末尾マジック ``08000000FDFFFFFF`` を持つ完全な FileDB V3 文書**だった． 既存の "
+"``parser.filedb`` を**そのまま再帰適用**するだけで，島 / 建物 / 人口系の 階層データが取得できる．"
+msgstr ""
+
+#: ../../source/reference/session_binary_investigation.md:13
+msgid "手順"
+msgstr ""
+
+#: ../../source/reference/session_binary_investigation.md:15
+msgid "外側 ``data.a7s`` 解凍後の FileDB を parse"
+msgstr ""
+
+#: ../../source/reference/session_binary_investigation.md:16
+msgid "タグ辞書から ``SessionData`` (id=466) と ``BinaryData`` (attrib id=33326) を解決"
+msgstr ""
+
+#: ../../source/reference/session_binary_investigation.md:17
+msgid "DOM 走査中，``<SessionData>`` スコープ内の ``<BinaryData>`` attrib content を 5 件収集"
+msgstr ""
+
+#: ../../source/reference/session_binary_investigation.md:18
+msgid "各 blob を ``detect_version`` → V3 確定"
+msgstr ""
+
+#: ../../source/reference/session_binary_investigation.md:19
+msgid "それぞれを再度 FileDB として ``parse_tag_section`` + ``iter_dom`` に食わせる"
+msgstr ""
+
+#: ../../source/reference/session_binary_investigation.md:21
+msgid "5 セッションの実測値"
+msgstr ""
+
+#: ../../source/reference/session_binary_investigation.md
+msgid "#"
+msgstr ""
+
+#: ../../source/reference/session_binary_investigation.md
+msgid "サイズ"
+msgstr ""
+
+#: ../../source/reference/session_binary_investigation.md
+msgid "Shannon entropy (bytes)"
+msgstr ""
+
+#: ../../source/reference/session_binary_investigation.md
+msgid "末尾マジック"
+msgstr ""
+
+#: ../../source/reference/session_binary_investigation.md
+msgid "0"
+msgstr ""
+
+#: ../../source/reference/session_binary_investigation.md
+msgid "22,853,288 B"
+msgstr ""
+
+#: ../../source/reference/session_binary_investigation.md
+msgid "0.411"
+msgstr ""
+
+#: ../../source/reference/session_binary_investigation.md
+msgid "`08000000FDFFFFFF` ✅"
+msgstr ""
+
+#: ../../source/reference/session_binary_investigation.md
+msgid "1"
+msgstr ""
+
+#: ../../source/reference/session_binary_investigation.md
+msgid "32,038,880 B"
+msgstr ""
+
+#: ../../source/reference/session_binary_investigation.md
+msgid "0.707"
+msgstr ""
+
+#: ../../source/reference/session_binary_investigation.md
+msgid "2"
+msgstr ""
+
+#: ../../source/reference/session_binary_investigation.md
+msgid "32,671,384 B"
+msgstr ""
+
+#: ../../source/reference/session_binary_investigation.md
+msgid "0.879"
+msgstr ""
+
+#: ../../source/reference/session_binary_investigation.md
+msgid "3"
+msgstr ""
+
+#: ../../source/reference/session_binary_investigation.md
+msgid "37,571,112 B"
+msgstr ""
+
+#: ../../source/reference/session_binary_investigation.md
+msgid "0.496"
+msgstr ""
+
+#: ../../source/reference/session_binary_investigation.md
+msgid "4"
+msgstr ""
+
+#: ../../source/reference/session_binary_investigation.md
+msgid "24,477,728 B"
+msgstr ""
+
+#: ../../source/reference/session_binary_investigation.md
+msgid "0.552"
+msgstr ""
+
+#: ../../source/reference/session_binary_investigation.md:31
+msgid ""
+"全て V3 magic 一致．entropy の低さ（0.4〜0.9 bit / byte）は DOM "
+"の反復構造（``[bytesize][id]`` の規則的なパターンと大量の 0 埋め属性）で説明がつく．追加圧縮（仮説 3）の必要なし．"
+msgstr ""
+
+#: ../../source/reference/session_binary_investigation.md:33
+msgid "先頭 24 バイト共通:"
+msgstr ""
+
+#: ../../source/reference/session_binary_investigation.md:41
+msgid "5 セッションとも **同じ先頭パターン**から始まる．"
+msgstr ""
+
+#: ../../source/reference/session_binary_investigation.md:43
+msgid "Session 0 の内部構造（先頭 30 op）"
+msgstr ""
+
+#: ../../source/reference/session_binary_investigation.md:71
+msgid "内部辞書の構成"
+msgstr ""
+
+#: ../../source/reference/session_binary_investigation.md:73
+msgid "Session 0 の場合:"
+msgstr ""
+
+#: ../../source/reference/session_binary_investigation.md:75
+msgid "Tag 辞書 = **447 件**（外側 465 件と別物．session 固有 ID）"
+msgstr ""
+
+#: ../../source/reference/session_binary_investigation.md:76
+msgid "Attrib 辞書 = **189 件**（外側 558 件．こちらも独立）"
+msgstr ""
+
+#: ../../source/reference/session_binary_investigation.md:77
+msgid "興味深いタグ群:"
+msgstr ""
+
+#: ../../source/reference/session_binary_investigation.md:78
+msgid "**104 件の ``AreaManager_*``**（動的にタグ名化された島マネージャ）"
+msgstr ""
+
+#: ../../source/reference/session_binary_investigation.md:79
+msgid ""
+"**62 件の ``Island*``**（``Island9``, ``Island18``, ``Island38``, "
+"``Island47`` など具体値）"
+msgstr ""
+
+#: ../../source/reference/session_binary_investigation.md:80
+msgid "``Building``, ``PassiveTradeBuilding``, ``AreaPopulationManager``"
+msgstr ""
+
+#: ../../source/reference/session_binary_investigation.md:81
+msgid "``MinimumStock``, ``ExclusiveTradeGood``"
+msgstr ""
+
+#: ../../source/reference/session_binary_investigation.md:83
+msgid "→ 島単位の建物・人口・在庫データが完全に内部 FileDB として格納されている．"
+msgstr ""
+
+#: ../../source/reference/session_binary_investigation.md:85
+msgid "Anonymous attrib (id = 0x8000 = 32768)"
+msgstr ""
+
+#: ../../source/reference/session_binary_investigation.md:87
+msgid ""
+"内部 DOM に ``<unknown 32768>`` が頻出．これは attrib 辞書に id 32768 が登録されていない "
+"ためフォールバック名になる．BlueByte は **無名プレースホルダ attrib として id=0x8000 を予約** "
+"している可能性が高い．``MineSlotMapping`` のような座標ペア配列でよく使われる．"
+msgstr ""
+
+#: ../../source/reference/session_binary_investigation.md:91
+msgid ""
+"v0.2 parser は未解決 ID を ``Attrib_32768`` フォールバックで処理するため decode は止まらない． "
+"interpreter 層（v0.2 step 5）で「親タグが ``MineSlotMapping`` かつ attrib id=0x8000 "
+"なら ``(u32, u32)`` ペア配列として解釈」のルールを用意すれば良い．"
+msgstr ""
+
+#: ../../source/reference/session_binary_investigation.md:95
+msgid "v0.3 実装方針（差分）"
+msgstr ""
+
+#: ../../source/reference/session_binary_investigation.md:97
+msgid "もともと「本丸 / 沼」想定だった v0.3 が，**v0.2 parser の副産物で実質 80% 完了**した． 残す主要課題:"
+msgstr ""
+
+#: ../../source/reference/session_binary_investigation.md:100
+msgid "再帰 FileDB 仮説の検証（この調査で確定）"
+msgstr ""
+
+#: ../../source/reference/session_binary_investigation.md:101
+msgid "``parser.filedb.session.extract_sessions(data)`` 実装（本 PR に同梱）"
+msgstr ""
+
+#: ../../source/reference/session_binary_investigation.md:102
+msgid "匿名 attrib (id=0x8000) のコンテキスト依存型解釈（interpreter 層の一部）"
+msgstr ""
+
+#: ../../source/reference/session_binary_investigation.md:103
+msgid "島エンティティ（``Island*`` / ``AreaManager_*`` / ``Building``）の Pydantic モデル化"
+msgstr ""
+
+#: ../../source/reference/session_binary_investigation.md:104
+msgid "人口 (``AreaPopulationManager``) / 在庫 (``MinimumStock``) のスキーマ調査"
+msgstr ""
+
+#: ../../source/reference/session_binary_investigation.md:105
+msgid "全 5 セッション（旧世界 / 新世界 / エンベサ / 北極 / Cape）の対応関係特定"
+msgstr ""
+
+#: ../../source/reference/session_binary_investigation.md:106
+msgid "セッションの「意味」は外側の同階層 Attrib（``SessionID`` など）で参照されているはず"
+msgstr ""
+
+#: ../../source/reference/session_binary_investigation.md:108
+msgid "参考"
+msgstr ""
+
+#: ../../source/reference/session_binary_investigation.md:110
+msgid ""
+"上流仮説: [anno-mods/FileDBReader #33](https://github.com/anno-"
+"mods/FileDBReader/issues/33) で accountdata の未解決ノードが言及されているが，SessionData "
+"が再帰 FileDB である旨は明示されていない"
+msgstr ""
+
+#: ../../source/reference/session_binary_investigation.md:111
+msgid "CLAUDE.md v0.3 本丸章に記載した 3 仮説のうち **仮説 1 を本調査で確定**（仮説 2/3 は棄却）"
+msgstr ""
+
+#: ../../source/reference/session_binary_investigation.md:112
+msgid ""
+"実装は ``src/anno_save_analyzer/parser/filedb/session.py`` の "
+"``extract_sessions`` 1 本で完結"
+msgstr ""
+

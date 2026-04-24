@@ -1,0 +1,120 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) 2026, Proletariat Yuuka
+# This file is distributed under the same license as the anno-save-analyzer
+# package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2026.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: anno-save-analyzer 0.1\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-04-24 21:04+0900\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language: ja\n"
+"Language-Team: ja <LL@li.org>\n"
+"Plural-Forms: nplurals=1; plural=0;\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.18.0\n"
+
+#: ../../source/index.md:53
+msgid "Guides"
+msgstr "ガイド"
+
+#: ../../source/index.md:35 ../../source/index.md:62
+msgid "API reference"
+msgstr "API リファレンス"
+
+#: ../../source/index.md:69
+msgid "Reference"
+msgstr "リファレンス"
+
+#: ../../source/index.md:80
+msgid "Project"
+msgstr "プロジェクト"
+
+#: ../../source/index.md:1
+msgid "anno-save-analyzer"
+msgstr "anno-save-analyzer"
+
+#: ../../source/index.md:3
+msgid ""
+"An offline analysis toolkit for **Anno 1800** and **Anno 117: Pax "
+"Romana** save files. Parses the RDA / FileDB container stack, "
+"reconstructs trade history, inventory trends, population breakdown, and "
+"supply-demand balance, then surfaces everything through a Textual TUI, a "
+"PySide6 GUI (frozen), a JSON export CLI, and a **pandas-native SCM "
+"analytics layer** (v0.5)."
+msgstr ""
+"**Anno 1800** / **Anno 117: Pax Romana** のセーブデータを解析するオフライン"
+"ツール．RDA / FileDB コンテナを剥いで貿易履歴・在庫推移・人口 tier 別内訳・"
+"需給バランスを再構成し，Textual TUI・PySide6 GUI (機能凍結)・JSON エクスポー"
+"ト CLI，そして **pandas ベースの SCM 分析層** (v0.5) で表示する．"
+
+#: ../../source/index.md:10
+msgid ""
+"This is an open-source side project by [@yuuka-dev](https://github.com"
+"/yuuka-dev). The tool is strictly **read-only**; it never modifies your "
+"save."
+msgstr ""
+"[@yuuka-dev](https://github.com/yuuka-dev) の OSS 副業プロジェクトです．本"
+"ツールは **読み取り専用**．セーブファイルを書き換えることはありません．"
+
+#: ../../source/index.md:14
+msgid "Quick navigation"
+msgstr "クイックナビ"
+
+#: ../../source/index.md:19
+msgid "Getting started"
+msgstr "はじめ方"
+
+#: ../../source/index.md:23
+msgid ""
+"Install, pick a save file, launch the TUI, export JSON. Start here if you"
+" are new."
+msgstr ""
+"インストール，セーブ選択，TUI 起動，JSON エクスポート．初めての人はここから．"
+
+#: ../../source/index.md:27
+msgid "SCM analytics (v0.5)"
+msgstr "SCM 分析 (v0.5)"
+
+#: ../../source/index.md:31
+msgid ""
+"DataFrame layer, deficit maps, correlation, route rankings, **Decision "
+"Matrix**, Min-Cost Flow, and OR-Tools VRP."
+msgstr ""
+"DataFrame 層，deficit マップ，相関分析，ルートランキング，**Decision "
+"Matrix**，Min-Cost Flow，OR-Tools VRP．"
+
+#: ../../source/index.md:39
+msgid ""
+"autodoc-generated reference for `analysis`, `trade`, `parser`, `tui`, "
+"`gui`, `cli`."
+msgstr ""
+"`analysis` / `trade` / `parser` / `tui` / `gui` / `cli` の autodoc 自動"
+"生成リファレンス．"
+
+#: ../../source/index.md:43
+msgid "Save file format"
+msgstr "セーブファイル形式"
+
+#: ../../source/index.md:47
+msgid "RDA container, FileDB V3, SessionData recursion, and the tag dictionary."
+msgstr "RDA コンテナ，FileDB V3，SessionData 再帰展開，タグ辞書の詳細．"
+
+#: ../../source/index.md:51
+msgid "Site map"
+msgstr "サイトマップ"
+
+#: ../../source/index.md:89
+msgid ""
+"Japanese documentation: [ja/index.html](ja/index.html) (build with ``make "
+"html-ja`` / ``make site`` for combined preview)．"
+msgstr ""
+"英語版ドキュメント: [../index.html](../index.html) ─ ``make site`` で両言語"
+"を ``_build/site/`` にまとめてビルドできます．"
+

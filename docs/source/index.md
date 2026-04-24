@@ -86,4 +86,5 @@ roadmap
 
 ---
 
-日本語ドキュメントは [こちら](../ja/index.html) (``make html-ja`` でビルド)．
+Japanese documentation: [ja/index.html](ja/index.html) (build with ``make html-ja`` /
+``make site`` for combined preview)．

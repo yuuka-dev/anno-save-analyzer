@@ -1,0 +1,1979 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) 2026, Proletariat Yuuka
+# This file is distributed under the same license as the anno-save-analyzer
+# package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2026.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: anno-save-analyzer 0.1\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-04-24 21:04+0900\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language: ja\n"
+"Language-Team: ja <LL@li.org>\n"
+"Plural-Forms: nplurals=1; plural=0;\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.18.0\n"
+
+#: ../../source/design/v0.3-trade-history-design.md:1
+msgid "v0.3.0 — Trade History Viewer: Design Document"
+msgstr ""
+
+#: ../../source/design/v0.3-trade-history-design.md:3
+msgid ""
+"**Status**: Draft, revision 5 (locale-split YAML + UI i18n switcher; W-1 "
+"spike result) **Target ship**: 2-3 weeks of part-time dev **Languages in "
+"this doc**: English (primary, OSS-facing). Japanese sibling: [`v0.3"
+"-trade-history-design.ja.md`](./v0.3-trade-history-design.ja.md) **Last "
+"updated**: 2026-04-19"
+msgstr ""
+
+#: ../../source/design/v0.3-trade-history-design.md:8
+msgid "1. Overview / 概要"
+msgstr ""
+
+#: ../../source/design/v0.3-trade-history-design.md:10
+msgid ""
+"`anno-save-analyzer` v0.3.0 ships a **Trade History Viewer** — a CLI + "
+"Textual TUI for inspecting trade activity recorded inside Anno save files"
+" (`.a7s`, `.a8s`)."
+msgstr ""
+
+#: ../../source/design/v0.3-trade-history-design.md:12
+msgid ""
+"Unlike Anno 1800, **Anno 117: Pax Romana ships without a built-in trade-"
+"history UI** (as of patch 1.4 / 2026-04). Ubisoft's *Thorlof* has "
+"acknowledged the gap as \"on the list\" but no ETA exists. This tool "
+"fills that gap in pure Python, on top of the v0.1/v0.2 RDA + FileDB "
+"parsers."
+msgstr ""
+
+#: ../../source/design/v0.3-trade-history-design.md:14
+msgid "**Design pillars** (in priority order):"
+msgstr ""
+
+#: ../../source/design/v0.3-trade-history-design.md:16
+msgid ""
+"**Dogfooding first**: the primary user is the maintainer (書記長), who "
+"actively plays Anno 117 and wants per-good and per-route trade insights "
+"to inform supply-chain decisions."
+msgstr ""
+
+#: ../../source/design/v0.3-trade-history-design.md:17
+msgid ""
+"**Cross-title abstraction**: the data model is title-agnostic so that "
+"future Anno releases (or even reimaginings) plug in via a thin "
+"interpreter layer."
+msgstr ""
+
+#: ../../source/design/v0.3-trade-history-design.md:18
+msgid ""
+"**Bounded scope**: ships in 2-3 weeks of part-time work. Anything that "
+"does not directly serve dogfooding is deferred."
+msgstr ""
+
+#: ../../source/design/v0.3-trade-history-design.md:19
+msgid ""
+"**Streaming-friendly**: handles 500MB+ inner FileDB binaries via the "
+"existing `parser.filedb.iter_dom` streaming iterator."
+msgstr ""
+
+#: ../../source/design/v0.3-trade-history-design.md:21
+msgid ""
+"This document **does not contain implementation code**. It freezes the "
+"contract that v0.3 will be built against."
+msgstr ""
+
+#: ../../source/design/v0.3-trade-history-design.md:23
+msgid "2. User Stories / ユーザーストーリー"
+msgstr ""
+
+#: ../../source/design/v0.3-trade-history-design.md:25
+msgid "2.1 書記長 (Primary — dogfooding operator)"
+msgstr ""
+
+#: ../../source/design/v0.3-trade-history-design.md:27
+msgid ""
+"書記長 plays Anno 117 with a deliberate \"5-good strategy\" to keep "
+"cognitive load down. Decisions about which routes to keep, which trade "
+"partners to favour, and which goods to over-produce currently rely on "
+"guesswork because the in-game UI gives no historical view."
+msgstr ""
+
+#: ../../source/design/v0.3-trade-history-design.md:30
+msgid ""
+"US-1. **As 書記長**, I want to load my latest `.a8s` save and see which "
+"goods were traded the most over the last in-game period, so I can verify "
+"my 5-good strategy is being respected."
+msgstr ""
+
+#: ../../source/design/v0.3-trade-history-design.md:31
+msgid ""
+"US-2. **As 書記長**, I want to see per-route balance (cost vs. revenue per "
+"active route) so I can kill or rewire routes that bleed gold."
+msgstr ""
+
+#: ../../source/design/v0.3-trade-history-design.md:32
+msgid ""
+"US-3. **As 書記長**, I want to keep snapshots of my saves over time and "
+"compare them, so I can reconstruct trade history even if Anno 117 doesn't"
+" record it natively."
+msgstr ""
+
+#: ../../source/design/v0.3-trade-history-design.md:33
+msgid ""
+"US-4. **As 書記長**, I want everything to run from a terminal — no Electron,"
+" no browser — because my daily flow is WSL2 + tmux + Vim."
+msgstr ""
+
+#: ../../source/design/v0.3-trade-history-design.md:35
+msgid "2.2 Anno 117 community (Secondary — English-speaking)"
+msgstr ""
+
+#: ../../source/design/v0.3-trade-history-design.md:37
+msgid ""
+"US-5. **As an Anno 117 player**, I want a CLI command that exports trade "
+"history to JSON so I can analyse it in my own spreadsheet/notebook tools."
+msgstr ""
+
+#: ../../source/design/v0.3-trade-history-design.md:38
+msgid ""
+"US-6. **As an Anno 117 modder**, I want a documented data model so I can "
+"write extensions (e.g. enrich GUIDs with mod-specific item names)."
+msgstr ""
+
+#: ../../source/design/v0.3-trade-history-design.md:40
+msgid "2.3 Anno 1800 legacy users (Tertiary)"
+msgstr ""
+
+#: ../../source/design/v0.3-trade-history-design.md:42
+msgid ""
+"US-7. **As an Anno 1800 player**, I want the same viewer to work on "
+"`.a7s` saves with minimal config (different YAML mapping is acceptable)."
+msgstr ""
+
+#: ../../source/design/v0.3-trade-history-design.md:44
+msgid "3. Functional Requirements / 機能要件"
+msgstr ""
+
+#: ../../source/design/v0.3-trade-history-design.md:46
+msgid "3.1 Must-have (M) — v0.3.0 ships without these = no release"
+msgstr ""
+
+#: ../../source/design/v0.3-trade-history-design.md
+msgid "ID"
+msgstr ""
+
+#: ../../source/design/v0.3-trade-history-design.md
+msgid "Requirement"
+msgstr ""
+
+#: ../../source/design/v0.3-trade-history-design.md
+msgid "Notes"
+msgstr ""
+
+#: ../../source/design/v0.3-trade-history-design.md
+msgid "M-1"
+msgstr ""
+
+#: ../../source/design/v0.3-trade-history-design.md
+msgid ""
+"Load `.a8s` (Anno 117) and `.a7s` (Anno 1800) via existing `parser.rda` +"
+" `parser.filedb`."
+msgstr ""
+
+#: ../../source/design/v0.3-trade-history-design.md
+msgid "Reuses v0.1/v0.2 stack."
+msgstr ""
+
+#: ../../source/design/v0.3-trade-history-design.md
+msgid "M-2"
+msgstr ""
+
+#: ../../source/design/v0.3-trade-history-design.md
+msgid ""
+"Extract `TradedGoods` records (`GoodGuid`, `GoodAmount`, `TotalPrice`) "
+"from inner FileDB sessions."
+msgstr ""
+
+#: ../../source/design/v0.3-trade-history-design.md
+msgid "Confirmed present in `sample_anno117.a8s` Session 0 (47.9MB)."
+msgstr ""
+
+#: ../../source/design/v0.3-trade-history-design.md
+msgid "M-3"
+msgstr ""
+
+#: ../../source/design/v0.3-trade-history-design.md
+msgid ""
+"Resolve `GoodGuid` (int32) to a human-readable name via locale-split YAML"
+" files (`data/items_<title>.<locale>.yaml`, e.g. `items_anno117.en.yaml`,"
+" `items_anno117.ja.yaml`). At minimum the `en` file ships; other locales "
+"are merged in when present."
+msgstr ""
+
+#: ../../source/design/v0.3-trade-history-design.md
+msgid "One file per locale lets translators contribute without merge conflicts."
+msgstr ""
+
+#: ../../source/design/v0.3-trade-history-design.md
+msgid "M-4"
+msgstr ""
+
+#: ../../source/design/v0.3-trade-history-design.md
+msgid ""
+"Aggregate by item and by route, returning quantity bought/sold and net "
+"gold."
+msgstr ""
+
+#: ../../source/design/v0.3-trade-history-design.md
+msgid "Two pivot views."
+msgstr ""
+
+#: ../../source/design/v0.3-trade-history-design.md
+msgid "M-5"
+msgstr ""
+
+#: ../../source/design/v0.3-trade-history-design.md
+msgid ""
+"CLI: `trade list`, `trade summary --by item`, `trade summary --by route` "
+"with `--format json`."
+msgstr ""
+
+#: ../../source/design/v0.3-trade-history-design.md
+msgid "Scriptable."
+msgstr ""
+
+#: ../../source/design/v0.3-trade-history-design.md
+msgid "M-6"
+msgstr ""
+
+#: ../../source/design/v0.3-trade-history-design.md
+msgid ""
+"Textual TUI: at least 2 screens — Overview and Trade Summary (item/route "
+"tabs)."
+msgstr ""
+
+#: ../../source/design/v0.3-trade-history-design.md
+msgid "Default `tui` entry point."
+msgstr ""
+
+#: ../../source/design/v0.3-trade-history-design.md
+msgid "M-7"
+msgstr ""
+
+#: ../../source/design/v0.3-trade-history-design.md
+msgid "Stream-friendly extraction: peak RSS ≤ 1.5× of source FileDB size."
+msgstr ""
+
+#: ../../source/design/v0.3-trade-history-design.md
+msgid "Reuses `iter_dom` generator chain."
+msgstr ""
+
+#: ../../source/design/v0.3-trade-history-design.md
+msgid "M-8"
+msgstr ""
+
+#: ../../source/design/v0.3-trade-history-design.md
+msgid ""
+"Display \"N minutes ago\" for each trade event by diffing event timestamp"
+" against the save's current game tick."
+msgstr ""
+
+#: ../../source/design/v0.3-trade-history-design.md
+msgid "Critical for human readability. See §9.4."
+msgstr ""
+
+#: ../../source/design/v0.3-trade-history-design.md
+msgid "M-9"
+msgstr ""
+
+#: ../../source/design/v0.3-trade-history-design.md
+msgid "UI defaults to English. CLI accepts `--locale en"
+msgstr ""
+
+#: ../../source/design/v0.3-trade-history-design.md
+msgid ""
+"ja`; TUI exposes a settings screen (or `^L`) to switch live without "
+"restart. Persisted in `~/.config/anno-save-analyzer/config.toml`."
+msgstr ""
+
+#: ../../source/design/v0.3-trade-history-design.md:60
+msgid "3.2 Should-have (S) — strong candidates if 2-week budget allows"
+msgstr ""
+
+#: ../../source/design/v0.3-trade-history-design.md
+msgid "S-1"
+msgstr ""
+
+#: ../../source/design/v0.3-trade-history-design.md
+msgid ""
+"Snapshot diff (Method B): given two saves, infer trade events from "
+"inventory deltas."
+msgstr ""
+
+#: ../../source/design/v0.3-trade-history-design.md
+msgid "S-2"
+msgstr ""
+
+#: ../../source/design/v0.3-trade-history-design.md
+msgid "Route detail screen in TUI: ships, stations, last visited, balance trend."
+msgstr ""
+
+#: ../../source/design/v0.3-trade-history-design.md
+msgid "S-3"
+msgstr ""
+
+#: ../../source/design/v0.3-trade-history-design.md
+msgid "Export formats: HTML (single-file), CSV, Markdown."
+msgstr ""
+
+#: ../../source/design/v0.3-trade-history-design.md
+msgid "S-4"
+msgstr ""
+
+#: ../../source/design/v0.3-trade-history-design.md
+msgid ""
+"Item interpreter for unknown GUIDs falls back to `Good_<guid>` rather "
+"than blocking."
+msgstr ""
+
+#: ../../source/design/v0.3-trade-history-design.md
+msgid "S-5"
+msgstr ""
+
+#: ../../source/design/v0.3-trade-history-design.md
+msgid ""
+"Detect Anno 1800 vs Anno 117 from outer dictionary signature, auto-select"
+" interpreter."
+msgstr ""
+
+#: ../../source/design/v0.3-trade-history-design.md
+msgid "S-6"
+msgstr ""
+
+#: ../../source/design/v0.3-trade-history-design.md
+msgid ""
+"Inline sparkline graphs in TUI table rows (Unicode block `▁▂▃▄▅▆▇█`) for "
+"per-good amount-over-time and per-route balance trend. Uses Textual's "
+"`Sparkline` widget."
+msgstr ""
+
+#: ../../source/design/v0.3-trade-history-design.md
+msgid "S-7"
+msgstr ""
+
+#: ../../source/design/v0.3-trade-history-design.md
+msgid ""
+"Full line-chart in the right context pane when a good or route is "
+"selected, modelled after the Anno 1800 statistics view. Uses `textual-"
+"plotext` (PlotextPlot widget); X axis = in-game time, Y axis = stock or "
+"balance."
+msgstr ""
+
+#: ../../source/design/v0.3-trade-history-design.md:72
+msgid "3.3 Nice-to-have (N) — explicitly deferred to v0.3.1+"
+msgstr ""
+
+#: ../../source/design/v0.3-trade-history-design.md
+msgid "Defer reason"
+msgstr ""
+
+#: ../../source/design/v0.3-trade-history-design.md
+msgid "N-1"
+msgstr ""
+
+#: ../../source/design/v0.3-trade-history-design.md
+msgid "PowerShell scheduled-task helper for automatic snapshotting."
+msgstr ""
+
+#: ../../source/design/v0.3-trade-history-design.md
+msgid "OS-specific, ships as docs/snippet."
+msgstr ""
+
+#: ../../source/design/v0.3-trade-history-design.md
+msgid "N-2"
+msgstr ""
+
+#: ../../source/design/v0.3-trade-history-design.md
+msgid "Trade-partner detail screen (per-NPC view)."
+msgstr ""
+
+#: ../../source/design/v0.3-trade-history-design.md
+msgid "Less load-bearing for the 5-good strategy."
+msgstr ""
+
+#: ../../source/design/v0.3-trade-history-design.md
+msgid "N-3"
+msgstr ""
+
+#: ../../source/design/v0.3-trade-history-design.md
+msgid "Charts (sparklines, bar graphs in TUI)."
+msgstr ""
+
+#: ../../source/design/v0.3-trade-history-design.md
+msgid "Cosmetic."
+msgstr ""
+
+#: ../../source/design/v0.3-trade-history-design.md
+msgid "N-4"
+msgstr ""
+
+#: ../../source/design/v0.3-trade-history-design.md
+msgid "Mod-aware GUID dictionary auto-merge."
+msgstr ""
+
+#: ../../source/design/v0.3-trade-history-design.md
+msgid "Requires mod ecosystem reverse engineering."
+msgstr ""
+
+#: ../../source/design/v0.3-trade-history-design.md
+msgid "N-5"
+msgstr ""
+
+#: ../../source/design/v0.3-trade-history-design.md
+msgid "Web export with embedded D3 charts."
+msgstr ""
+
+#: ../../source/design/v0.3-trade-history-design.md
+msgid "Out of scope for terminal-first MVP."
+msgstr ""
+
+#: ../../source/design/v0.3-trade-history-design.md:82
+msgid "4. Non-functional Requirements / 非機能要件"
+msgstr ""
+
+#: ../../source/design/v0.3-trade-history-design.md
+msgid "Aspect"
+msgstr ""
+
+#: ../../source/design/v0.3-trade-history-design.md
+msgid "Target"
+msgstr ""
+
+#: ../../source/design/v0.3-trade-history-design.md
+msgid "**Performance**"
+msgstr ""
+
+#: ../../source/design/v0.3-trade-history-design.md
+msgid ""
+"Cold load + summary on a 500MB inner FileDB ≤ 30s on the maintainer's "
+"WSL2 box (Ryzen + RTX 3080, but CPU-bound)."
+msgstr ""
+
+#: ../../source/design/v0.3-trade-history-design.md
+msgid "**Memory**"
+msgstr ""
+
+#: ../../source/design/v0.3-trade-history-design.md
+msgid ""
+"Peak RSS during a single-save extraction ≤ 1.5× the inner FileDB size. "
+"Snapshot diff ≤ 2.5× the larger snapshot."
+msgstr ""
+
+#: ../../source/design/v0.3-trade-history-design.md
+msgid "**Cross-platform**"
+msgstr ""
+
+#: ../../source/design/v0.3-trade-history-design.md
+msgid ""
+"Linux / WSL2 first; macOS and Windows native expected to work via Textual"
+" + stdlib. No platform-specific deps in core."
+msgstr ""
+
+#: ../../source/design/v0.3-trade-history-design.md
+msgid "**Determinism**"
+msgstr ""
+
+#: ../../source/design/v0.3-trade-history-design.md
+msgid ""
+"Same input → identical output bytes (JSON / CSV). Critical for snapshot-"
+"diff regression tests."
+msgstr ""
+
+#: ../../source/design/v0.3-trade-history-design.md
+msgid "**Test coverage**"
+msgstr ""
+
+#: ../../source/design/v0.3-trade-history-design.md
+#, python-format
+msgid ""
+"Maintain repo-wide 100% line+branch coverage gate (`--cov-fail-"
+"under=100`)."
+msgstr ""
+
+#: ../../source/design/v0.3-trade-history-design.md
+msgid "**i18n**"
+msgstr ""
+
+#: ../../source/design/v0.3-trade-history-design.md
+msgid ""
+"English is the default for both UI strings and item names. Japanese ships"
+" in v0.3.0 as the second supported locale via locale-split YAML and a "
+"`Locale` runtime switcher. Adding a new locale = drop one YAML + register"
+" one string table."
+msgstr ""
+
+#: ../../source/design/v0.3-trade-history-design.md:93
+msgid "5. Data Model / データモデル"
+msgstr ""
+
+#: ../../source/design/v0.3-trade-history-design.md:95
+msgid "5.1 Cross-title abstract layer"
+msgstr ""
+
+#: ../../source/design/v0.3-trade-history-design.md:97
+msgid ""
+"All trade data is normalised into a title-agnostic `TradeEvent` stream. "
+"Per-title quirks live behind a single `GameInterpreter` strategy class."
+msgstr ""
+
+#: ../../source/design/v0.3-trade-history-design.md:152
+msgid "5.2 GameInterpreter strategy"
+msgstr ""
+
+#: ../../source/design/v0.3-trade-history-design.md:171
+msgid ""
+"Two concrete classes ship in v0.3.0: `Anno117Interpreter`, "
+"`Anno1800Interpreter`. Adding a future title means writing one new class "
+"+ one YAML."
+msgstr ""
+
+#: ../../source/design/v0.3-trade-history-design.md:173
+msgid "5.3 YAML item dictionary (locale-split)"
+msgstr ""
+
+#: ../../source/design/v0.3-trade-history-design.md:175
+msgid ""
+"One YAML per `(title, locale)` pair. The English file is canonical for "
+"non-name metadata (`category`, etc.); other locales carry only `name`. "
+"Loader merges them at runtime keyed by GUID."
+msgstr ""
+
+#: ../../source/design/v0.3-trade-history-design.md:197
+msgid "Loader pseudo-API:"
+msgstr ""
+
+#: ../../source/design/v0.3-trade-history-design.md:206
+msgid ""
+"`scripts/scaffold_items_yaml.py` (delivered with v0.3) scans a save and "
+"emits an English-only YAML stub with all GUIDs found. Translators copy "
+"the stub to `<title>.<locale>.yaml` and replace names; non-name fields "
+"are inherited from the `.en.yaml` at load time."
+msgstr ""
+
+#: ../../source/design/v0.3-trade-history-design.md:211
+msgid "6. Architecture / アーキテクチャ"
+msgstr ""
+
+#: ../../source/design/v0.3-trade-history-design.md:255
+msgid "**Module breakdown** (planned package layout):"
+msgstr ""
+
+#: ../../source/design/v0.3-trade-history-design.md:290
+msgid "7. Data Flow / データフロー"
+msgstr ""
+
+#: ../../source/design/v0.3-trade-history-design.md:292
+msgid "7.1 Method A (history-field extraction) — single save"
+msgstr ""
+
+#: ../../source/design/v0.3-trade-history-design.md:323
+msgid "7.2 Method B (snapshot diff) — two saves"
+msgstr ""
+
+#: ../../source/design/v0.3-trade-history-design.md:339
+msgid ""
+"The two methods produce the **same `TradeEvent`** type. Downstream code "
+"does not branch on which method produced an event; it can be filtered or "
+"merged using `source_method`."
+msgstr ""
+
+#: ../../source/design/v0.3-trade-history-design.md:341
+msgid "8. Extraction Strategy / 抽出戦略"
+msgstr ""
+
+#: ../../source/design/v0.3-trade-history-design.md:343
+msgid "8.1 Method A — history-field extraction"
+msgstr ""
+
+#: ../../source/design/v0.3-trade-history-design.md:345
+msgid "**Confirmed candidates** (from the spike on `sample_anno117.a8s`):"
+msgstr ""
+
+#: ../../source/design/v0.3-trade-history-design.md
+msgid "Tag (inner session)"
+msgstr ""
+
+#: ../../source/design/v0.3-trade-history-design.md
+msgid "id"
+msgstr ""
+
+#: ../../source/design/v0.3-trade-history-design.md
+msgid "Status"
+msgstr ""
+
+#: ../../source/design/v0.3-trade-history-design.md
+#, python-brace-format
+msgid "`<TradedGoods>` containing `{GoodGuid, GoodAmount, TotalPrice}` triples"
+msgstr ""
+
+#: ../../source/design/v0.3-trade-history-design.md
+msgid "29"
+msgstr ""
+
+#: ../../source/design/v0.3-trade-history-design.md
+msgid "✅ Confirmed populated. Primary source."
+msgstr ""
+
+#: ../../source/design/v0.3-trade-history-design.md
+msgid "`<ActiveTradeHandler>` (ships + lastVisited)"
+msgstr ""
+
+#: ../../source/design/v0.3-trade-history-design.md
+msgid "552"
+msgstr ""
+
+#: ../../source/design/v0.3-trade-history-design.md
+msgid "✅ Confirmed; useful for route attribution."
+msgstr ""
+
+#: ../../source/design/v0.3-trade-history-design.md
+msgid "`<GoodsTradeHandler>` with `LastGoodTradeUpdate` timestamp"
+msgstr ""
+
+#: ../../source/design/v0.3-trade-history-design.md
+msgid "600"
+msgstr ""
+
+#: ../../source/design/v0.3-trade-history-design.md
+msgid "✅ Confirmed; provides per-update wall clock."
+msgstr ""
+
+#: ../../source/design/v0.3-trade-history-design.md
+msgid "`<LastRouteResult>`"
+msgstr ""
+
+#: ../../source/design/v0.3-trade-history-design.md
+msgid "167"
+msgstr ""
+
+#: ../../source/design/v0.3-trade-history-design.md
+msgid "⚠ Empty in the sampled save; revisit with a longer-played save."
+msgstr ""
+
+#: ../../source/design/v0.3-trade-history-design.md:354
+msgid "**Outer FileDB candidates** (top-level):"
+msgstr ""
+
+#: ../../source/design/v0.3-trade-history-design.md
+msgid "Tag"
+msgstr ""
+
+#: ../../source/design/v0.3-trade-history-design.md
+msgid "`<ActiveTradeHistory>`"
+msgstr ""
+
+#: ../../source/design/v0.3-trade-history-design.md
+msgid "534"
+msgstr ""
+
+#: ../../source/design/v0.3-trade-history-design.md
+msgid ""
+"⚠ Tag exists but **empty** in sample. May only populate after specific "
+"events."
+msgstr ""
+
+#: ../../source/design/v0.3-trade-history-design.md
+msgid "`<SessionTradeRouteManager>` / `<RouteMap>`"
+msgstr ""
+
+#: ../../source/design/v0.3-trade-history-design.md
+msgid "496 / 497"
+msgstr ""
+
+#: ../../source/design/v0.3-trade-history-design.md
+msgid "🔍 Structure not yet inspected — see Open Question Q-1."
+msgstr ""
+
+#: ../../source/design/v0.3-trade-history-design.md
+msgid "`<TradeContractManager>` (and `<ActiveContract>`)"
+msgstr ""
+
+#: ../../source/design/v0.3-trade-history-design.md
+msgid "— / 544"
+msgstr ""
+
+#: ../../source/design/v0.3-trade-history-design.md
+msgid "✅ Tag exists; useful for contract metadata."
+msgstr ""
+
+#: ../../source/design/v0.3-trade-history-design.md:362
+msgid "**Extraction algorithm (pseudocode)**:"
+msgstr ""
+
+#: ../../source/design/v0.3-trade-history-design.md:374
+msgid "8.2 Method B — snapshot diff"
+msgstr ""
+
+#: ../../source/design/v0.3-trade-history-design.md:376
+msgid ""
+"**Use case**: Anno 117 may not retain a long history of `<TradedGoods>`. "
+"Method B reconstructs trade activity from periodic save snapshots "
+"maintained by the user."
+msgstr ""
+
+#: ../../source/design/v0.3-trade-history-design.md:378
+msgid "**Algorithm**:"
+msgstr ""
+
+#: ../../source/design/v0.3-trade-history-design.md:380
+msgid "Load snapshot `t0` and `t1`. Compute per-island per-good inventory."
+msgstr ""
+
+#: ../../source/design/v0.3-trade-history-design.md:381
+msgid "For each `(island, good)`, take `Δ = stock(t1) - stock(t0)`."
+msgstr ""
+
+#: ../../source/design/v0.3-trade-history-design.md:382
+msgid ""
+"Subtract known production/consumption derived from buildings (using "
+"`GoodsTradeHandler.ProductGainPerArea`)."
+msgstr ""
+
+#: ../../source/design/v0.3-trade-history-design.md:383
+msgid ""
+"Residual `Δ` is attributed to a synthetic `TradeEvent` with "
+"`source_method=\"diff\"`."
+msgstr ""
+
+#: ../../source/design/v0.3-trade-history-design.md:384
+msgid ""
+"Match deltas across islands within the same session to infer "
+"counterparties when possible."
+msgstr ""
+
+#: ../../source/design/v0.3-trade-history-design.md:386
+msgid "**Caveats**:"
+msgstr ""
+
+#: ../../source/design/v0.3-trade-history-design.md:387
+msgid "Less precise than Method A (no per-event timestamp)."
+msgstr ""
+
+#: ../../source/design/v0.3-trade-history-design.md:388
+msgid "Cannot detect short trades that net to zero between snapshots."
+msgstr ""
+
+#: ../../source/design/v0.3-trade-history-design.md:389
+msgid ""
+"Should be presented to users with an honesty label (\"inferred from "
+"snapshot delta\")."
+msgstr ""
+
+#: ../../source/design/v0.3-trade-history-design.md:391
+msgid "8.3 Common interface"
+msgstr ""
+
+#: ../../source/design/v0.3-trade-history-design.md:393
+msgid ""
+"Both methods are exposed as iterators returning `TradeEvent`. Callers "
+"(CLI / TUI / aggregate) do not branch on the method; they may filter via "
+"`event.source_method`."
+msgstr ""
+
+#: ../../source/design/v0.3-trade-history-design.md:403
+msgid "9. UI Specification / UI 仕様"
+msgstr ""
+
+#: ../../source/design/v0.3-trade-history-design.md:405
+msgid "9.1 Textual TUI layout"
+msgstr ""
+
+#: ../../source/design/v0.3-trade-history-design.md:407
+msgid ""
+"**Reference**: the layout is modelled after the in-game **Anno 1800 "
+"Statistics view** (3-column structure: session/island tree, central data "
+"table, contextual right pane that flips between partner-by-partner "
+"balances and a per-good time chart). Reference screenshots live locally "
+"in `_screenshots/` (gitignored for copyright reasons; do not commit)."
+msgstr ""
+
+#: ../../source/design/v0.3-trade-history-design.md:413
+msgid "**Style guide** — subdued, no decorative themes:"
+msgstr ""
+
+#: ../../source/design/v0.3-trade-history-design.md:415
+msgid ""
+"Use Textual's default theme; lean on terminal-default colours where "
+"possible."
+msgstr ""
+
+#: ../../source/design/v0.3-trade-history-design.md:416
+msgid ""
+"Two accents only: terminal-red for negatives, terminal-green for "
+"positives (mirrors the in-game `▲ green / ▼ red` trend arrows in the "
+"screenshots)."
+msgstr ""
+
+#: ../../source/design/v0.3-trade-history-design.md:418
+msgid "Selection / focus highlight uses terminal-default reverse video."
+msgstr ""
+
+#: ../../source/design/v0.3-trade-history-design.md:419
+msgid ""
+"Monospace by definition (terminal). No emojis, no decorative glyphs, no "
+"ASCII-art logos."
+msgstr ""
+
+#: ../../source/design/v0.3-trade-history-design.md:421
+msgid ""
+"Footer always shows: `[anno-save-analyzer · v0.3.0]` left, save path "
+"right."
+msgstr ""
+
+#: ../../source/design/v0.3-trade-history-design.md:423
+msgid "**Screens (MVP — 2 screens for v0.3.0; +1 for S-2)**:"
+msgstr ""
+
+#: ../../source/design/v0.3-trade-history-design.md:425
+msgid "Screen 1 — Overview"
+msgstr ""
+
+#: ../../source/design/v0.3-trade-history-design.md:448
+msgid "Screen 2 — Trade Statistics (3-column, mirrors Anno 1800 統計)"
+msgstr ""
+
+#: ../../source/design/v0.3-trade-history-design.md:450
+msgid "Three vertical regions, resizable with `[` / `]`:"
+msgstr ""
+
+#: ../../source/design/v0.3-trade-history-design.md:452
+msgid ""
+"**Left (Tree)**: sessions × islands. The user picks one entry; the "
+"central table re-loads for that scope. Top entry \"All islands\" "
+"aggregates the title."
+msgstr ""
+
+#: ../../source/design/v0.3-trade-history-design.md:454
+msgid ""
+"**Centre (DataTable)**: per-good rows for the selected scope. Columns "
+"mirror the in-game statistics screen — stock, production rate, "
+"consumption rate, trend arrow (`▲`/`▼` with green/red), net amount, last-"
+"seen."
+msgstr ""
+
+#: ../../source/design/v0.3-trade-history-design.md:457
+msgid "**Right (Context pane)**: tab strip switches between"
+msgstr ""
+
+#: ../../source/design/v0.3-trade-history-design.md:458
+msgid ""
+"**Partners** — list of trading partners (NPC traders + own routes) for "
+"the selected good / island, with `+N` / `−N` counters and `N min ago` "
+"labels (this is the part the screenshots show in image 2)."
+msgstr ""
+
+#: ../../source/design/v0.3-trade-history-design.md:461
+msgid ""
+"**Chart** — line chart of stock-over-time for the selected good (image "
+"3). Backed by `textual-plotext` (S-7)."
+msgstr ""
+
+#: ../../source/design/v0.3-trade-history-design.md:484
+msgid ""
+"When the user toggles `g` (or selects the **Chart** tab), the right pane "
+"swaps to a `textual-plotext` line chart (S-7). Sparklines (S-6) coexist "
+"as an optional column inside the central table."
+msgstr ""
+
+#: ../../source/design/v0.3-trade-history-design.md:501
+msgid "Screen 3 — Route Detail (S-2; deferred if budget tight)"
+msgstr ""
+
+#: ../../source/design/v0.3-trade-history-design.md:503
+msgid ""
+"When S-6/S-7 ship, the per-cycle balance renders as both a sparkline "
+"(compact) and a plotext line chart (when the screen has the focus and is "
+"taller)."
+msgstr ""
+
+#: ../../source/design/v0.3-trade-history-design.md:526
+msgid ""
+"**Hotkey philosophy**: nano-flavored, Decided in rev 4. The bottom of "
+"every screen shows a permanent menu bar (Textual `Footer`) listing the "
+"active bindings, mirroring nano's two-line shortcut hint."
+msgstr ""
+
+#: ../../source/design/v0.3-trade-history-design.md
+msgid "Key"
+msgstr ""
+
+#: ../../source/design/v0.3-trade-history-design.md
+msgid "Action"
+msgstr ""
+
+#: ../../source/design/v0.3-trade-history-design.md
+msgid "`^X`"
+msgstr ""
+
+#: ../../source/design/v0.3-trade-history-design.md
+msgid "exit / back"
+msgstr ""
+
+#: ../../source/design/v0.3-trade-history-design.md
+msgid "`^G`"
+msgstr ""
+
+#: ../../source/design/v0.3-trade-history-design.md
+msgid "help / show all bindings"
+msgstr ""
+
+#: ../../source/design/v0.3-trade-history-design.md
+msgid "`^W`"
+msgstr ""
+
+#: ../../source/design/v0.3-trade-history-design.md
+msgid "filter (where-is)"
+msgstr ""
+
+#: ../../source/design/v0.3-trade-history-design.md
+msgid "`^O`"
+msgstr ""
+
+#: ../../source/design/v0.3-trade-history-design.md
+msgid "export (write-out)"
+msgstr ""
+
+#: ../../source/design/v0.3-trade-history-design.md
+msgid "`^P` / `^N`"
+msgstr ""
+
+#: ../../source/design/v0.3-trade-history-design.md
+msgid "up / down (previous / next row)"
+msgstr ""
+
+#: ../../source/design/v0.3-trade-history-design.md
+msgid "`^V` / `^Y`"
+msgstr ""
+
+#: ../../source/design/v0.3-trade-history-design.md
+msgid "page down / page up"
+msgstr ""
+
+#: ../../source/design/v0.3-trade-history-design.md
+msgid "`^A` / `^E`"
+msgstr ""
+
+#: ../../source/design/v0.3-trade-history-design.md
+msgid "top / bottom of list"
+msgstr ""
+
+#: ../../source/design/v0.3-trade-history-design.md
+msgid "`Tab`"
+msgstr ""
+
+#: ../../source/design/v0.3-trade-history-design.md
+msgid "switch right-pane tab (partners ↔ chart)"
+msgstr ""
+
+#: ../../source/design/v0.3-trade-history-design.md
+msgid "`Alt+←` / `Alt+→`"
+msgstr ""
+
+#: ../../source/design/v0.3-trade-history-design.md
+msgid "shift focus between left / centre / right panes"
+msgstr ""
+
+#: ../../source/design/v0.3-trade-history-design.md
+msgid "`Alt+\\`"
+msgstr ""
+
+#: ../../source/design/v0.3-trade-history-design.md
+msgid "first row in current scope"
+msgstr ""
+
+#: ../../source/design/v0.3-trade-history-design.md
+msgid "`Alt+/`"
+msgstr ""
+
+#: ../../source/design/v0.3-trade-history-design.md
+msgid "last row in current scope"
+msgstr ""
+
+#: ../../source/design/v0.3-trade-history-design.md
+msgid "`Esc` `Esc`"
+msgstr ""
+
+#: ../../source/design/v0.3-trade-history-design.md
+msgid "meta command palette (e.g. `:export csv`)"
+msgstr ""
+
+#: ../../source/design/v0.3-trade-history-design.md:545
+msgid ""
+"The menu bar reserves at most six bindings per row (e.g. `^X Exit  ^G "
+"Help ^W Find  ^O Export  Tab Pane  Esc:Esc Cmd`); secondary bindings are "
+"listed in `^G` help."
+msgstr ""
+
+#: ../../source/design/v0.3-trade-history-design.md:549
+msgid ""
+"The same key contract is used across all screens. Screen-specific "
+"shortcuts (e.g. `^T` jump to trade statistics, `^R` jump to route detail)"
+" are listed in the per-screen Footer."
+msgstr ""
+
+#: ../../source/design/v0.3-trade-history-design.md:553
+msgid "9.2 CLI surface"
+msgstr ""
+
+#: ../../source/design/v0.3-trade-history-design.md:573
+msgid ""
+"`anno-save-analyzer scaffold-items <save> > stub.yaml` ships as a helper "
+"to bootstrap the YAML dictionary."
+msgstr ""
+
+#: ../../source/design/v0.3-trade-history-design.md:575
+msgid "9.3 Visual style guide"
+msgstr ""
+
+#: ../../source/design/v0.3-trade-history-design.md:577
+msgid "Default Textual theme. No bespoke palette, no decorative glyphs, no logos."
+msgstr ""
+
+#: ../../source/design/v0.3-trade-history-design.md:578
+msgid "One accent only: terminal-red for negative balances and warnings."
+msgstr ""
+
+#: ../../source/design/v0.3-trade-history-design.md:579
+msgid "Selection / focus uses terminal-default reverse video."
+msgstr ""
+
+#: ../../source/design/v0.3-trade-history-design.md:580
+msgid ""
+"All numerical formatting uses locale-independent comma grouping; gold "
+"values prefixed with `+` / `−` and a fixed-width `g` suffix."
+msgstr ""
+
+#: ../../source/design/v0.3-trade-history-design.md:581
+msgid "Time-deltas formatted as `N sec`, `N min`, `N hr`, `N d` ago — see §9.4."
+msgstr ""
+
+#: ../../source/design/v0.3-trade-history-design.md:583
+msgid "9.4 Time-ago formatting / 「N 分前」表示"
+msgstr ""
+
+#: ../../source/design/v0.3-trade-history-design.md:585
+msgid ""
+"Each `TradeEvent` carries an optional `timestamp` in **game ticks** "
+"(uint64 from `LastGoodTradeUpdate` and similar). The save's *current* "
+"tick is taken from the outermost `<Timer>` / `<GameTotal>` attrib "
+"(precise location to be locked in implementation). The TUI displays:"
+msgstr ""
+
+#: ../../source/design/v0.3-trade-history-design.md:595
+msgid ""
+"`SECONDS_PER_TICK` is a per-title constant determined empirically. As of "
+"this draft, the assumption is **Anno 117 ≈ 0.05 s/tick (20 ticks/sec)**, "
+"consistent with the Anno 1800 simulation rate; the constant lives in "
+"`trade.interpreter.<title>.GameTimebase` and is overridable via "
+"`--seconds-per-tick` for paranoid users."
+msgstr ""
+
+#: ../../source/design/v0.3-trade-history-design.md:601
+msgid "Display rules:"
+msgstr ""
+
+#: ../../source/design/v0.3-trade-history-design.md
+msgid "Δ"
+msgstr ""
+
+#: ../../source/design/v0.3-trade-history-design.md
+msgid "Format"
+msgstr ""
+
+#: ../../source/design/v0.3-trade-history-design.md
+msgid "< 60 s"
+msgstr ""
+
+#: ../../source/design/v0.3-trade-history-design.md
+msgid "`N sec ago`"
+msgstr ""
+
+#: ../../source/design/v0.3-trade-history-design.md
+msgid "< 60 min"
+msgstr ""
+
+#: ../../source/design/v0.3-trade-history-design.md
+msgid "`N min ago`"
+msgstr ""
+
+#: ../../source/design/v0.3-trade-history-design.md
+msgid "< 24 hr"
+msgstr ""
+
+#: ../../source/design/v0.3-trade-history-design.md
+msgid "`N hr ago`"
+msgstr ""
+
+#: ../../source/design/v0.3-trade-history-design.md
+msgid "≥ 24 hr"
+msgstr ""
+
+#: ../../source/design/v0.3-trade-history-design.md
+msgid "`N d ago`"
+msgstr ""
+
+#: ../../source/design/v0.3-trade-history-design.md
+msgid "timestamp absent"
+msgstr ""
+
+#: ../../source/design/v0.3-trade-history-design.md
+msgid "`—`"
+msgstr ""
+
+#: ../../source/design/v0.3-trade-history-design.md:611
+msgid ""
+"JSON export keeps the raw tick (`timestamp_tick`) and the resolved "
+"seconds (`age_sec_at_export`); the human label is computed by consumers."
+msgstr ""
+
+#: ../../source/design/v0.3-trade-history-design.md:614
+msgid "10. Risk Analysis / リスク分析"
+msgstr ""
+
+#: ../../source/design/v0.3-trade-history-design.md
+msgid "Risk"
+msgstr ""
+
+#: ../../source/design/v0.3-trade-history-design.md
+msgid "Likelihood"
+msgstr ""
+
+#: ../../source/design/v0.3-trade-history-design.md
+msgid "Impact"
+msgstr ""
+
+#: ../../source/design/v0.3-trade-history-design.md
+msgid "Mitigation"
+msgstr ""
+
+#: ../../source/design/v0.3-trade-history-design.md
+msgid "R-1"
+msgstr ""
+
+#: ../../source/design/v0.3-trade-history-design.md
+msgid "`RouteMap` ↔ `TradedGoods` parent-child relation differs from assumption."
+msgstr ""
+
+#: ../../source/design/v0.3-trade-history-design.md
+msgid "Medium"
+msgstr ""
+
+#: ../../source/design/v0.3-trade-history-design.md
+msgid ""
+"Q-1 spike before implementation; extraction code factored to allow "
+"alternative attribution."
+msgstr ""
+
+#: ../../source/design/v0.3-trade-history-design.md
+msgid "R-2"
+msgstr ""
+
+#: ../../source/design/v0.3-trade-history-design.md
+msgid "`TradedGoods` is a rolling window, not full history (loses old events)."
+msgstr ""
+
+#: ../../source/design/v0.3-trade-history-design.md
+msgid "High"
+msgstr ""
+
+#: ../../source/design/v0.3-trade-history-design.md
+msgid "Method B (snapshot diff) is precisely the workaround; ship both."
+msgstr ""
+
+#: ../../source/design/v0.3-trade-history-design.md
+msgid "R-3"
+msgstr ""
+
+#: ../../source/design/v0.3-trade-history-design.md
+msgid ""
+"`GoodsTradeHandler.LastGoodTradeUpdate` is the only timestamp; cannot "
+"order events finer than one save."
+msgstr ""
+
+#: ../../source/design/v0.3-trade-history-design.md
+msgid "Low"
+msgstr ""
+
+#: ../../source/design/v0.3-trade-history-design.md
+msgid ""
+"Document the limitation; expose timestamp at ledger granularity, not per-"
+"event."
+msgstr ""
+
+#: ../../source/design/v0.3-trade-history-design.md
+msgid "R-4"
+msgstr ""
+
+#: ../../source/design/v0.3-trade-history-design.md
+msgid ""
+"Anonymous attrib `id=0x8000` semantics differ between Anno 1800 and Anno "
+"117."
+msgstr ""
+
+#: ../../source/design/v0.3-trade-history-design.md
+msgid "Interpreter handles per-title; `data/items_*.yaml` carries the diff."
+msgstr ""
+
+#: ../../source/design/v0.3-trade-history-design.md
+msgid "R-5"
+msgstr ""
+
+#: ../../source/design/v0.3-trade-history-design.md
+msgid "Inner FileDB for very late-game saves blows past 500MB."
+msgstr ""
+
+#: ../../source/design/v0.3-trade-history-design.md
+msgid "All extraction paths are generator-based; no full DOM materialisation."
+msgstr ""
+
+#: ../../source/design/v0.3-trade-history-design.md
+msgid "R-6"
+msgstr ""
+
+#: ../../source/design/v0.3-trade-history-design.md
+msgid "Textual API churn between v0.x releases."
+msgstr ""
+
+#: ../../source/design/v0.3-trade-history-design.md
+msgid ""
+"Pin minor version in `pyproject.toml`; isolate Textual imports to `tui/` "
+"package."
+msgstr ""
+
+#: ../../source/design/v0.3-trade-history-design.md
+msgid "R-7"
+msgstr ""
+
+#: ../../source/design/v0.3-trade-history-design.md
+#, python-format
+msgid "100% coverage gate slows iteration on UI code."
+msgstr ""
+
+#: ../../source/design/v0.3-trade-history-design.md
+msgid ""
+"Use Textual's `pilot` for snapshot tests; gate UI modules on visual tests"
+" instead of branch coverage where appropriate."
+msgstr ""
+
+#: ../../source/design/v0.3-trade-history-design.md
+msgid "R-8"
+msgstr ""
+
+#: ../../source/design/v0.3-trade-history-design.md
+msgid "Snapshot-diff false positives if user pauses with goods in transit."
+msgstr ""
+
+#: ../../source/design/v0.3-trade-history-design.md
+msgid ""
+"Display synthetic events with prominent \"inferred\" badge; allow "
+"`--exclude inferred`."
+msgstr ""
+
+#: ../../source/design/v0.3-trade-history-design.md
+msgid "R-9"
+msgstr ""
+
+#: ../../source/design/v0.3-trade-history-design.md
+msgid "Anno 117 patch changes tag dictionary (inevitable)."
+msgstr ""
+
+#: ../../source/design/v0.3-trade-history-design.md
+msgid ""
+"Interpreter looks up tags by name, not by hard-coded id; `extract` dies "
+"loudly if a required name is missing."
+msgstr ""
+
+#: ../../source/design/v0.3-trade-history-design.md
+msgid "R-10"
+msgstr ""
+
+#: ../../source/design/v0.3-trade-history-design.md
+msgid "Maintainer (書記長) gets pulled into job hunt and ships nothing."
+msgstr ""
+
+#: ../../source/design/v0.3-trade-history-design.md
+msgid ""
+"Scope is set so that even M-1 to M-6 alone delivers dogfooding value; S/N"
+" items are explicitly skippable."
+msgstr ""
+
+#: ../../source/design/v0.3-trade-history-design.md
+msgid "R-11"
+msgstr ""
+
+#: ../../source/design/v0.3-trade-history-design.md
+msgid "3-column layout + plotext line chart inflates Week 2 scope."
+msgstr ""
+
+#: ../../source/design/v0.3-trade-history-design.md
+msgid ""
+"If Week 2 slips, ship a 1-column fallback (centre table only, partners "
+"pane disabled) and push the 3-column + chart to v0.3.1. M-1〜M-8 still "
+"deliver."
+msgstr ""
+
+#: ../../source/design/v0.3-trade-history-design.md
+msgid "R-12"
+msgstr ""
+
+#: ../../source/design/v0.3-trade-history-design.md
+msgid "`textual-plotext` API churn or rendering bugs in narrow terminals."
+msgstr ""
+
+#: ../../source/design/v0.3-trade-history-design.md
+msgid ""
+"Pin minor version. Detect terminal width; degrade gracefully to S-6 "
+"sparkline only when width < 60 cols."
+msgstr ""
+
+#: ../../source/design/v0.3-trade-history-design.md:631
+msgid "11. Non-goals / 非目標"
+msgstr ""
+
+#: ../../source/design/v0.3-trade-history-design.md:633
+msgid "The following are explicitly **out of scope** for v0.3.0:"
+msgstr ""
+
+#: ../../source/design/v0.3-trade-history-design.md:635
+msgid "Save editing or any write-back to `.a8s` / `.a7s`."
+msgstr ""
+
+#: ../../source/design/v0.3-trade-history-design.md:636
+msgid "Real-time monitoring / file watchers."
+msgstr ""
+
+#: ../../source/design/v0.3-trade-history-design.md:637
+msgid "GPU acceleration, distributed processing, or cloud sync."
+msgstr ""
+
+#: ../../source/design/v0.3-trade-history-design.md:638
+msgid "Web UI, browser-based viewer, Tauri desktop app (deferred indefinitely)."
+msgstr ""
+
+#: ../../source/design/v0.3-trade-history-design.md:639
+msgid "Mod-loader integration or mod-tag dictionary auto-merge."
+msgstr ""
+
+#: ../../source/design/v0.3-trade-history-design.md:640
+msgid ""
+"Predictive analytics / recommendation engine (that is v0.5 MILP "
+"territory)."
+msgstr ""
+
+#: ../../source/design/v0.3-trade-history-design.md:641
+msgid "Localisation infrastructure beyond `name_en` / `name_ja` in YAML."
+msgstr ""
+
+#: ../../source/design/v0.3-trade-history-design.md:642
+msgid ""
+"Multi-save batch dashboard (Method B handles two-save diff; N-saves is "
+"N+1)."
+msgstr ""
+
+#: ../../source/design/v0.3-trade-history-design.md:643
+msgid ""
+"Anno 1404 / 2070 / 2205 support (RDA layer reads them, but no domain "
+"model planned)."
+msgstr ""
+
+#: ../../source/design/v0.3-trade-history-design.md:645
+msgid "12. Implementation Plan (high-level) / 実装計画"
+msgstr ""
+
+#: ../../source/design/v0.3-trade-history-design.md:647
+msgid ""
+"Three weekly chunks; each ends with a green CI run and a tagged "
+"checkpoint."
+msgstr ""
+
+#: ../../source/design/v0.3-trade-history-design.md:649
+msgid "Week 1 — Core extraction + CLI"
+msgstr ""
+
+#: ../../source/design/v0.3-trade-history-design.md:651
+msgid "`trade.models` Pydantic schemas"
+msgstr ""
+
+#: ../../source/design/v0.3-trade-history-design.md:652
+msgid "`trade.items` YAML loader + `scaffold-items` helper"
+msgstr ""
+
+#: ../../source/design/v0.3-trade-history-design.md:653
+msgid "`trade.interpreter.Anno117Interpreter` (M-2 / M-3 / M-4 / M-5)"
+msgstr ""
+
+#: ../../source/design/v0.3-trade-history-design.md:654
+msgid "`cli.trade list` and `cli.trade summary` with JSON output"
+msgstr ""
+
+#: ../../source/design/v0.3-trade-history-design.md:655
+msgid "Anno 1800 interpreter wired in (skeleton; full coverage in week 3)"
+msgstr ""
+
+#: ../../source/design/v0.3-trade-history-design.md:657
+msgid ""
+"**Exit criterion**: `anno-save-analyzer trade summary --by item "
+"sample_anno117.a8s` prints a sane table."
+msgstr ""
+
+#: ../../source/design/v0.3-trade-history-design.md:659
+msgid "Week 2 — Textual TUI MVP (3-column statistics)"
+msgstr ""
+
+#: ../../source/design/v0.3-trade-history-design.md:661
+msgid "`tui.app` + Overview screen"
+msgstr ""
+
+#: ../../source/design/v0.3-trade-history-design.md:662
+msgid ""
+"Trade Statistics screen — Tree (left) + DataTable (centre) + Partners "
+"pane (right)"
+msgstr ""
+
+#: ../../source/design/v0.3-trade-history-design.md:663
+msgid "`theme.py` (subdued overrides)"
+msgstr ""
+
+#: ../../source/design/v0.3-trade-history-design.md:664
+msgid ""
+"`pilot`-based snapshot tests for at least: tree navigation, table sort, "
+"pane focus"
+msgstr ""
+
+#: ../../source/design/v0.3-trade-history-design.md:665
+msgid "Sparkline column (S-6) hooked into the central DataTable"
+msgstr ""
+
+#: ../../source/design/v0.3-trade-history-design.md:667
+msgid ""
+"**Exit criterion**: `anno-save-analyzer tui sample_anno117.a8s` boots, "
+"the 3-column layout renders, picking an island in the tree updates the "
+"centre table, picking a good in the table updates the partners pane."
+msgstr ""
+
+#: ../../source/design/v0.3-trade-history-design.md:671
+msgid ""
+"**Slip plan**: if 3-column layout overruns, fall back to centre-table-"
+"only and push the partners pane and chart to v0.3.1 (R-11)."
+msgstr ""
+
+#: ../../source/design/v0.3-trade-history-design.md:674
+msgid "Week 3 — Charts, Method B, polish"
+msgstr ""
+
+#: ../../source/design/v0.3-trade-history-design.md:676
+msgid ""
+"`textual-plotext` line chart (S-7) — stock-over-time for selected good in"
+" the right pane; per-cycle balance for routes"
+msgstr ""
+
+#: ../../source/design/v0.3-trade-history-design.md:678
+msgid "`trade.diff.snapshot_diff` (S-1)"
+msgstr ""
+
+#: ../../source/design/v0.3-trade-history-design.md:679
+msgid "Route detail screen (S-2)"
+msgstr ""
+
+#: ../../source/design/v0.3-trade-history-design.md:680
+msgid "Export formats CSV / Markdown / HTML (S-3)"
+msgstr ""
+
+#: ../../source/design/v0.3-trade-history-design.md:681
+msgid "Anno 1800 full coverage + interpreter parity"
+msgstr ""
+
+#: ../../source/design/v0.3-trade-history-design.md:682
+msgid "Documentation pass (`README.ja.md`, `docs/usage.md`)"
+msgstr ""
+
+#: ../../source/design/v0.3-trade-history-design.md:683
+msgid "Optional: PowerShell snapshot scheduler doc snippet (N-1)"
+msgstr ""
+
+#: ../../source/design/v0.3-trade-history-design.md:685
+#, python-format
+msgid ""
+"**Exit criterion**: v0.3.0 release PR open, all CI green, 100% coverage "
+"maintained, ✅ from 書記長."
+msgstr ""
+
+#: ../../source/design/v0.3-trade-history-design.md:687
+msgid ""
+"If week 3 slips, ship v0.3.0 with M-only + 3-column layout (no chart, no "
+"diff) and push the rest into v0.3.1."
+msgstr ""
+
+#: ../../source/design/v0.3-trade-history-design.md:690
+msgid "13. Open Questions for 書記長 / 書記長への確認事項"
+msgstr ""
+
+#: ../../source/design/v0.3-trade-history-design.md:692
+msgid "These block or shape implementation. Decide before week 1 starts."
+msgstr ""
+
+#: ../../source/design/v0.3-trade-history-design.md
+msgid "Question"
+msgstr ""
+
+#: ../../source/design/v0.3-trade-history-design.md
+msgid "My recommendation"
+msgstr ""
+
+#: ../../source/design/v0.3-trade-history-design.md
+msgid "**Q-1**"
+msgstr ""
+
+#: ../../source/design/v0.3-trade-history-design.md
+msgid ""
+"Is `<TradedGoods>` always a direct child of `<RouteMap>` / `<Route>`, or "
+"can it appear in other contexts? Needs a 10-min hex-dump spike on "
+"`sample_anno117.a8s` Session 0."
+msgstr ""
+
+#: ../../source/design/v0.3-trade-history-design.md
+msgid "Spike before week 1. Without it, route attribution is uncertain."
+msgstr ""
+
+#: ../../source/design/v0.3-trade-history-design.md
+msgid "**Q-2**"
+msgstr ""
+
+#: ../../source/design/v0.3-trade-history-design.md
+msgid ""
+"Does the Anno 117 outer `<ActiveTradeHistory>` ever populate? Need a save"
+" with significant trade volume to confirm."
+msgstr ""
+
+#: ../../source/design/v0.3-trade-history-design.md
+msgid "Capture a fresh save after several hours of trade and re-spike."
+msgstr ""
+
+#: ../../source/design/v0.3-trade-history-design.md
+msgid "**Q-3 (Decided)**"
+msgstr ""
+
+#: ../../source/design/v0.3-trade-history-design.md
+msgid "TUI hotkey style: Vim vs nano vs other."
+msgstr ""
+
+#: ../../source/design/v0.3-trade-history-design.md
+msgid ""
+"**nano-flavored** (`^X` exit, `^G` help, `^W` find, `^O` export, `^P/^N` "
+"row nav, `Tab` pane swap). Footer menu bar always visible."
+msgstr ""
+
+#: ../../source/design/v0.3-trade-history-design.md
+msgid "**Q-4 (Decided)**"
+msgstr ""
+
+#: ../../source/design/v0.3-trade-history-design.md
+msgid "Default snapshot interval for Method B documentation."
+msgstr ""
+
+#: ../../source/design/v0.3-trade-history-design.md
+msgid ""
+"**15 min** for active sessions; **60 min** for casual play. Both "
+"documented as recommendation."
+msgstr ""
+
+#: ../../source/design/v0.3-trade-history-design.md
+msgid "**Q-5 (Decided)**"
+msgstr ""
+
+#: ../../source/design/v0.3-trade-history-design.md
+msgid "Export format priority."
+msgstr ""
+
+#: ../../source/design/v0.3-trade-history-design.md
+msgid ""
+"**JSON > HTML > CSV > Markdown.** JSON for integrations, HTML for "
+"shareables, CSV for spreadsheets, Markdown for forum posts."
+msgstr ""
+
+#: ../../source/design/v0.3-trade-history-design.md
+msgid "**Q-6 (Decided, revised in rev 5)**"
+msgstr ""
+
+#: ../../source/design/v0.3-trade-history-design.md
+msgid "Item YAML scope and language."
+msgstr ""
+
+#: ../../source/design/v0.3-trade-history-design.md
+msgid ""
+"**Locale-split** files (`items_<title>.<locale>.yaml`). English file is "
+"canonical (carries `category`, etc.); per-locale files carry only `name`."
+" Pre-populate top 20 goods in `en`; Japanese ships as a parallel "
+"translation. `scaffold-items` emits English stubs."
+msgstr ""
+
+#: ../../source/design/v0.3-trade-history-design.md
+msgid "**Q-7 (Decided)**"
+msgstr ""
+
+#: ../../source/design/v0.3-trade-history-design.md
+msgid "TUI visual theme."
+msgstr ""
+
+#: ../../source/design/v0.3-trade-history-design.md
+msgid ""
+"**Subdued default** (no logos, no `☭`, no bespoke palette). Two accents "
+"only: terminal-red for negatives, terminal-green for positives."
+msgstr ""
+
+#: ../../source/design/v0.3-trade-history-design.md
+msgid "**Q-8 (Decided)**"
+msgstr ""
+
+#: ../../source/design/v0.3-trade-history-design.md
+msgid "Snapshot-diff inferred events default behavior."
+msgstr ""
+
+#: ../../source/design/v0.3-trade-history-design.md
+msgid ""
+"**Include in default ledger** with `source: diff` flag; consumers filter "
+"via `--exclude inferred`."
+msgstr ""
+
+#: ../../source/design/v0.3-trade-history-design.md
+msgid "**Q-9 (Decided)**"
+msgstr ""
+
+#: ../../source/design/v0.3-trade-history-design.md
+msgid "`SECONDS_PER_TICK` measurement methodology."
+msgstr ""
+
+#: ../../source/design/v0.3-trade-history-design.md
+msgid ""
+"Take **two saves at exactly 1-minute intervals** during Week 1 spike, "
+"diff tick counts, divide. Lock the constant in "
+"`trade.interpreter.<title>.GameTimebase`."
+msgstr ""
+
+#: ../../source/design/v0.3-trade-history-design.md
+msgid "**Q-10 (Decided)**"
+msgstr ""
+
+#: ../../source/design/v0.3-trade-history-design.md
+msgid "Chart library choice."
+msgstr ""
+
+#: ../../source/design/v0.3-trade-history-design.md
+msgid ""
+"**`textual-plotext`** (Textual widget around `plotext`). Axes / ticks / "
+"resize handled; degrade to S-6 sparkline when terminal width < 60 cols."
+msgstr ""
+
+#: ../../source/design/v0.3-trade-history-design.md
+msgid "**Q-11 (Decided)**"
+msgstr ""
+
+#: ../../source/design/v0.3-trade-history-design.md
+msgid "Reference screenshots storage."
+msgstr ""
+
+#: ../../source/design/v0.3-trade-history-design.md
+msgid ""
+"**Local-only `_screenshots/`** directory, gitignored. Design doc carries "
+"verbal references; screenshots are personal aide-memoire, not "
+"redistributable (Ubisoft / BlueByte copyright)."
+msgstr ""
+
+#: ../../source/design/v0.3-trade-history-design.md:708
+msgid "Open work items (not user decisions, deferred to implementation)"
+msgstr ""
+
+#: ../../source/design/v0.3-trade-history-design.md
+msgid "Work item"
+msgstr ""
+
+#: ../../source/design/v0.3-trade-history-design.md
+msgid "When"
+msgstr ""
+
+#: ../../source/design/v0.3-trade-history-design.md
+msgid "W-1 (Done, rev 5)"
+msgstr ""
+
+#: ../../source/design/v0.3-trade-history-design.md
+msgid "Confirm `<TradedGoods>` parent."
+msgstr ""
+
+#: ../../source/design/v0.3-trade-history-design.md
+msgid ""
+"**Resolved**. See Appendix C. Parents are `PassiveTrade > History > "
+"TradeRouteEntries / PassiveTradeEntries`, not `<RouteMap>`."
+msgstr ""
+
+#: ../../source/design/v0.3-trade-history-design.md
+msgid "W-2"
+msgstr ""
+
+#: ../../source/design/v0.3-trade-history-design.md
+msgid ""
+"Investigate whether outer `<ActiveTradeHistory>` populates in long-played"
+" saves."
+msgstr ""
+
+#: ../../source/design/v0.3-trade-history-design.md
+msgid ""
+"When 書記長 supplies a long-played save. Non-blocking; inner `<TradedGoods>`"
+" is sufficient."
+msgstr ""
+
+#: ../../source/design/v0.3-trade-history-design.md:717
+msgid "Appendix A — Spike findings (2026-04-19, `sample_anno117.a8s`)"
+msgstr ""
+
+#: ../../source/design/v0.3-trade-history-design.md:719
+msgid ""
+"Reproducible via the v0.2 parser (already merged in `feature/filedb-"
+"parser`):"
+msgstr ""
+
+#: ../../source/design/v0.3-trade-history-design.md:741
+msgid "Full hex/sample available on request — see commit `0cfc746` (PR #16)."
+msgstr ""
+
+#: ../../source/design/v0.3-trade-history-design.md:743
+msgid "Appendix B — W-1 spike result (2026-04-19): TradedGoods parent paths"
+msgstr ""
+
+#: ../../source/design/v0.3-trade-history-design.md:745
+msgid ""
+"Discharged immediately after rev 5. Reproduced on `sample_anno117.a8s` (2"
+" inner sessions, recursive FileDB V3) by walking the inner DOM with "
+"`parser.filedb.iter_dom` and recording the tag stack at every "
+"`<TradedGoods>` open event:"
+msgstr ""
+
+#: ../../source/design/v0.3-trade-history-design.md
+msgid "Parent path (inner Session DOM)"
+msgstr ""
+
+#: ../../source/design/v0.3-trade-history-design.md
+msgid "Session 0"
+msgstr ""
+
+#: ../../source/design/v0.3-trade-history-design.md
+msgid "Session 1"
+msgstr ""
+
+#: ../../source/design/v0.3-trade-history-design.md
+msgid "`PassiveTrade > History > TradeRouteEntries > <1> > <1> > TradedGoods`"
+msgstr ""
+
+#: ../../source/design/v0.3-trade-history-design.md
+msgid "1,237"
+msgstr ""
+
+#: ../../source/design/v0.3-trade-history-design.md
+msgid "574"
+msgstr ""
+
+#: ../../source/design/v0.3-trade-history-design.md
+msgid "`PassiveTrade > History > PassiveTradeEntries > <1> > <1> > TradedGoods`"
+msgstr ""
+
+#: ../../source/design/v0.3-trade-history-design.md
+msgid "296"
+msgstr ""
+
+#: ../../source/design/v0.3-trade-history-design.md
+msgid "189"
+msgstr ""
+
+#: ../../source/design/v0.3-trade-history-design.md
+msgid "`GameObject > objects > <1> > ConstructionAI > EventBuffer > TradedGoods`"
+msgstr ""
+
+#: ../../source/design/v0.3-trade-history-design.md
+msgid "3"
+msgstr ""
+
+#: ../../source/design/v0.3-trade-history-design.md
+msgid "2"
+msgstr ""
+
+#: ../../source/design/v0.3-trade-history-design.md:756
+msgid "Implications for the extractor"
+msgstr ""
+
+#: ../../source/design/v0.3-trade-history-design.md:758
+msgid ""
+"The dominant container is `PassiveTrade > History`, splitting into "
+"**`TradeRouteEntries`** (player-owned routes) and "
+"**`PassiveTradeEntries`** (direct NPC trade)."
+msgstr ""
+
+#: ../../source/design/v0.3-trade-history-design.md:761
+msgid ""
+"Each entry is wrapped twice: outer `<1>` likely keys by route / partner "
+"(siblings in `<1>` carry attribs such as `RouteID`, `TraderGUID`); inner "
+"`<1>` is the per-visit / per-transaction wrapper."
+msgstr ""
+
+#: ../../source/design/v0.3-trade-history-design.md:764
+msgid ""
+"The third path (`ConstructionAI / EventBuffer`) is residual noise (5 "
+"events total) and the extractor should skip it explicitly."
+msgstr ""
+
+#: ../../source/design/v0.3-trade-history-design.md:767
+msgid "Updated extraction policy (supersedes §8.1 first-draft assumption)"
+msgstr ""
+
+#: ../../source/design/v0.3-trade-history-design.md:769
+msgid "The Week 1 interpreter walks each inner Session DOM and:"
+msgstr ""
+
+#: ../../source/design/v0.3-trade-history-design.md:771
+msgid ""
+"Recognises only `PassiveTrade > History > TradeRouteEntries` and "
+"`PassiveTrade > History > PassiveTradeEntries` as valid `<TradedGoods>` "
+"ancestors."
+msgstr ""
+
+#: ../../source/design/v0.3-trade-history-design.md:774
+msgid ""
+"Tags each emitted `TradeEvent` with `partner.kind = \"route\"` or "
+"`\"passive\"` based on which subtree it came from."
+msgstr ""
+
+#: ../../source/design/v0.3-trade-history-design.md:776
+msgid ""
+"Carries the outer-`<1>` attribs (`RouteID` / `TraderGUID` / etc.) as "
+"`route_id` / `partner.id`."
+msgstr ""
+
+#: ../../source/design/v0.3-trade-history-design.md:778
+msgid ""
+"Skips `ConstructionAI / EventBuffer` occurrences explicitly; the current "
+"Week 1 implementation does so silently (no `WARN` log)."
+msgstr ""
+
+#: ../../source/design/v0.3-trade-history-design.md:781
+msgid ""
+"The original \"RouteMap > Route > TradedGoods\" hypothesis from rev 1 is "
+"formally discarded."
+msgstr ""
+
+#: ../../source/design/v0.3-trade-history-design.md:784
+msgid "Appendix C — Glossary / 用語集"
+msgstr ""
+
+#: ../../source/design/v0.3-trade-history-design.md
+msgid "Term"
+msgstr ""
+
+#: ../../source/design/v0.3-trade-history-design.md
+msgid "Meaning"
+msgstr ""
+
+#: ../../source/design/v0.3-trade-history-design.md
+msgid "RDA V2.2"
+msgstr ""
+
+#: ../../source/design/v0.3-trade-history-design.md
+msgid ""
+"The outer container format (`Resource File V2.2`) common to Anno "
+"1404/2070/2205/1800 and confirmed for Anno 117."
+msgstr ""
+
+#: ../../source/design/v0.3-trade-history-design.md
+msgid "FileDB V3"
+msgstr ""
+
+#: ../../source/design/v0.3-trade-history-design.md
+msgid ""
+"The inner BBDom format used by Anno 1800 and Anno 117. End-of-file magic "
+"`08 00 00 00 FD FF FF FF`."
+msgstr ""
+
+#: ../../source/design/v0.3-trade-history-design.md
+msgid "SessionData / BinaryData"
+msgstr ""
+
+#: ../../source/design/v0.3-trade-history-design.md
+msgid "A FileDB attrib whose payload is itself a complete FileDB V3 document."
+msgstr ""
+
+#: ../../source/design/v0.3-trade-history-design.md
+msgid "Method A"
+msgstr ""
+
+#: ../../source/design/v0.3-trade-history-design.md
+msgid ""
+"Extracting trade events directly from in-save history fields "
+"(`<TradedGoods>` etc.)."
+msgstr ""
+
+#: ../../source/design/v0.3-trade-history-design.md
+msgid "Method B"
+msgstr ""
+
+#: ../../source/design/v0.3-trade-history-design.md
+msgid "Reconstructing trade events from periodic snapshot inventory diffs."
+msgstr ""
+
+#: ../../source/design/v0.3-trade-history-design.md
+msgid "5-good strategy / 5物資戦略"
+msgstr ""
+
+#: ../../source/design/v0.3-trade-history-design.md
+msgid ""
+"The maintainer's deliberate restriction to a small good set to keep "
+"cognitive load down."
+msgstr ""
+
+#: ../../source/design/v0.3-trade-history-design.md
+msgid "Sparkline"
+msgstr ""
+
+#: ../../source/design/v0.3-trade-history-design.md
+msgid "Single-line micro-graph rendered via Unicode block glyphs `▁▂▃▄▅▆▇█`."
+msgstr ""
+
+#: ../../source/design/v0.3-trade-history-design.md
+msgid "Game tick"
+msgstr ""
+
+#: ../../source/design/v0.3-trade-history-design.md
+msgid ""
+"The atomic simulation step inside the Anno engine. Several attribs (e.g. "
+"`LastGoodTradeUpdate`) carry uint64 ticks."
+msgstr ""
+
+#: ../../source/design/v0.3-trade-history-design.md
+msgid "`textual-plotext`"
+msgstr ""
+
+#: ../../source/design/v0.3-trade-history-design.md
+msgid ""
+"Textual widget (`PlotextPlot`) wrapping the `plotext` terminal-charting "
+"library. Renders line / bar / scatter charts with Unicode glyphs."
+msgstr ""
+
+#: ../../source/design/v0.3-trade-history-design.md:800
+msgid ""
+"*End of design document. v0.3.0 implementation starts only after 書記長 "
+"review-OK.*"
+msgstr ""
+

@@ -1,0 +1,328 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) 2026, Proletariat Yuuka
+# This file is distributed under the same license as the anno-save-analyzer
+# package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2026.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: anno-save-analyzer 0.1\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-04-24 21:04+0900\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language: ja\n"
+"Language-Team: ja <LL@li.org>\n"
+"Plural-Forms: nplurals=1; plural=0;\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.18.0\n"
+
+#: ../../source/roadmap.md:1
+msgid "Roadmap"
+msgstr ""
+
+#: ../../source/roadmap.md:3
+msgid ""
+"Last updated: 2026-04-19. This roadmap is directional, not a commitment. "
+"Priorities may shift as the *Anno 1800* save-file format yields its "
+"secrets. Japanese version: [ROADMAP.ja.md](ROADMAP.ja.md)."
+msgstr ""
+
+#: ../../source/roadmap.md:5
+msgid "Current release"
+msgstr ""
+
+#: ../../source/roadmap.md:7
+msgid "v0.1.0 — RDA V2.2 native parser (shipped)"
+msgstr ""
+
+#: ../../source/roadmap.md:9
+msgid "Native Python reader for the outer `.a7s` RDA container. Provides:"
+msgstr ""
+
+#: ../../source/roadmap.md:11
+msgid ""
+"`RDAArchive` context-manager API with entry enumeration and per-file zlib"
+" decompression"
+msgstr ""
+
+#: ../../source/roadmap.md:12
+msgid "`parser.pipeline.extract_inner_filedb` one-call unwrap to FileDB bytes"
+msgstr ""
+
+#: ../../source/roadmap.md:13
+msgid ""
+"Format specification documented in "
+"[rda_format_spec.md](rda_format_spec.md)"
+msgstr ""
+
+#: ../../source/roadmap.md:14
+msgid ""
+"pytest suite (14 tests) using synthetic fixtures and optional real-save "
+"integration"
+msgstr ""
+
+#: ../../source/roadmap.md:16
+msgid "Planned milestones"
+msgstr ""
+
+#: ../../source/roadmap.md:18
+msgid "v0.2 — FileDB parser"
+msgstr ""
+
+#: ../../source/roadmap.md:20
+msgid "Goal: expose the structured XML tree that sits inside `data.a7s`."
+msgstr ""
+
+#: ../../source/roadmap.md:22
+msgid "Decode FileDB V1 / V2 / V3 binary tag streams"
+msgstr ""
+
+#: ../../source/roadmap.md:23
+msgid "Produce an lxml-compatible XML document (streamed where possible)"
+msgstr ""
+
+#: ../../source/roadmap.md:24
+msgid "Introduce route/contract/quest Pydantic models fed from the XML tree"
+msgstr ""
+
+#: ../../source/roadmap.md:25
+msgid ""
+"Keep peak memory bounded for late-game saves (≈2.2M XML lines, 170MB "
+"decompressed)"
+msgstr ""
+
+#: ../../source/roadmap.md:27
+msgid "Dependencies: `lxml` (already declared), streaming byte-reader helpers."
+msgstr ""
+
+#: ../../source/roadmap.md:29
+msgid "v0.3 — Trade History Viewer (Anno 117 dogfooding)"
+msgstr ""
+
+#: ../../source/roadmap.md:31
+msgid ""
+"**Scope changed in 2026-04**: the original SessionData / BinaryData "
+"decoder work was largely subsumed by v0.2 (recursive FileDB hypothesis "
+"confirmed) and displaced by a more pressing dogfooding need — Anno 117 "
+"ships without an in-game trade-history UI, and the maintainer wants one."
+msgstr ""
+
+#: ../../source/roadmap.md:36
+msgid ""
+"Goal: a CLI + Textual TUI that exposes per-good and per-route trade "
+"activity extracted from `.a8s` (Anno 117) and `.a7s` (Anno 1800) saves."
+msgstr ""
+
+#: ../../source/roadmap.md:39
+msgid "Cross-title abstract data model (`TradeEvent`, `Item`, `Route`, ...)"
+msgstr ""
+
+#: ../../source/roadmap.md:40
+msgid "Method A: extract from in-save history fields (`<TradedGoods>` etc.)"
+msgstr ""
+
+#: ../../source/roadmap.md:41
+msgid "Method B: snapshot diff for titles where history is sparse"
+msgstr ""
+
+#: ../../source/roadmap.md:42
+msgid "3-column Textual TUI modelled after the Anno 1800 statistics view"
+msgstr ""
+
+#: ../../source/roadmap.md:43
+msgid "Inline charts via `textual-plotext`"
+msgstr ""
+
+#: ../../source/roadmap.md:44
+msgid "Bilingual (`name_en` + `name_ja`) GUID dictionary YAMLs"
+msgstr ""
+
+#: ../../source/roadmap.md:46
+msgid ""
+"Detailed specification: [`v0.3-trade-history-design.md`](./v0.3-trade-"
+"history-design.md) (Japanese sibling: [`v0.3-trade-history-"
+"design.ja.md`](./v0.3-trade-history-design.ja.md))."
+msgstr ""
+
+#: ../../source/roadmap.md:49
+msgid ""
+"The deeper SessionData / BinaryData domain modelling (full island / "
+"building / population schema) is preserved as **v0.6** below."
+msgstr ""
+
+#: ../../source/roadmap.md:52
+msgid "v0.4 — Supply-chain balance sheet"
+msgstr ""
+
+#: ../../source/roadmap.md:54
+msgid "Goal: for each island, compute net production vs. consumption per good."
+msgstr ""
+
+#: ../../source/roadmap.md:56
+msgid "Input: island inventory + building count × recipe efficiency"
+msgstr ""
+
+#: ../../source/roadmap.md:57
+msgid "Output: surplus/deficit table, bottleneck highlighting"
+msgstr ""
+
+#: ../../source/roadmap.md:58
+msgid "CLI command: `anno-save-analyzer balance <save>`"
+msgstr ""
+
+#: ../../source/roadmap.md:60
+msgid "v0.5 — Route optimizer (OR-Tools)"
+msgstr ""
+
+#: ../../source/roadmap.md:62
+msgid ""
+"Goal: suggest route reassignments that reduce idle ships or unfilled "
+"demand."
+msgstr ""
+
+#: ../../source/roadmap.md:64
+msgid "MILP formulation over islands × goods × routes"
+msgstr ""
+
+#: ../../source/roadmap.md:65
+msgid "Respect ship capacity, travel time, and current assignments"
+msgstr ""
+
+#: ../../source/roadmap.md:66
+msgid "`optimizer` extras group: `pip install anno-save-analyzer[optimizer]`"
+msgstr ""
+
+#: ../../source/roadmap.md:68
+msgid "v0.6 — Island / Building / Population schema deep-dive"
+msgstr ""
+
+#: ../../source/roadmap.md:70
+msgid ""
+"**Scope changed in 2026-04**: the original \"Textual TUI dashboard\" was "
+"pulled forward into v0.3 (the trade-history viewer ships its own TUI). "
+"The v0.6 slot is now used for the deeper schema work that the supply-"
+"chain balance (v0.4) and route optimizer (v0.5) will consume."
+msgstr ""
+
+#: ../../source/roadmap.md:75
+msgid ""
+"Goal: complete Pydantic models for islands, buildings, and population "
+"layers inside the SessionData inner FileDB. v0.2 / v0.3 already extract "
+"the bytes; v0.6 turns them into typed domain objects."
+msgstr ""
+
+#: ../../source/roadmap.md:79
+msgid "Schema for `Island*` / `AreaManager_*` / `AreaPopulationManager`"
+msgstr ""
+
+#: ../../source/roadmap.md:80
+msgid "Building catalogue (production / consumption per building type)"
+msgstr ""
+
+#: ../../source/roadmap.md:81
+msgid "Population tier breakdowns (Roman / Italic / etc. for Anno 117)"
+msgstr ""
+
+#: ../../source/roadmap.md:82
+msgid "Anonymous attrib (`id=0x8000`) context-dependent type resolution"
+msgstr ""
+
+#: ../../source/roadmap.md:83
+msgid "Anno 1800 ↔ Anno 117 schema diff documentation"
+msgstr ""
+
+#: ../../source/roadmap.md:85
+msgid "v1.0 — Public stable release"
+msgstr ""
+
+#: ../../source/roadmap.md:87
+msgid "Goal: first version presentable on PyPI with English-first docs."
+msgstr ""
+
+#: ../../source/roadmap.md:89
+msgid "Stable public APIs (semver from here on)"
+msgstr ""
+
+#: ../../source/roadmap.md:90
+msgid "CHANGELOG.md, MkDocs site or in-repo docs"
+msgstr ""
+
+#: ../../source/roadmap.md:91
+msgid "Packaged on PyPI as `anno-save-analyzer`"
+msgstr ""
+
+#: ../../source/roadmap.md:92
+msgid "Example notebooks / saved-data anonymization tooling"
+msgstr ""
+
+#: ../../source/roadmap.md:94
+msgid "Future (version TBD)"
+msgstr ""
+
+#: ../../source/roadmap.md:96
+msgid "Anno 117: Pax Romana support"
+msgstr ""
+
+#: ../../source/roadmap.md:98
+#, python-format
+msgid ""
+"*Anno 117: Pax Romana* ships with the `.a8s` save extension. The engine "
+"is expected to share roughly 90% of the format with Anno 1800, but "
+"confirmation requires access to a real `.a8s` file once the game is "
+"released. The version number for this milestone will be decided after "
+"that investigation."
+msgstr ""
+
+#: ../../source/roadmap.md:100
+msgid "Intentionally non-goals"
+msgstr ""
+
+#: ../../source/roadmap.md:102
+msgid ""
+"GPU acceleration: the pipeline is I/O- and parse-bound, so a GPU does not"
+" help."
+msgstr ""
+
+#: ../../source/roadmap.md:103
+msgid ""
+"Online / hosted service: save files are local personal assets; requiring "
+"an upload would ruin the UX."
+msgstr ""
+
+#: ../../source/roadmap.md:104
+msgid ""
+"Cheat / save-editing assistance: this project is a **read-only "
+"analyzer**. Save editing is left to other projects such as "
+"[olescheller/anno1800-retroactive-dlc-"
+"activation](https://github.com/olescheller/anno1800-retroactive-dlc-"
+"activation)."
+msgstr ""
+
+#: ../../source/roadmap.md:105
+msgid ""
+"Real-time save monitoring: *Anno 1800* autosaves discretely; continuous "
+"monitoring adds little value."
+msgstr ""
+
+#: ../../source/roadmap.md:107
+msgid "How to follow progress"
+msgstr ""
+
+#: ../../source/roadmap.md:109
+msgid ""
+"GitHub Milestones: https://github.com/yuuka-dev/anno-save-"
+"analyzer/milestones"
+msgstr ""
+
+#: ../../source/roadmap.md:110
+msgid "Issues grouped per milestone track the concrete tasks for each version."
+msgstr ""
+
+#: ../../source/roadmap.md:111
+msgid "CHANGELOG.md (added from v0.2 onward) records shipped changes."
+msgstr ""
+

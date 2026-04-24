@@ -1,0 +1,1211 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) 2026, Proletariat Yuuka
+# This file is distributed under the same license as the anno-save-analyzer
+# package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2026.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: anno-save-analyzer 0.1\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-04-24 21:04+0900\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language: ja\n"
+"Language-Team: ja <LL@li.org>\n"
+"Plural-Forms: nplurals=1; plural=0;\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.18.0\n"
+
+#: ../../source/api/trade.rst:2
+msgid "trade — save parsing & domain models"
+msgstr ""
+
+#: ../../source/api/trade.rst:4
+msgid "Trade event extraction, balance engine, residence/factory aggregation."
+msgstr ""
+
+#: ../../source/api/trade.rst:7
+msgid "Models"
+msgstr ""
+
+#: anno_save_analyzer.trade.models:1 of
+msgid "タイトル横断の貿易データモデル．"
+msgstr ""
+
+#: anno_save_analyzer.trade.models:3 of
+msgid ""
+"すべての TradeEvent は title-agnostic．Anno 117 / Anno 1800 の差は "
+"``trade.interpreter`` で吸収する．"
+msgstr ""
+
+#: anno_save_analyzer.trade.models.GameTitle:1 of
+msgid "対応タイトル．interpreter 切替の primary key．"
+msgstr ""
+
+#: anno_save_analyzer.trade.models.GameTitle:3 of
+msgid ""
+"値は YAML ファイル名（``items_<title>.<locale>.yaml``）の `<title>` 部に "
+"そのまま使われるため，アンダースコア無しで統一する．"
+msgstr ""
+
+#: anno_save_analyzer.trade.models.GameTitle.from_save_path:1 of
+msgid "セーブファイルの拡張子からタイトルを判定．"
+msgstr ""
+
+#: anno_save_analyzer.trade.models.GameTitle.from_save_path:3 of
+msgid "``.a7s`` → Anno 1800 (book 1 的な旧世代 container)"
+msgstr ""
+
+#: anno_save_analyzer.trade.models.GameTitle.from_save_path:4 of
+msgid "``.a8s`` → Anno 117: Pax Romana (新世代 container)"
+msgstr ""
+
+#: anno_save_analyzer.trade.models.GameTitle.from_save_path:6 of
+msgid "判別不能な拡張子なら ``ValueError``．``path`` は ``str`` でも ``Path`` でも OK．"
+msgstr ""
+
+#: ../../source/api/trade.rst
+msgid "Return type"
+msgstr ""
+
+#: anno_save_analyzer.trade.models.GameTitle.from_save_path:8 of
+msgid ":sphinx_autodoc_typehints_type:`\\:py\\:class\\:\\`\\~anno\\_save\\_analyzer.trade.models.GameTitle\\``"
+msgstr ""
+
+#: ../../source/api/trade.rst
+msgid "Parameters"
+msgstr ""
+
+#: anno_save_analyzer.trade.models.Item:1 of
+msgid "物資（GoodGuid に対応）．names は locale → name の dict．"
+msgstr ""
+
+#: anno_save_analyzer.trade.balance.IslandBalance.model_config:1
+#: anno_save_analyzer.trade.balance.ProductBalance.model_config:1
+#: anno_save_analyzer.trade.balance.SupplyBalanceTable.model_config:1
+#: anno_save_analyzer.trade.buildings.BuildingDictionary.model_config:1
+#: anno_save_analyzer.trade.buildings.BuildingEntry.model_config:1
+#: anno_save_analyzer.trade.consumption.ConsumptionTable.model_config:1
+#: anno_save_analyzer.trade.consumption.PopulationTier.model_config:1
+#: anno_save_analyzer.trade.consumption.TierNeed.model_config:1
+#: anno_save_analyzer.trade.factories.FactoryAggregate.model_config:1
+#: anno_save_analyzer.trade.factories.FactoryInstance.model_config:1
+#: anno_save_analyzer.trade.factories.ProductionStateSnapshot.model_config:1
+#: anno_save_analyzer.trade.factory_recipes.FactoryRecipe.model_config:1
+#: anno_save_analyzer.trade.factory_recipes.FactoryRecipeTable.model_config:1
+#: anno_save_analyzer.trade.factory_recipes.RecipeInput.model_config:1
+#: anno_save_analyzer.trade.factory_recipes.RecipeOutput.model_config:1
+#: anno_save_analyzer.trade.models.Item.model_config:1
+#: anno_save_analyzer.trade.models.TradeEvent.model_config:1
+#: anno_save_analyzer.trade.models.TradingPartner.model_config:1
+#: anno_save_analyzer.trade.population.ProductSaturation.model_config:1
+#: anno_save_analyzer.trade.population.ResidenceAggregate.model_config:1
+#: anno_save_analyzer.trade.population.TierSummary.model_config:1
+#: anno_save_analyzer.trade.storage.IslandStorageTrend.model_config:1
+#: anno_save_analyzer.trade.storage.PointSeries.model_config:1 of
+msgid ""
+"Configuration for the model, should be a dictionary conforming to "
+"[`ConfigDict`][pydantic.config.ConfigDict]."
+msgstr ""
+
+#: anno_save_analyzer.trade.models.Item.display_name:1 of
+msgid "指定 locale の名前．無ければ en にフォールバック，それも無ければ ``Good_<guid>``．"
+msgstr ""
+
+#: anno_save_analyzer.trade.models.Item.display_name:3 of
+msgid ":sphinx_autodoc_typehints_type:`\\:py\\:class\\:\\`str\\``"
+msgstr ""
+
+#: anno_save_analyzer.trade.models.TradingPartner:1 of
+msgid "貿易相手．プレイヤー所有ルート / NPC trader / passive partner を統合表現．"
+msgstr ""
+
+#: anno_save_analyzer.trade.models.TradeEvent:1 of
+msgid "貿易台帳の 1 行．Method A / B 共通．"
+msgstr ""
+
+#: anno_save_analyzer.trade.models.TradeEvent.timestamp_tick:1 of
+msgid "ゲーム内 tick．未取得時は None．"
+msgstr ""
+
+#: anno_save_analyzer.trade.models.TradeEvent.island_name:1 of
+msgid ""
+"この取引が帰属するプレイヤー保有島の ``CityName``．NPC 同士の取引は interpreter "
+"側で除外済みのためここに載るのは全てプレイヤー所有． TUI 側の Tree filter (島単位 / セッション単位) の key．"
+msgstr ""
+
+#: anno_save_analyzer.trade.models.TradeEvent.route_name:1 of
+msgid ""
+"書記長がゲーム内で命名したトレードルート名．``partner_kind='route'`` の ときのみ意味を持つ．表示では "
+"``route_name`` 優先，無ければ ``route_id`` を fallback．"
+msgstr ""
+
+#: anno_save_analyzer.trade.models.TradeEvent.display_partner:1 of
+msgid "取引相手の表示ラベル．``route_name > #route_id > partner_id > —`` の fallback．"
+msgstr ""
+
+#: anno_save_analyzer.trade.models.TradeEvent.display_partner:3 of
+msgid ""
+"Partners pane / 直近取引ビューで `PartnerSummary.display_partner` と同じ 粒度で event "
+"単体を表示するために使う．"
+msgstr ""
+
+#: ../../source/api/trade.rst:13
+msgid "Extraction"
+msgstr ""
+
+#: anno_save_analyzer.trade.extract:1 of
+msgid "raw triple → TradeEvent 正規化と save → ledger 抽出のオーケストレーション．"
+msgstr ""
+
+#: anno_save_analyzer.trade.extract.normalise:1 of
+msgid "1 件の raw triple を TradeEvent に組み立てる．"
+msgstr ""
+
+#: anno_save_analyzer.trade.extract.normalise:3 of
+msgid ""
+"Anno 117 では「Trader」attrib が文脈で意味を変えるため，interpreter は route_id / "
+"partner_id を排他で埋める．本関数は両方の場合に対して ``TradingPartner`` を必ず生成し，集計層で kind "
+"が常に確定するようにする．"
+msgstr ""
+
+#: anno_save_analyzer.trade.extract.normalise:7 of
+msgid ":sphinx_autodoc_typehints_type:`\\:py\\:class\\:\\`\\~anno\\_save\\_analyzer.trade.models.TradeEvent\\``"
+msgstr ""
+
+#: anno_save_analyzer.trade.extract.extract:1 of
+msgid "``.a7s`` / ``.a8s`` セーブから TradeEvent ストリームを yield する．"
+msgstr ""
+
+#: anno_save_analyzer.trade.extract.extract:3
+#: anno_save_analyzer.trade.extract.extract_from_outer:7 of
+msgid ""
+":sphinx_autodoc_typehints_type:`\\:py\\:class\\:\\`\\~collections.abc.Iterator\\`\\\\"
+" "
+"\\\\\\[\\:py\\:class\\:\\`\\~anno\\_save\\_analyzer.trade.models.TradeEvent\\`\\]`"
+msgstr ""
+
+#: anno_save_analyzer.trade.extract.extract_from_outer:1 of
+msgid "既に解凍済みの outer FileDB bytes から TradeEvent ストリームを yield．"
+msgstr ""
+
+#: anno_save_analyzer.trade.extract.extract_from_outer:3 of
+msgid ""
+"TUI のロードパスでは outer を 1 回だけ解凍して使い回すために使う (``extract`` が内部で毎回 "
+"``extract_inner_filedb`` を呼ぶと RDA + zlib を重複実行する)．"
+msgstr ""
+
+#: anno_save_analyzer.trade.extract.load_outer_filedb:1 of
+msgid "セーブファイルを解凍して内部 FileDB バイナリを返す．"
+msgstr ""
+
+#: anno_save_analyzer.trade.extract.load_outer_filedb:3 of
+msgid ":sphinx_autodoc_typehints_type:`\\:py\\:class\\:\\`bytes\\``"
+msgstr ""
+
+#: anno_save_analyzer.trade.extract.load_outer_filedb:5 of
+msgid ""
+"extension ではなく **magic prefix で形式判定**する (実 save は必ず ``.a7s`` / "
+"``.a8s``．テスト fixture や手動展開済みファイルにも対応するため)："
+msgstr ""
+
+#: anno_save_analyzer.trade.extract.load_outer_filedb:8 of
+msgid "RDA container (``Resource File V2.`` の ASCII prefix) → RDA 層を剥ぐ"
+msgstr ""
+
+#: anno_save_analyzer.trade.extract.load_outer_filedb:9 of
+msgid "zlib 圧縮 (``0x78 9c / da / 01``) → 展開して bare bytes"
+msgstr ""
+
+#: anno_save_analyzer.trade.extract.load_outer_filedb:10 of
+msgid "それ以外 → bare FileDB バイナリとしてそのまま返す"
+msgstr ""
+
+#: ../../source/api/trade.rst:19
+msgid "Balance engine"
+msgstr ""
+
+#: anno_save_analyzer.trade.balance:1 of
+msgid "Supply balance engine (v0.4 #12)．"
+msgstr ""
+
+#: anno_save_analyzer.trade.balance:3 of
+msgid "島単位で「生産 / 消費 / delta」の per-product バランスを算出する．"
+msgstr ""
+
+#: anno_save_analyzer.trade.balance:5 of
+msgid "## 依存"
+msgstr ""
+
+#: anno_save_analyzer.trade.balance:7 of
+msgid "``FactoryAggregate`` (trade.factories) — 供給側 (factory instance 群)"
+msgstr ""
+
+#: anno_save_analyzer.trade.balance:8 of
+msgid ""
+"``FactoryRecipeTable`` (trade.factory_recipes) — Calculator 由来の tpmin / "
+"outputs マップ"
+msgstr ""
+
+#: anno_save_analyzer.trade.balance:10 of
+msgid "``ResidenceAggregate.tier_breakdown`` (trade.population) — tier 別の人口"
+msgstr ""
+
+#: anno_save_analyzer.trade.balance:11 of
+msgid "``ConsumptionTable`` (trade.consumption) — tier × product の tpmin/人"
+msgstr ""
+
+#: anno_save_analyzer.trade.balance:13 of
+msgid "## 計算式"
+msgstr ""
+
+#: anno_save_analyzer.trade.balance:15 of
+msgid ""
+"**生産量 (ton/min)** = Σ over factory instances of ``productivity × "
+"recipe.tpmin × output.amount``"
+msgstr ""
+
+#: anno_save_analyzer.trade.balance:17 of
+msgid ""
+"**消費量 (ton/min)** = Σ over tier × needs of ``tier.resident_total × "
+"need.tpmin`` - ``is_bonus_need`` の物資は通常消費に含めない - **unlock "
+"未達の物資は除外**．Calculator の ``tier.needs`` は tier の"
+msgstr ""
+
+#: anno_save_analyzer.trade.balance:21 of
+msgid ""
+"潜在的な全 need 候補．書記長の島で実際 unlock されてるかは "
+"``ResidenceAggregate.product_saturations`` (save の ``ConsumptionStates`` "
+"観測値) で判定し，観測されてない need は加算しない (「ビスケット 要求されてないのに消費加算される」問題の修正)．observe "
+"ゼロの島は tier.needs を素直に使う (都市再建直後など tier breakdown だけで推定 したいフォールバック)．"
+msgstr ""
+
+#: anno_save_analyzer.trade.balance:27 of
+msgid "**delta** = produced - consumed"
+msgstr ""
+
+#: anno_save_analyzer.trade.balance:29 of
+msgid "複数島の集計は ``SupplyBalanceTable.aggregate`` で area_manager 集合を指定 して行う．"
+msgstr ""
+
+#: anno_save_analyzer.trade.balance.ProductBalance:1 of
+msgid "1 物資あたりの生産 / 消費 / delta (ton/min 単位)．"
+msgstr ""
+
+#: anno_save_analyzer.trade.balance.ProductBalance.delta_per_minute:1 of
+msgid "正なら黒字 (余剰)，負なら赤字 (不足)．"
+msgstr ""
+
+#: anno_save_analyzer.trade.balance.ProductBalance.is_deficit:1 of
+msgid "消費が生産を上回る (赤字) かどうか．許容誤差 1e-9．"
+msgstr ""
+
+#: anno_save_analyzer.trade.balance.IslandBalance:1 of
+msgid "1 島分の supply balance．``products`` は物資 GUID 昇順．"
+msgstr ""
+
+#: anno_save_analyzer.trade.balance.IslandBalance.resident_total:1 of
+msgid "寄与した人口．aggregate 時には合計人口．"
+msgstr ""
+
+#: anno_save_analyzer.trade.balance.IslandBalance.deficits:1 of
+msgid "赤字品目だけ返す (最大赤字→小の順)．"
+msgstr ""
+
+#: anno_save_analyzer.trade.balance.IslandBalance.deficits:3 of
+msgid ""
+":sphinx_autodoc_typehints_type:`\\:py\\:class\\:\\`tuple\\`\\\\ "
+"\\\\\\[\\:py\\:class\\:\\`\\~anno\\_save\\_analyzer.trade.balance.ProductBalance\\`\\,"
+" \\:py\\:data\\:\\`...\\<Ellipsis\\>\\`\\]`"
+msgstr ""
+
+#: anno_save_analyzer.trade.balance.SupplyBalanceTable:1 of
+msgid "島ごとの IslandBalance 群．複数島集計は ``aggregate``/``combined``．"
+msgstr ""
+
+#: anno_save_analyzer.trade.balance.SupplyBalanceTable.by_area_manager:1 of
+msgid ""
+":sphinx_autodoc_typehints_type:`\\:py\\:class\\:\\`dict\\`\\\\ "
+"\\\\\\[\\:py\\:class\\:\\`str\\`\\, "
+"\\:py\\:class\\:\\`\\~anno\\_save\\_analyzer.trade.balance.IslandBalance\\`\\]`"
+msgstr ""
+
+#: anno_save_analyzer.trade.balance.SupplyBalanceTable.aggregate:1 of
+msgid "指定した area_manager 集合 (``None`` なら全島) を合算した総計を返す．"
+msgstr ""
+
+#: anno_save_analyzer.trade.balance.SupplyBalanceTable.aggregate:3 of
+msgid ""
+"集計 IslandBalance の ``area_manager`` は ``\"<aggregate>\"`` で固定． "
+"``city_name`` は選択島が 1 件のみならその島名，複数なら結合キー．"
+msgstr ""
+
+#: anno_save_analyzer.trade.balance.SupplyBalanceTable.aggregate:6 of
+msgid ":sphinx_autodoc_typehints_type:`\\:py\\:class\\:\\`\\~anno\\_save\\_analyzer.trade.balance.IslandBalance\\``"
+msgstr ""
+
+#: anno_save_analyzer.trade.balance.build_balance_table:1 of
+msgid ""
+"供給側 (factories + recipes) と消費側 (residences + consumption) から "
+"``SupplyBalanceTable`` を組み立てる．"
+msgstr ""
+
+#: anno_save_analyzer.trade.balance.build_balance_table:4 of
+msgid "``recipes`` 未指定なら生産量は全 0"
+msgstr ""
+
+#: anno_save_analyzer.trade.balance.build_balance_table:5 of
+msgid "``consumption`` 未指定なら消費量は全 0"
+msgstr ""
+
+#: anno_save_analyzer.trade.balance.build_balance_table:6 of
+msgid ""
+"``include_bonus_needs=False`` の時 Rum / Spirits 等の嗜好品需要は無視 (Calculator の "
+"``isBonusNeed`` フラグに従う)．住民 upgrade には必要だが通常供給計算には含めない"
+msgstr ""
+
+#: anno_save_analyzer.trade.balance.build_balance_table:9 of
+msgid ":sphinx_autodoc_typehints_type:`\\:py\\:class\\:\\`\\~anno\\_save\\_analyzer.trade.balance.SupplyBalanceTable\\``"
+msgstr ""
+
+#: ../../source/api/trade.rst:25
+msgid "Population"
+msgstr ""
+
+#: anno_save_analyzer.trade.population:1 of
+msgid "島ごとの人口 / 住居消費パーサ (v0.4.3 PR B)."
+msgstr ""
+
+#: anno_save_analyzer.trade.population:3 of
+msgid "内側 Session DOM の ``AreaManager_<N>`` 配下から住居・人口・消費データを抽出する．"
+msgstr ""
+
+#: anno_save_analyzer.trade.population:5 of
+msgid "## DOM 構造 (実測 2026-04-22)"
+msgstr ""
+
+#: anno_save_analyzer.trade.population:7 of
+msgid ""
+"``` GameSessionManager ├─ AreaInfo > <1>                     (CityName 持ち"
+" = プレイヤー島) │   └─ AreaEconomy > StorageTrends   (trade / storage — 既存) └─"
+" AreaManagers"
+msgstr ""
+
+#: anno_save_analyzer.trade.population:12 of
+msgid "└─ AreaManager_<N>                (島実体．N = 内部 area ID)"
+msgstr ""
+
+#: anno_save_analyzer.trade.population:13 of
+msgid ""
+"├─ AreaPopulationManager ├─ AreaResidenceConsumptionManager ├─ "
+"AreaWideNeedsManager └─ AreaObjectManager > GameObject > objects > <1>"
+msgstr ""
+
+#: anno_save_analyzer.trade.population:17 of
+msgid "├─ A guid, ID, Position, ... └─ Residence7                (1 建物)"
+msgstr ""
+
+#: anno_save_analyzer.trade.population:19 of
+msgid ""
+"├─ A ResidentCount                       i32 ├─ A ProductMoneyOutput"
+"                  i32 ├─ A NewspaperMoneyOutput                i32 ├─ A "
+"AverageNeedSaturation               float32 (i32 bit pattern) ├─ A "
+"AverageNeedSaturationExcludingBonusNeeds └─ ConsumptionStates"
+msgstr ""
+
+#: anno_save_analyzer.trade.population:25 of
+msgid "├─ A <anon> ProductGUID  i32 └─ <1>"
+msgstr ""
+
+#: anno_save_analyzer.trade.population:27 of
+msgid "├─ A CurrentSaturation      float32 └─ A AverageSaturation      float32"
+msgstr ""
+
+#: anno_save_analyzer.trade.factories:21 anno_save_analyzer.trade.population:29
+#: anno_save_analyzer.trade.storage:27 anno_save_analyzer.trade.storage:44 of
+msgid "```"
+msgstr ""
+
+#: anno_save_analyzer.trade.population:31 of
+msgid "## 島名への結合 (heuristic)"
+msgstr ""
+
+#: anno_save_analyzer.trade.population:33 of
+msgid ""
+"AreaInfo と AreaManager は同じ save で並列に存在するが構造的な join キー無し． 対策として **Jaccard "
+"overlap heuristic** を採用:"
+msgstr ""
+
+#: anno_save_analyzer.trade.population:36 of
+msgid "プレイヤー島 = ``CityName`` を持つ AreaInfo entry"
+msgstr ""
+
+#: anno_save_analyzer.trade.population:37 of
+msgid "各 CityName について StorageTrends の nonzero 品目集合を signature に"
+msgstr ""
+
+#: anno_save_analyzer.trade.population:38 of
+msgid "各 AreaManager_N について Residence7 ConsumptionStates の品目集合を signature に"
+msgstr ""
+
+#: anno_save_analyzer.trade.population:39 of
+msgid "Jaccard 降順で greedy な bijective assignment"
+msgstr ""
+
+#: anno_save_analyzer.trade.population:41 of
+msgid ""
+"実測 (2026-04-22, 18 プレイヤー島) で最大都市は全セッション書記長確認通りで 正解．低 tier 都市は Jaccard "
+"が低くなるため「低信頼」扱いとし，``confidence`` フィールドで表面化する．ユーザは信頼度で filter / 手動 override"
+" できる．"
+msgstr ""
+
+#: anno_save_analyzer.trade.population.ProductSaturation:1 of
+msgid "住居消費で 1 物資あたりの充足率．``CurrentSaturation`` は 0.0–1.0 の float．"
+msgstr ""
+
+#: anno_save_analyzer.trade.population.ProductSaturation.current:1 of
+msgid "直近の満足率．0=不足で不満，1=完全充足．"
+msgstr ""
+
+#: anno_save_analyzer.trade.population.ProductSaturation.average:1 of
+msgid "直近平均．short-term ノイズが乗った current よりトレンドを見るのに使う．"
+msgstr ""
+
+#: anno_save_analyzer.trade.population.TierSummary:1 of
+msgid "1 住居階層 (Farmer / Worker / ...) 分の集計．島別 tier breakdown の要素．"
+msgstr ""
+
+#: anno_save_analyzer.trade.population.TierSummary.tier:1 of
+msgid ""
+"``farmer`` / ``worker`` / ``artisan`` / ``engineer`` / ``investor`` / "
+"``jornaleros`` / ``obreros`` / ``unknown``．``unknown`` は "
+"``BuildingDictionary`` で tier 判定できなかった Residence (Arctic / Colony "
+"系など命名規則外)．"
+msgstr ""
+
+#: anno_save_analyzer.trade.population.ResidenceAggregate.avg_saturation_mean:1
+#: anno_save_analyzer.trade.population.TierSummary.avg_saturation_mean:1 of
+msgid "住居平均 ``AverageNeedSaturation`` (residents weighted)．"
+msgstr ""
+
+#: anno_save_analyzer.trade.population.ResidenceAggregate:1 of
+msgid "1 島分の住居サマリ．住居 (Residence7) 群の集計値．"
+msgstr ""
+
+#: anno_save_analyzer.trade.population.ResidenceAggregate.resident_total:1 of
+msgid "``ResidentCount`` の合計 = 島の全人口．"
+msgstr ""
+
+#: anno_save_analyzer.trade.population.ResidenceAggregate.product_saturations:1
+#: of
+msgid "島全体で観測された物資 × (current, average)．全住居の平均を取る．"
+msgstr ""
+
+#: anno_save_analyzer.trade.population.ResidenceAggregate.tier_breakdown:1 of
+msgid ""
+"Farmer / Worker / ... 別の内訳．``list_residence_aggregates`` に ``buildings`` "
+"を渡した時のみ populate．渡さない場合は空 tuple．"
+msgstr ""
+
+#: anno_save_analyzer.trade.population.list_residence_aggregates:1 of
+msgid "内側 Session FileDB から AreaManager 単位の住居サマリを抽出．"
+msgstr ""
+
+#: anno_save_analyzer.trade.population.list_residence_aggregates:3 of
+msgid ""
+"プレイヤー島だけじゃなく Residence7 を持つ全 AreaManager を返す (NPC 都市 含む)．プレイヤー絞り込みは上位 "
+"layer の city name 結合で行う．"
+msgstr ""
+
+#: anno_save_analyzer.trade.population.list_residence_aggregates:6 of
+msgid ""
+"``buildings`` を渡すと親 ``objects > <1>`` の ``guid`` attrib から "
+"``BuildingEntry.tier`` を引き，``tier_breakdown`` に tier 別集計を populate "
+"する．未指定なら ``tier_breakdown`` は空 tuple になり既存挙動と一致．"
+msgstr ""
+
+#: anno_save_analyzer.trade.population.list_residence_aggregates:10 of
+msgid ""
+":sphinx_autodoc_typehints_type:`\\:py\\:class\\:\\`tuple\\`\\\\ "
+"\\\\\\[\\:py\\:class\\:\\`\\~anno\\_save\\_analyzer.trade.population.ResidenceAggregate\\`\\,"
+" \\:py\\:data\\:\\`...\\<Ellipsis\\>\\`\\]`"
+msgstr ""
+
+#: anno_save_analyzer.trade.population.CityAreaMatch:1 of
+msgid "1 組の (CityName, AreaManager) 結合結果．``confidence`` で信頼度を表す．"
+msgstr ""
+
+#: anno_save_analyzer.trade.population.CityAreaMatch.jaccard:1 of
+msgid "物資集合の Jaccard 類似度．高いほど信頼できる．"
+msgstr ""
+
+#: anno_save_analyzer.trade.population.CityAreaMatch.confidence:1 of
+msgid "``high`` (>= 0.25) / ``medium`` (>= 0.15) / ``low`` (それ以下)．"
+msgstr ""
+
+#: anno_save_analyzer.trade.population.match_cities_to_area_managers:1 of
+msgid "CityName ↔ AreaManager の bijective match (greedy jaccard)．"
+msgstr ""
+
+#: anno_save_analyzer.trade.population.match_cities_to_area_managers:3 of
+msgid ""
+"入力: - ``city_signatures``: city_name → StorageTrends nonzero product "
+"GUIDs - ``am_signatures``: area_manager → Residence7 consumption product "
+"GUIDs - ``am_residence_counts``: area_manager → residence 総数 (filter 用)"
+msgstr ""
+
+#: anno_save_analyzer.trade.population.match_cities_to_area_managers:8 of
+msgid ""
+"処理: 1. AM を residence 数 top-N (N = len(cities)) に絞る (プレイヤー島だけ残す) 2. すべての "
+"(city, am) ペアの Jaccard を計算 3. Jaccard 降順で greedy に割当 (重複無し)"
+msgstr ""
+
+#: anno_save_analyzer.trade.population.match_cities_to_area_managers:13 of
+msgid ""
+"実測で最大都市は全件正解．低 tier 都市は Jaccard 0.1-0.2 で「tentative」 扱いとなるが，それでも "
+"positional fallback より accurate．"
+msgstr ""
+
+#: anno_save_analyzer.trade.population.match_cities_to_area_managers:16 of
+msgid ""
+":sphinx_autodoc_typehints_type:`\\:py\\:class\\:\\`list\\`\\\\ "
+"\\\\\\[\\:py\\:class\\:\\`\\~anno\\_save\\_analyzer.trade.population.CityAreaMatch\\`\\]`"
+msgstr ""
+
+#: anno_save_analyzer.trade.population.build_am_consumption_signatures:1 of
+msgid "``ResidenceAggregate`` 群から AM 単位の product GUID signature を作る．"
+msgstr ""
+
+#: anno_save_analyzer.trade.population.build_am_consumption_signatures:3 of
+msgid ""
+":sphinx_autodoc_typehints_type:`\\:py\\:class\\:\\`dict\\`\\\\ "
+"\\\\\\[\\:py\\:class\\:\\`str\\`\\, \\:py\\:class\\:\\`set\\`\\\\ "
+"\\\\\\[\\:py\\:class\\:\\`int\\`\\]\\]`"
+msgstr ""
+
+#: ../../source/api/trade.rst:31
+msgid "Factories"
+msgstr ""
+
+#: anno_save_analyzer.trade.factories:1 of
+msgid "島ごとの Factory7 抽出 (v0.4 supply-balance の供給側データ)．"
+msgstr ""
+
+#: anno_save_analyzer.trade.factories:3 of
+msgid "Factory7 を持つ建物ノードを対象に，この docstring で定義する DOM 前提を state machine で走査する．"
+msgstr ""
+
+#: anno_save_analyzer.trade.factories:6 of
+msgid "## DOM 構造 (Anno 1800 / 117 共通)"
+msgstr ""
+
+#: anno_save_analyzer.trade.factories:8 of
+msgid "``` AreaManager_<N> └─ GameObject"
+msgstr ""
+
+#: anno_save_analyzer.trade.factories:11 of
+msgid "└─ objects"
+msgstr ""
+
+#: anno_save_analyzer.trade.factories:12 of
+msgid "└─ <1>                       (1 建物インスタンス)"
+msgstr ""
+
+#: anno_save_analyzer.trade.factories:13 of
+msgid ""
+"├─ A guid                i32  ← 建物 GUID (buildings.yaml key) ├─ A ID / "
+"Position / ... (他メタ) └─ Factory7              (このタグを持つ建物のみ生産コンポ)"
+msgstr ""
+
+#: anno_save_analyzer.trade.factories:16 of
+msgid ""
+"├─ A CurrentProductivity f32 (通常 0.0–2.0 / DLC 系アイテムで 3.0+ 実測) └─ "
+"ProductionState"
+msgstr ""
+
+#: anno_save_analyzer.trade.factories:18 of
+msgid ""
+"├─ A InProgress       u8 bool ├─ A RemainingTime    f32 (game tick) └─ A "
+"Productivity     f32 (累積，履歴用)"
+msgstr ""
+
+#: anno_save_analyzer.trade.factories:23 of
+msgid ""
+"``Pausable`` / ``Maintenance`` 等の兄弟タグは本 module では扱わない．停止状態 や維持費は future "
+"work (``balance.py`` 合流時)."
+msgstr ""
+
+#: anno_save_analyzer.trade.factories.ProductionStateSnapshot:1 of
+msgid "``ProductionState`` 子タグのスナップショット．全属性 optional．"
+msgstr ""
+
+#: anno_save_analyzer.trade.factories.ProductionStateSnapshot.in_progress:1 of
+msgid "``True`` で生産中 (enabled かつ原料充足)，``False`` で停止．"
+msgstr ""
+
+#: anno_save_analyzer.trade.factories.ProductionStateSnapshot.remaining_time:1
+#: of
+msgid "次サイクル完了までの残秒 (game tick 単位)．"
+msgstr ""
+
+#: anno_save_analyzer.trade.factories.ProductionStateSnapshot.cumulative_productivity:1
+#: of
+msgid "``ProductionState > Productivity``．累積生産レートの移動平均 (履歴用)．"
+msgstr ""
+
+#: anno_save_analyzer.trade.factories.FactoryInstance:1 of
+msgid "1 工場インスタンス．``guid`` attrib 経由で建物種別が引ける．"
+msgstr ""
+
+#: anno_save_analyzer.trade.factories.FactoryInstance.building_guid:1 of
+msgid "``objects > <1>`` 直下の ``guid`` attrib．``buildings.yaml`` の key に対応．"
+msgstr ""
+
+#: anno_save_analyzer.trade.factories.FactoryInstance.productivity:1 of
+msgid ""
+"``Factory7 > CurrentProductivity``．通常 0.0–2.0 (200% バフ込み) だが DLC "
+"のアイテムスタッキングで 3.0 以上になるケースも実在する (書記長 save で 300% 実測)．UI 側で ``* 100`` して % "
+"表示する想定．"
+msgstr ""
+
+#: anno_save_analyzer.trade.factories.FactoryInstance.state:1 of
+msgid "``ProductionState`` の内容．全属性欠けてれば ``None``．"
+msgstr ""
+
+#: anno_save_analyzer.trade.factories.FactoryAggregate:1 of
+msgid "1 AreaManager あたりの工場群．"
+msgstr ""
+
+#: anno_save_analyzer.trade.factories.FactoryAggregate.mean_productivity:1 of
+msgid "全工場の productivity 単純平均．0 工場なら 0.0．"
+msgstr ""
+
+#: anno_save_analyzer.trade.factories.FactoryAggregate.by_building:1 of
+msgid "building_guid で group 化して返す．"
+msgstr ""
+
+#: anno_save_analyzer.trade.factories.FactoryAggregate.by_building:3 of
+msgid ""
+":sphinx_autodoc_typehints_type:`\\:py\\:class\\:\\`dict\\`\\\\ "
+"\\\\\\[\\:py\\:class\\:\\`int\\`\\, \\:py\\:class\\:\\`tuple\\`\\\\ "
+"\\\\\\[\\:py\\:class\\:\\`\\~anno\\_save\\_analyzer.trade.factories.FactoryInstance\\`\\,"
+" \\:py\\:data\\:\\`...\\<Ellipsis\\>\\`\\]\\]`"
+msgstr ""
+
+#: anno_save_analyzer.trade.factories.list_factory_aggregates:1 of
+msgid "inner session (per-session FileDB) から AreaManager 単位の工場集計を返す．"
+msgstr ""
+
+#: anno_save_analyzer.trade.factories.list_factory_aggregates:3 of
+msgid ""
+"プレイヤー島 / NPC 島を区別せずに全 AreaManager を返す．プレイヤー絞り込み は "
+"``parser.filedb.session.list_player_islands`` の city_name 結合で上位層に委譲．"
+msgstr ""
+
+#: anno_save_analyzer.trade.factories.list_factory_aggregates:6 of
+msgid ""
+":sphinx_autodoc_typehints_type:`\\:py\\:class\\:\\`tuple\\`\\\\ "
+"\\\\\\[\\:py\\:class\\:\\`\\~anno\\_save\\_analyzer.trade.factories.FactoryAggregate\\`\\,"
+" \\:py\\:data\\:\\`...\\<Ellipsis\\>\\`\\]`"
+msgstr ""
+
+#: ../../source/api/trade.rst:37
+msgid "Factory recipes"
+msgstr ""
+
+#: anno_save_analyzer.trade.factory_recipes:1 of
+msgid "Anno 1800 factory template GUID → 生産レシピ loader．"
+msgstr ""
+
+#: anno_save_analyzer.trade.factory_recipes:3 of
+msgid ""
+"``data/factory_recipes_anno1800.en.yaml`` を canonical に各 factory template"
+" の ``tpmin`` (tons/min/factory at 100% productivity) と ``outputs`` / "
+"``inputs`` を保持する．"
+msgstr ""
+
+#: anno_save_analyzer.trade.factory_recipes:7 of
+msgid ""
+"save の ``objects > <1>`` 直下 ``guid`` attrib がこの recipe の ``guid`` と "
+"一致するため，``FactoryInstance.building_guid`` → ``FactoryRecipe`` の直接 lookup "
+"ができる．"
+msgstr ""
+
+#: anno_save_analyzer.trade.factory_recipes:11 of
+msgid "Calculator (MIT, NiHoel) の ``factories.js`` の生産量式を流用::"
+msgstr ""
+
+#: anno_save_analyzer.trade.factory_recipes:15 of
+msgid "本 module は recipe の保管のみ．生産量算出は ``trade.balance`` 側の責務．"
+msgstr ""
+
+#: anno_save_analyzer.trade.factory_recipes.RecipeOutput.amount:1 of
+msgid "1 cycle あたりの出力個数 (通常 1)．``tpmin × amount`` が /min レート．"
+msgstr ""
+
+#: anno_save_analyzer.trade.factory_recipes.FactoryRecipe:1 of
+msgid "1 factory template 分のレシピ定義．"
+msgstr ""
+
+#: anno_save_analyzer.trade.factory_recipes.FactoryRecipe.tpmin:1 of
+msgid "tons per minute per factory at 100% productivity．``None`` は未定義．"
+msgstr ""
+
+#: anno_save_analyzer.trade.factory_recipes.FactoryRecipe.produced_per_minute:1
+#: of
+msgid "``productivity`` (0.0–2.0+) で 1 factory の /min 生産量を product 別に返す．"
+msgstr ""
+
+#: anno_save_analyzer.trade.factory_recipes.FactoryRecipe.produced_per_minute:3
+#: of
+msgid "``tpmin`` 未定義なら空 dict．``output.amount`` が ``None`` の稀な ケースは 1.0 とみなす．"
+msgstr ""
+
+#: anno_save_analyzer.trade.factory_recipes.FactoryRecipe.produced_per_minute:6
+#: of
+msgid ""
+":sphinx_autodoc_typehints_type:`\\:py\\:class\\:\\`dict\\`\\\\ "
+"\\\\\\[\\:py\\:class\\:\\`int\\`\\, \\:py\\:class\\:\\`float\\`\\]`"
+msgstr ""
+
+#: anno_save_analyzer.trade.factory_recipes.FactoryRecipeTable:1 of
+msgid "factory GUID → FactoryRecipe のテーブル．"
+msgstr ""
+
+#: anno_save_analyzer.trade.factory_recipes.FactoryRecipeTable.get:1 of
+msgid ""
+":sphinx_autodoc_typehints_type:`\\:py\\:class\\:\\`\\~anno\\_save\\_analyzer.trade.factory\\_recipes.FactoryRecipe\\`"
+" \\| \\:py\\:obj\\:\\`None\\``"
+msgstr ""
+
+#: anno_save_analyzer.trade.factory_recipes.FactoryRecipeTable.load:1 of
+msgid ":sphinx_autodoc_typehints_type:`\\:py\\:class\\:\\`\\~anno\\_save\\_analyzer.trade.factory\\_recipes.FactoryRecipeTable\\``"
+msgstr ""
+
+#: ../../source/api/trade.rst:43
+msgid "Buildings"
+msgstr ""
+
+#: anno_save_analyzer.trade.buildings:1 of
+msgid "Anno 1800 建物辞書 loader．"
+msgstr ""
+
+#: anno_save_analyzer.trade.buildings:3 of
+msgid ""
+"``data/buildings_anno1800.en.yaml`` を canonical に ``(guid → "
+"BuildingEntry)`` を提供する．``en`` が全メタ (name / kind / template / tier?) を持ち，他"
+" locale は name の override のみ．"
+msgstr ""
+
+#: anno_save_analyzer.trade.buildings:7 of
+msgid ""
+"MVP 範囲: name / kind / template / tier．workforce / inputs / outputs は 後続 "
+"issue (#66, #12) で assets.xml の FactoryBase / ProductionChain 深掘りと "
+"併せて拡張する．"
+msgstr ""
+
+#: anno_save_analyzer.trade.buildings.BuildingEntry:1 of
+msgid "1 建物分のメタ．``tier`` は residence 限定で，それ以外は ``None``．"
+msgstr ""
+
+#: anno_save_analyzer.trade.buildings.BuildingEntry.name:1 of
+msgid "locale 適用後の表示名．packaged en YAML なら英語，override 済みなら当該 locale．"
+msgstr ""
+
+#: anno_save_analyzer.trade.buildings.BuildingEntry.kind:1 of
+msgid ""
+"``residence`` / ``factory`` / ``farm`` / ``warehouse`` / "
+"``public_service`` / ``buff_factory`` / ``market`` / ``pier`` / "
+"``farmfield``．"
+msgstr ""
+
+#: anno_save_analyzer.trade.buildings.BuildingEntry.template:1 of
+msgid ""
+"元 assets.xml の ``<Template>`` 値．細分種別 (``ResidenceBuilding7_Arctic`` 等) "
+"を見たい場合はこちらを参照．"
+msgstr ""
+
+#: anno_save_analyzer.trade.buildings.BuildingEntry.tier:1 of
+msgid ""
+"Residence のみ．``farmer`` / ``worker`` / ``artisan`` / ``engineer`` / "
+"``investor`` / ``jornaleros`` / ``obreros``．判定不能で未設定の可能性もある．"
+msgstr ""
+
+#: anno_save_analyzer.trade.buildings.BuildingDictionary:1 of
+msgid "GUID → BuildingEntry の lookup テーブル．"
+msgstr ""
+
+#: anno_save_analyzer.trade.buildings.BuildingDictionary.get:1 of
+msgid ""
+":sphinx_autodoc_typehints_type:`\\:py\\:class\\:\\`\\~anno\\_save\\_analyzer.trade.buildings.BuildingEntry\\`"
+" \\| \\:py\\:obj\\:\\`None\\``"
+msgstr ""
+
+#: anno_save_analyzer.trade.buildings.BuildingDictionary.by_kind:1 of
+msgid "``kind`` が一致する建物を GUID 昇順で返す．"
+msgstr ""
+
+#: anno_save_analyzer.trade.buildings.BuildingDictionary.by_kind:3
+#: anno_save_analyzer.trade.buildings.BuildingDictionary.by_tier:3 of
+msgid ""
+":sphinx_autodoc_typehints_type:`\\:py\\:class\\:\\`tuple\\`\\\\ "
+"\\\\\\[\\:py\\:class\\:\\`\\~anno\\_save\\_analyzer.trade.buildings.BuildingEntry\\`\\,"
+" \\:py\\:data\\:\\`...\\<Ellipsis\\>\\`\\]`"
+msgstr ""
+
+#: anno_save_analyzer.trade.buildings.BuildingDictionary.by_tier:1 of
+msgid "``tier`` が一致する residence を GUID 昇順で返す．"
+msgstr ""
+
+#: anno_save_analyzer.trade.buildings.BuildingDictionary.load:1 of
+msgid "packaged or 指定 ``data_dir`` から YAML を読み込む．"
+msgstr ""
+
+#: anno_save_analyzer.trade.buildings.BuildingDictionary.load:3 of
+msgid ""
+"``locales`` は name override の優先順．先頭から順に探索して最初に見つかった name を採用．``en`` は "
+"canonical メタソースとして常にベースロード．"
+msgstr ""
+
+#: anno_save_analyzer.trade.buildings.BuildingDictionary.load:6 of
+msgid ":sphinx_autodoc_typehints_type:`\\:py\\:class\\:\\`\\~anno\\_save\\_analyzer.trade.buildings.BuildingDictionary\\``"
+msgstr ""
+
+#: anno_save_analyzer.trade.buildings.known_kinds:1 of
+msgid "テスト / ドキュメント用に kind 集合を公開する．"
+msgstr ""
+
+#: anno_save_analyzer.trade.buildings.known_kinds:3 of
+msgid ""
+":sphinx_autodoc_typehints_type:`\\:py\\:class\\:\\`frozenset\\`\\\\ "
+"\\\\\\[\\:py\\:class\\:\\`str\\`\\]`"
+msgstr ""
+
+#: ../../source/api/trade.rst:49
+msgid "Consumption (tier rates)"
+msgstr ""
+
+#: anno_save_analyzer.trade.consumption:1 of
+msgid "Anno 1800 tier 別消費レート (Anno1800Calculator 由来) の loader．"
+msgstr ""
+
+#: anno_save_analyzer.trade.consumption:3 of
+msgid ""
+"``data/consumption_anno1800.en.yaml`` を canonical ソースとして読み，``(tier_guid, "
+"product_guid) → tpmin`` (tons-per-minute-per-resident) を返す "
+"``ConsumptionTable`` を提供する．``.ja.yaml`` は tier 名の日本語ローカライズに使う．"
+msgstr ""
+
+#: anno_save_analyzer.trade.consumption:7 of
+msgid ""
+"YAML 生成は ``scripts/generate_supply_data_anno1800.py`` で再生成できる． CI の "
+"validate-supply-data job が diff 検知するため Calculator が更新されたら "
+"再生成してコミットする必要がある．"
+msgstr ""
+
+#: anno_save_analyzer.trade.consumption.TierNeed:1 of
+msgid "1 tier が消費 (あるいは欲しがる) する 1 物資の設定．"
+msgstr ""
+
+#: anno_save_analyzer.trade.consumption.TierNeed.tpmin:1 of
+msgid ""
+"tons-per-minute-per-resident．``None`` は物資が \"need\" として登録されてる が実消費量が未定義 "
+"(例: 共同体・公共サービス系の intangible need)．"
+msgstr ""
+
+#: anno_save_analyzer.trade.consumption.TierNeed.residents:1 of
+msgid "この need を満たしたとき 1 住居 / tier upgrade あたりで増える住民数．"
+msgstr ""
+
+#: anno_save_analyzer.trade.consumption.TierNeed.happiness:1 of
+msgid "この need を満たしたときの happiness 寄与．bonus need で使う．"
+msgstr ""
+
+#: anno_save_analyzer.trade.consumption.TierNeed.is_bonus_need:1 of
+msgid "Spirits / Rum のような住人 upgrade 不要の嗜好品系．"
+msgstr ""
+
+#: anno_save_analyzer.trade.consumption.PopulationTier:1 of
+msgid "Farmer / Worker / Artisan などの住民階層 1 件．"
+msgstr ""
+
+#: anno_save_analyzer.trade.consumption.PopulationTier.name:1 of
+msgid "Calculator 由来の英語名 (canonical)．日本語 override は別メソッド経由．"
+msgstr ""
+
+#: anno_save_analyzer.trade.consumption.PopulationTier.full_house:1 of
+msgid "Farmer=10．"
+msgstr ""
+
+#: anno_save_analyzer.trade.consumption.PopulationTier.full_house of
+msgid "type"
+msgstr ""
+
+#: anno_save_analyzer.trade.consumption.PopulationTier.full_house:3 of
+msgid "1 住居あたりの人数上限．例"
+msgstr ""
+
+#: anno_save_analyzer.trade.consumption.ConsumptionTable:1 of
+msgid "Tier 群の集合と locale 名 override．``load`` で YAML から構築する．"
+msgstr ""
+
+#: anno_save_analyzer.trade.consumption.ConsumptionTable.localized_names:1 of
+msgid "``((locale, ((tier_guid, 名前), ...)), ...)``．英語は ``tier.name`` を使う．"
+msgstr ""
+
+#: anno_save_analyzer.trade.consumption.ConsumptionTable.get_tier:1 of
+msgid "tier guid で 1 件返す．未登録は ``None``．"
+msgstr ""
+
+#: anno_save_analyzer.trade.consumption.ConsumptionTable.get_tier:3 of
+msgid ""
+":sphinx_autodoc_typehints_type:`\\:py\\:class\\:\\`\\~anno\\_save\\_analyzer.trade.consumption.PopulationTier\\`"
+" \\| \\:py\\:obj\\:\\`None\\``"
+msgstr ""
+
+#: anno_save_analyzer.trade.consumption.ConsumptionTable.get_rate:1 of
+msgid "``(tier, product)`` の tpmin を返す．組み合わせが無ければ ``None``．"
+msgstr ""
+
+#: anno_save_analyzer.trade.consumption.ConsumptionTable.get_rate:3 of
+msgid ""
+":sphinx_autodoc_typehints_type:`\\:py\\:class\\:\\`float\\` \\| "
+"\\:py\\:obj\\:\\`None\\``"
+msgstr ""
+
+#: anno_save_analyzer.trade.consumption.ConsumptionTable.display_name:1 of
+msgid "``locale`` 優先 → 英語 fallback の順で tier 表示名を返す．"
+msgstr ""
+
+#: anno_save_analyzer.trade.consumption.ConsumptionTable.display_name:3 of
+msgid ""
+":sphinx_autodoc_typehints_type:`\\:py\\:class\\:\\`str\\` \\| "
+"\\:py\\:obj\\:\\`None\\``"
+msgstr ""
+
+#: anno_save_analyzer.trade.consumption.ConsumptionTable.load:1 of
+msgid "canonical (en) + ``ja`` ローカライズ YAML を読み込む．"
+msgstr ""
+
+#: anno_save_analyzer.trade.consumption.ConsumptionTable.load:3 of
+msgid "``data_dir`` が ``None`` なら同梱 ``anno_save_analyzer.data`` から読む．"
+msgstr ""
+
+#: anno_save_analyzer.trade.consumption.ConsumptionTable.load:5 of
+msgid ":sphinx_autodoc_typehints_type:`\\:py\\:class\\:\\`\\~anno\\_save\\_analyzer.trade.consumption.ConsumptionTable\\``"
+msgstr ""
+
+#: ../../source/api/trade.rst:55
+msgid "Storage trends"
+msgstr ""
+
+#: anno_save_analyzer.trade.storage:1 of
+msgid "島ごとの在庫時系列 (StorageTrends) 抽出．"
+msgstr ""
+
+#: anno_save_analyzer.trade.storage:3 of
+msgid ""
+"内側 Session DOM の ``AreaInfo > <1> > AreaEconomy > StorageTrends`` 階層から "
+"物資ごとの在庫履歴を取り出す．本モジュールは"
+msgstr ""
+
+#: anno_save_analyzer.trade.storage:6 of
+msgid "生 FileDB bytes から ``IslandStorageTrend`` Pydantic model を抽出"
+msgstr ""
+
+#: anno_save_analyzer.trade.storage:7 of
+msgid "``latest`` / ``peak`` / ``mean`` / ``slope`` 等の derived プロパティを提供"
+msgstr ""
+
+#: anno_save_analyzer.trade.storage:9 of
+msgid "の 2 段階を担う．TUI の Inventory tab / CLI の ``trade inventory`` 将来実装で 消費される．"
+msgstr ""
+
+#: anno_save_analyzer.trade.storage:12 of
+msgid "## DOM 構造 (実測)"
+msgstr ""
+
+#: anno_save_analyzer.trade.storage:14 of
+msgid ""
+"### Anno 117 (sample_anno117.a8s) ``` AreaInfo > <1> (player island, "
+"CityName を持つ)"
+msgstr ""
+
+#: anno_save_analyzer.trade.storage:17 anno_save_analyzer.trade.storage:36 of
+msgid "└─ AreaEconomy"
+msgstr ""
+
+#: anno_save_analyzer.trade.storage:18 anno_save_analyzer.trade.storage:37 of
+msgid "└─ StorageTrends"
+msgstr ""
+
+#: anno_save_analyzer.trade.storage:19 anno_save_analyzer.trade.storage:38 of
+msgid "└─ <ProductGUID> (anonymous attrib, i32)"
+msgstr ""
+
+#: anno_save_analyzer.trade.storage:20 anno_save_analyzer.trade.storage:39 of
+msgid "└─ <1>"
+msgstr ""
+
+#: anno_save_analyzer.trade.storage:21 of
+msgid "├─ A LastPointTime: i64 (最新サンプル tick) ├─ A Estimation: i32 └─ T Points"
+msgstr ""
+
+#: anno_save_analyzer.trade.storage:24 of
+msgid ""
+"├─ A capacity: i64 (120 固定) ├─ A size: i64 (120 固定) └─ A <32768> × 120 "
+"(i32 各サンプル値．ring buffer)"
+msgstr ""
+
+#: anno_save_analyzer.trade.storage:29 of
+msgid ""
+"1800 と違って `capacity` / `size` named attrib + 120 samples の full ring "
+"buffer．13 player islands × 110 unique GUIDs = 1,430 trend rows を検証済． "
+"``Points`` は shift register で ``[-1]`` = 最新サンプル．"
+msgstr ""
+
+#: anno_save_analyzer.trade.storage:33 of
+msgid ""
+"### Anno 1800 (sample_anno1800.a7s) ``` AreaInfo > <1> (player island, "
+"CityName を持つ)"
+msgstr ""
+
+#: anno_save_analyzer.trade.storage:40 of
+msgid "├─ A LastPointTime: i64 ├─ A Estimation: i32 └─ T Points"
+msgstr ""
+
+#: anno_save_analyzer.trade.storage:43 of
+msgid "└─ A <32768> × 2 (i32．named attrib 無し．実質 [現在値, 前回値])"
+msgstr ""
+
+#: anno_save_analyzer.trade.storage:46 of
+msgid ""
+"**Anno 1800 は 2 サンプルしか保存してない**．120 サンプル時系列じゃなくてデルタ ペア．latest / peak / "
+"slope は成立するが mean はほぼ意味なし，sparkline は 2 文字だけ．完全な chart は描けん．``capacity`` "
+"/ ``size`` named attrib が 無いので loader 側で ``len(samples)`` にフォールバックして "
+"yield する．"
+msgstr ""
+
+#: anno_save_analyzer.trade.storage.PointSeries:1 of
+msgid "StorageTrends 配下の ``Points`` 時系列．"
+msgstr ""
+
+#: anno_save_analyzer.trade.storage.PointSeries:3 of
+msgid ""
+"``samples`` は shift register で古い方が先頭．``samples[-1]`` が最新． 実セーブでは "
+"``capacity == size == 120`` 固定．"
+msgstr ""
+
+#: anno_save_analyzer.trade.storage.PointSeries.latest:1 of
+msgid "最新サンプル (= ``samples[-1]``)．空ならば 0．"
+msgstr ""
+
+#: anno_save_analyzer.trade.storage.PointSeries.peak:1 of
+msgid "観測された最大値．"
+msgstr ""
+
+#: anno_save_analyzer.trade.storage.PointSeries.mean:1 of
+msgid "算術平均．空なら 0．"
+msgstr ""
+
+#: anno_save_analyzer.trade.storage.PointSeries.slope:1 of
+msgid "線形回帰の傾き．増減トレンドの符号判定に使う．"
+msgstr ""
+
+#: anno_save_analyzer.trade.storage.PointSeries.slope:3 of
+msgid "単純な最小二乗で y = a*x + b の ``a`` を返す．サンプル数 < 2 なら 0．"
+msgstr ""
+
+#: anno_save_analyzer.trade.storage.IslandStorageTrend:1 of
+msgid "1 島 × 1 物資の在庫時系列レコード．"
+msgstr ""
+
+#: anno_save_analyzer.trade.storage.list_storage_trends:1 of
+msgid "内側 Session FileDB から島 × 物資の時系列を全件抽出．"
+msgstr ""
+
+#: anno_save_analyzer.trade.storage.list_storage_trends:3 of
+msgid ""
+"プレイヤー保有島 (``AreaInfo > <1>`` 直下に ``CityName`` attrib を持つもの) のみ対象．NPC 島の "
+"StorageTrends は CityName ゲートで除外．"
+msgstr ""
+
+#: anno_save_analyzer.trade.storage.list_storage_trends:6 of
+msgid ""
+":sphinx_autodoc_typehints_type:`\\:py\\:class\\:\\`tuple\\`\\\\ "
+"\\\\\\[\\:py\\:class\\:\\`\\~anno\\_save\\_analyzer.trade.storage.IslandStorageTrend\\`\\,"
+" \\:py\\:data\\:\\`...\\<Ellipsis\\>\\`\\]`"
+msgstr ""
+
+#: anno_save_analyzer.trade.storage.group_by_island:1 of
+msgid "island_name をキーに pivot．Inventory tab の island > product hierarchy 用．"
+msgstr ""
+
+#: anno_save_analyzer.trade.storage.group_by_island:3 of
+msgid ""
+":sphinx_autodoc_typehints_type:`\\:py\\:class\\:\\`dict\\`\\\\ "
+"\\\\\\[\\:py\\:class\\:\\`str\\`\\, \\:py\\:class\\:\\`tuple\\`\\\\ "
+"\\\\\\[\\:py\\:class\\:\\`\\~anno\\_save\\_analyzer.trade.storage.IslandStorageTrend\\`\\,"
+" \\:py\\:data\\:\\`...\\<Ellipsis\\>\\`\\]\\]`"
+msgstr ""
+
+#: ../../source/api/trade.rst:61
+msgid "Routes"
+msgstr ""
+
+#: anno_save_analyzer.trade.routes:1 of
+msgid "貿易ルート定義の列挙．"
+msgstr ""
+
+#: anno_save_analyzer.trade.routes:3 of
+msgid ""
+"Anno 117 の内側 Session FileDB には，`ConstructionAI > TradeRoute > TradeRoutes"
+" > <1>` 配下に定義済み貿易ルートが列挙されている．Trade history (`TradeRouteEntries`) に "
+"まだ履歴が出てない idle route もここから拾えるため，「登録済全ルート ∖ 履歴あり ルート」 で idle を特定できる．"
+msgstr ""
+
+#: anno_save_analyzer.trade.routes:8 of
+msgid "本モジュールは title-agnostic な生抽出のみ行う．semantic な解釈 (idle 判定など) は 呼び出し側．"
+msgstr ""
+
+#: anno_save_analyzer.trade.routes.TransportTask:1 of
+msgid "TradeRoute 配下の 1 レグ．"
+msgstr ""
+
+#: anno_save_analyzer.trade.routes.TransportTask:3 of
+msgid ""
+"``from_key`` / ``to_key`` は save 内部の u16 キー (建物 / dock の localID と推定)． "
+"AreaManager_<N> / CityName への対応は未解明．"
+msgstr ""
+
+#: anno_save_analyzer.trade.routes.TradeRouteDef:1 of
+msgid "貿易ルート 1 本．"
+msgstr ""
+
+#: anno_save_analyzer.trade.routes.TradeRouteDef:3 of
+msgid ""
+"``ship_id`` は trade history の ``Trader`` attrib と一致するため，履歴との 突き合わせ (idle "
+"判定) に使える．``route_hash`` は Anno 内部のルート識別子．"
+msgstr ""
+
+#: anno_save_analyzer.trade.routes.list_trade_routes:1 of
+msgid "内側 Session FileDB から登録済貿易ルートを全件抽出．"
+msgstr ""
+
+#: anno_save_analyzer.trade.routes.list_trade_routes:3 of
+msgid ""
+"複数 ``ConstructionAI`` ブロックがある場合 (プレイヤー + AI) はそれぞれ展開し， 呼び出し側が必要に応じて "
+"ship_id などで filter する．"
+msgstr ""
+
+#: anno_save_analyzer.trade.routes.list_trade_routes:6 of
+msgid ""
+":sphinx_autodoc_typehints_type:`\\:py\\:class\\:\\`tuple\\`\\\\ "
+"\\\\\\[\\:py\\:class\\:\\`\\~anno\\_save\\_analyzer.trade.routes.TradeRouteDef\\`\\,"
+" \\:py\\:data\\:\\`...\\<Ellipsis\\>\\`\\]`"
+msgstr ""
+
