@@ -111,6 +111,6 @@ msgid "Site map"
 msgstr "サイトマップ"
 
 #: ../../source/index.md:89
-msgid "Japanese documentation: [ja/index.html](ja/index.html)．"
-msgstr "English documentation: [../index.html](../index.html)．"
+msgid "Japanese documentation: <a href=\"ja/\">日本語版</a>．"
+msgstr "English documentation: <a href=\"../\">English</a>．"
 

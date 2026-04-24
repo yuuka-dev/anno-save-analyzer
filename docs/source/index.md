@@ -86,4 +86,4 @@ roadmap
 
 ---
 
-Japanese documentation: [ja/index.html](ja/index.html)．
+Japanese documentation: <a href="ja/">日本語版</a>．
