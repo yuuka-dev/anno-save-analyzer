@@ -46,7 +46,7 @@ _OUTPUT_COLUMNS = [
 def optimal_flow(
     balance_df: pd.DataFrame,
     *,
-    session_by_area_manager: Mapping[str, str] | None = None,
+    session_by_area_manager: Mapping[str, str | None] | None = None,
 ) -> pd.DataFrame:
     """各物資の供給余剰→赤字 flow を min-cost で解く．
 
@@ -58,6 +58,7 @@ def optimal_flow(
     if balance_df.empty:
         return pd.DataFrame(columns=_OUTPUT_COLUMNS)
 
+    session_map: Mapping[str, str | None] = session_by_area_manager or {}
     rows: list[dict] = []
     for (guid, name), group in balance_df.groupby(["product_guid", "product_name"]):
         suppliers = group[group["delta_per_minute"] > 0]
@@ -67,10 +68,10 @@ def optimal_flow(
         flow_dict = _solve_product(
             suppliers=suppliers,
             demanders=demanders,
-            session_by_area_manager=session_by_area_manager or {},
+            session_by_area_manager=session_map,
         )
         for source_am, sink_am, flow_scaled in flow_dict:
-            cost = _edge_cost(source_am, sink_am, session_by_area_manager or {})
+            cost = _edge_cost(source_am, sink_am, session_map)
             rows.append(
                 {
                     "product_guid": int(guid),
@@ -95,7 +96,7 @@ def _solve_product(
     *,
     suppliers: pd.DataFrame,
     demanders: pd.DataFrame,
-    session_by_area_manager: Mapping[str, str],
+    session_by_area_manager: Mapping[str, str | None],
 ) -> list[tuple[str, str, int]]:
     """1 物資について max-flow min-cost を解いて (source, sink, flow) を返す．"""
     g = nx.DiGraph()
@@ -106,14 +107,14 @@ def _solve_product(
 
     for _, row in suppliers.iterrows():
         am = str(row["area_manager"])
-        cap = int(float(row["delta_per_minute"]) * _SCALE)
+        cap = int(round(float(row["delta_per_minute"]) * _SCALE))
         if cap <= 0:
             continue
         g.add_edge(src_node, _supplier_node(am), capacity=cap, weight=0)
 
     for _, row in demanders.iterrows():
         am = str(row["area_manager"])
-        cap = int(-float(row["delta_per_minute"]) * _SCALE)
+        cap = int(round(-float(row["delta_per_minute"]) * _SCALE))
         if cap <= 0:
             continue
         g.add_edge(_demander_node(am), sink_node, capacity=cap, weight=0)
@@ -159,7 +160,7 @@ def _demander_node(area_manager: str) -> str:
 def _edge_cost(
     source_am: str,
     sink_am: str,
-    session_by_area_manager: Mapping[str, str],
+    session_by_area_manager: Mapping[str, str | None],
 ) -> int:
     if not session_by_area_manager:
         return _SAME_SESSION_COST
