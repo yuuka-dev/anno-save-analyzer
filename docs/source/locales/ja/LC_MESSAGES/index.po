@@ -111,10 +111,6 @@ msgid "Site map"
 msgstr "サイトマップ"
 
 #: ../../source/index.md:89
-msgid ""
-"Japanese documentation: [ja/index.html](ja/index.html) (build with ``make "
-"html-ja`` / ``make site`` for combined preview)．"
-msgstr ""
-"英語版ドキュメント: [../index.html](../index.html) ─ ``make site`` で両言語"
-"を ``_build/site/`` にまとめてビルドできます．"
+msgid "Japanese documentation: [ja/index.html](ja/index.html)．"
+msgstr "English documentation: [../index.html](../index.html)．"
 
