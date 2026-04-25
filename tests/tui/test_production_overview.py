@@ -85,7 +85,7 @@ def tui_state_with_factories(tui_state, monkeypatch) -> TuiState:
     """
     monkeypatch.setattr(
         "anno_save_analyzer.tui.screens.production_overview.FactoryRecipeTable.load",
-        classmethod(lambda cls: _make_recipe_table()),
+        classmethod(lambda cls, *, locales=("en",): _make_recipe_table()),
     )
     return dataclasses.replace(
         tui_state,
@@ -297,7 +297,7 @@ class TestProductionRecipeFallbacks:
 
         monkeypatch.setattr(
             "anno_save_analyzer.tui.screens.production_overview.FactoryRecipeTable.load",
-            classmethod(lambda cls: FactoryRecipeTable(recipes={})),
+            classmethod(lambda cls, *, locales=("en",): FactoryRecipeTable(recipes={})),
         )
         unknown_state = dataclasses.replace(
             tui_state,
@@ -322,6 +322,56 @@ class TestProductionRecipeFallbacks:
             assert "Building_999999" in row[0]
             assert row[3] == "—"
             assert row[4] == "0.00"
+
+
+class TestProductionRecipeLocalePassthrough:
+    """``state.locale`` が ``FactoryRecipeTable.load`` に届くこと (#102)．"""
+
+    def test_load_called_with_state_locale_ja(self, tui_state, monkeypatch) -> None:
+        """state.locale="ja" で screen を作ると ``locales=("en", "ja")`` が渡る．"""
+        captured: dict[str, object] = {}
+
+        def fake_load(cls, *, locales=("en",)):
+            captured["locales"] = locales
+            return _make_recipe_table()
+
+        monkeypatch.setattr(
+            "anno_save_analyzer.tui.screens.production_overview.FactoryRecipeTable.load",
+            classmethod(fake_load),
+        )
+        ja_state = dataclasses.replace(
+            tui_state,
+            locale="ja",
+            title=GameTitle.ANNO_1800,
+            factories_by_island=_make_factories_by_island(),
+        )
+        from anno_save_analyzer.tui.i18n import Localizer
+
+        ProductionOverviewScreen(ja_state, Localizer.load("ja"))
+        assert captured["locales"] == ("en", "ja")
+
+    def test_load_called_with_en_only_when_locale_en(self, tui_state, monkeypatch) -> None:
+        """state.locale="en" なら冗長な ja YAML を読まないよう ``("en",)`` のみ．"""
+        captured: dict[str, object] = {}
+
+        def fake_load(cls, *, locales=("en",)):
+            captured["locales"] = locales
+            return _make_recipe_table()
+
+        monkeypatch.setattr(
+            "anno_save_analyzer.tui.screens.production_overview.FactoryRecipeTable.load",
+            classmethod(fake_load),
+        )
+        en_state = dataclasses.replace(
+            tui_state,
+            locale="en",
+            title=GameTitle.ANNO_1800,
+            factories_by_island=_make_factories_by_island(),
+        )
+        from anno_save_analyzer.tui.i18n import Localizer
+
+        ProductionOverviewScreen(en_state, Localizer.load("en"))
+        assert captured["locales"] == ("en",)
 
 
 class TestProductionRateCalculation:

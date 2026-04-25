@@ -92,8 +92,9 @@ class ProductionOverviewScreen(Screen):
         # 現在 Tree で選択中の filter．None = All．それ以外は (kind, value)．
         self._filter: tuple[str, str] | None = None
         # FactoryRecipeTable を 1 度だけ load (失敗時 None)．Anno 1800 以外は
-        # データが無いので空テーブル相当で表示するフォールバック．
-        self._recipes: FactoryRecipeTable | None = self._try_load_recipes()
+        # データが無いので空テーブル相当で表示するフォールバック．state.locale を
+        # 渡して factory 名を日本語化 (#102)．
+        self._recipes: FactoryRecipeTable | None = self._try_load_recipes(state.locale)
         # building_guid → recipe を直接引けるように cache．
         self._recipe_by_guid: dict[int, FactoryRecipe] = (
             dict(self._recipes.recipes) if self._recipes is not None else {}
@@ -102,9 +103,10 @@ class ProductionOverviewScreen(Screen):
         self._last_detail_row: tuple[str, int] | None = None
 
     @staticmethod
-    def _try_load_recipes() -> FactoryRecipeTable | None:
+    def _try_load_recipes(locale: str) -> FactoryRecipeTable | None:
+        recipe_locales = ("en",) if locale == "en" else ("en", locale)
         try:
-            return FactoryRecipeTable.load()
+            return FactoryRecipeTable.load(locales=recipe_locales)
         except (FileNotFoundError, ValueError):  # pragma: no cover - defensive
             return None
 

@@ -217,7 +217,9 @@ def load_state(
     )
 
     progress("computing supply balance")
-    balance_table, am_to_session_key = _try_build_balance_table(title, inner_payloads, buildings)
+    balance_table, am_to_session_key = _try_build_balance_table(
+        title, inner_payloads, buildings, locale=locale
+    )
     # Jaccard match 成功した AM → city_name map (label 分類用)．
     am_to_city: dict[str, str] = {m.area_manager: m.city_name for m in city_area_matches}
 
@@ -330,17 +332,22 @@ def _try_build_balance_table(
     title: GameTitle,
     inner_payloads: list[bytes],
     buildings: BuildingDictionary | None,
+    locale: str = "en",
 ) -> tuple[SupplyBalanceTable | None, dict[str, str]]:
     """Anno 1800 + BuildingDictionary 有り の時だけ supply balance を算出．
+
+    ``locale`` は ``FactoryRecipeTable.load(locales=...)`` に渡して工場名を
+    日本語等に解決させる．未指定なら英語のみ (#102 の locale 透過)．
 
     返り値は ``(balance_table, area_manager → session_locale_key)`` のタプル．
     後者は UI 側で「どの session の島か」を表示するのに使う．
     """
     if title is not GameTitle.ANNO_1800 or buildings is None:
         return None, {}
+    recipe_locales = ("en",) if locale == "en" else ("en", locale)
     try:
         consumption = ConsumptionTable.load()
-        recipes = FactoryRecipeTable.load()
+        recipes = FactoryRecipeTable.load(locales=recipe_locales)
     except (FileNotFoundError, ValueError):  # pragma: no cover - defensive
         return None, {}
     all_residences: list[ResidenceAggregate] = []
