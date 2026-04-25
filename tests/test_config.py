@@ -9,6 +9,7 @@ import pytest
 
 from anno_save_analyzer.config import (
     _ENV_OVERRIDE,
+    PathsConfig,
     UiConfig,
     UserConfig,
     chart_window_from_token,
@@ -164,3 +165,41 @@ class TestSaveConfig:
         save_config(UserConfig(ui=UiConfig(locale='weird"locale\\x', theme="default")), path)
         loaded = load_config(path)
         assert loaded.ui.locale == 'weird"locale\\x'
+
+
+class TestPathsConfig:
+    def test_round_trip_with_save_dirs(self, tmp_path: Path) -> None:
+        path = tmp_path / "cfg.toml"
+        cfg = UserConfig(
+            paths=PathsConfig(
+                anno1800_save_dir=r"C:\Users\u\Documents\Anno 1800\accounts\1\savegame",
+                anno117_save_dir="/home/u/.steam/anno117/savegame",
+            )
+        )
+        save_config(cfg, path)
+        loaded = load_config(path)
+        assert (
+            loaded.paths.anno1800_save_dir == r"C:\Users\u\Documents\Anno 1800\accounts\1\savegame"
+        )
+        assert loaded.paths.anno117_save_dir == "/home/u/.steam/anno117/savegame"
+
+    def test_unset_paths_are_commented_out(self, tmp_path: Path) -> None:
+        path = tmp_path / "cfg.toml"
+        save_config(UserConfig(), path)
+        text = path.read_text(encoding="utf-8")
+        assert "[paths]" in text
+        assert "# anno1800_save_dir" in text
+        assert "# anno117_save_dir" in text
+
+    def test_partial_paths_persist(self, tmp_path: Path) -> None:
+        """1800 だけ設定した場合，117 はコメントアウトのまま保存される．"""
+        path = tmp_path / "cfg.toml"
+        save_config(
+            UserConfig(paths=PathsConfig(anno1800_save_dir="/saves/1800")),
+            path,
+        )
+        loaded = load_config(path)
+        assert loaded.paths.anno1800_save_dir == "/saves/1800"
+        assert loaded.paths.anno117_save_dir is None
+        text = path.read_text(encoding="utf-8")
+        assert "# anno117_save_dir" in text

@@ -173,6 +173,41 @@ class TestTuiCommand:
         assert result.exit_code == 0
         assert captured["state_locale"] == "en"
 
+    def test_tui_save_omitted_without_title_fails(self, tmp_path: Path, monkeypatch) -> None:
+        """save 省略 + ``--title`` 未指定 → exit 2 + ``--title`` 要求メッセージ．"""
+        cfg = tmp_path / "cfg.toml"
+        cfg.write_text("", encoding="utf-8")
+        monkeypatch.setenv("ANNO_SAVE_ANALYZER_CONFIG", str(cfg))
+        result = runner.invoke(app, ["tui"])
+        assert result.exit_code == 2
+        assert "--title" in result.output
+
+    def test_tui_save_omitted_no_config_path_fails(self, tmp_path: Path, monkeypatch) -> None:
+        """save 省略 + ``--title`` あり + config に paths 未設定 → exit 2 + ガイド．"""
+        cfg = tmp_path / "cfg.toml"
+        cfg.write_text("[ui]\n", encoding="utf-8")
+        monkeypatch.setenv("ANNO_SAVE_ANALYZER_CONFIG", str(cfg))
+        result = runner.invoke(app, ["tui", "--title", "anno1800"])
+        assert result.exit_code == 2
+        assert "anno1800_save_dir" in result.output
+
+    def test_tui_save_omitted_picks_latest_from_config(self, tmp_path: Path, monkeypatch) -> None:
+        """save 省略 + config 設定済 → 最新 save を自動選択して TUI 起動．"""
+        save_dir = tmp_path / "saves"
+        save_dir.mkdir()
+        save = save_dir / "auto.a8s"
+        save.write_bytes(_make_save(tmp_path).read_bytes())
+
+        cfg = tmp_path / "cfg.toml"
+        cfg.write_text(f'[paths]\nanno117_save_dir = "{save_dir}"\n', encoding="utf-8")
+        monkeypatch.setenv("ANNO_SAVE_ANALYZER_CONFIG", str(cfg))
+
+        with patch("anno_save_analyzer.tui.TradeApp.run"):
+            result = runner.invoke(app, ["tui", "--title", "anno117"])
+        assert result.exit_code == 0, result.output
+        assert "Auto-selected latest save" in result.output
+        assert "auto.a8s" in result.output
+
     def test_tui_warns_on_unknown_theme_in_config(self, tmp_path: Path, monkeypatch) -> None:
         """破損 theme 値は default にフォールバックし warning を出す．"""
         cfg_path = tmp_path / "cfg.toml"

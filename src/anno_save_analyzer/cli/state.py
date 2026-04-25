@@ -20,6 +20,7 @@ from typing import Any
 
 import typer
 
+from anno_save_analyzer.latest_save import resolve_save
 from anno_save_analyzer.trade.balance import IslandBalance, ProductBalance
 from anno_save_analyzer.trade.models import GameTitle, TradeEvent
 from anno_save_analyzer.trade.population import ResidenceAggregate, TierSummary
@@ -28,7 +29,13 @@ from anno_save_analyzer.tui.state import TuiState, load_state
 
 
 def dump_state(  # noqa: PLR0913,B008 — CLI entrypoint．typer.Argument/Option は default で使う慣例
-    save: Path = typer.Argument(..., help="Anno save file (.a7s / .a8s)", exists=True),  # noqa: B008
+    save: Path | None = typer.Argument(  # noqa: B008
+        None,
+        help=(
+            "Anno save file (.a7s / .a8s). Omit to auto-select latest save "
+            "from config.toml ([paths] anno1800_save_dir / anno117_save_dir)."
+        ),
+    ),
     title: str = typer.Option(  # noqa: B008
         GameTitle.ANNO_1800.value,
         "--title",
@@ -47,6 +54,24 @@ def dump_state(  # noqa: PLR0913,B008 — CLI entrypoint．typer.Argument/Option
 ) -> None:
     """Load the save and dump a single JSON document to ``--out``．"""
     title_enum = GameTitle(title)
+    resolved = resolve_save(save, title_enum)
+    if resolved is None:
+        field = "anno1800_save_dir" if title_enum is GameTitle.ANNO_1800 else "anno117_save_dir"
+        typer.secho(
+            f"ERROR: could not auto-select a save from [paths] {field}. "
+            "The setting may be unset, the configured directory may not exist, "
+            "or it may contain no matching .a7s/.a8s files. "
+            "Either pass the save path explicitly or fix your config.toml.",
+            err=True,
+            fg=typer.colors.RED,
+        )
+        raise typer.Exit(code=2)
+    if save is None:
+        typer.secho(f"Auto-selected latest save: {resolved}", err=True, fg=typer.colors.CYAN)
+    if not resolved.is_file():
+        typer.secho(f"ERROR: save file not found: {resolved}", err=True, fg=typer.colors.RED)
+        raise typer.Exit(code=2)
+    save = resolved
     state = load_state(save, title=title_enum, locale=locale)
     localizer = Localizer.load(locale)
     payload = _build_payload(state, localizer, include_events=include_events)

@@ -9,6 +9,7 @@ from typing import Annotated
 import typer
 
 from anno_save_analyzer.cli._title import resolve_title
+from anno_save_analyzer.latest_save import resolve_save
 from anno_save_analyzer.trade.models import GameTitle
 
 
@@ -25,7 +26,16 @@ _THEME_SENTINEL = "__from_config__"
 
 
 def _launch(
-    save: Annotated[Path, typer.Argument(help="Save file (.a7s / .a8s).")],
+    save: Annotated[
+        Path | None,
+        typer.Argument(
+            help=(
+                "Save file (.a7s / .a8s). Omit to auto-select the newest save "
+                "from your config.toml ([paths] anno1800_save_dir / "
+                "anno117_save_dir); --title is then required."
+            ),
+        ),
+    ] = None,
     title: Annotated[
         GameTitleArg | None,
         typer.Option(
@@ -52,6 +62,32 @@ def _launch(
     Long saves may take 10–40 seconds to parse; a progress log is printed to
     stderr while loading.
     """
+    # save 省略時: config.toml [paths] から最新 save を自動選択．
+    # ただし title 必須 (拡張子による推定ができないため)．
+    if save is None:
+        if title is None:
+            typer.secho(
+                "SAVE not given and --title missing. When SAVE is omitted, "
+                "--title anno1800 / anno117 is required so we can pick the "
+                "right [paths] entry from your config.toml.",
+                err=True,
+                fg=typer.colors.RED,
+            )
+            raise typer.Exit(code=2)
+        resolved = resolve_save(None, title.to_title())
+        if resolved is None:
+            field = "anno1800_save_dir" if title == GameTitleArg.ANNO_1800 else "anno117_save_dir"
+            typer.secho(
+                f"No save found from [paths] {field}. The setting may be unset, "
+                "the configured directory may not exist, or it may contain no "
+                ".a7s/.a8s files. Pass the save path or fix your config.toml.",
+                err=True,
+                fg=typer.colors.RED,
+            )
+            raise typer.Exit(code=2)
+        save = resolved
+        typer.secho(f"Auto-selected latest save: {save}", err=True, fg=typer.colors.CYAN)
+
     try:
         from anno_save_analyzer.tui import TradeApp
         from anno_save_analyzer.tui.state import load_state
