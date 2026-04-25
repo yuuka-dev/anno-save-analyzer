@@ -8,6 +8,7 @@ from anno_save_analyzer.trade import GameTitle, Item, TradingPartner
 from anno_save_analyzer.trade.aggregate import ItemSummary, RouteSummary
 from anno_save_analyzer.trade.models import TradeEvent
 from anno_save_analyzer.tui.state import (
+    _collect_factories_by_island,
     _collect_islands_by_session,
     _collect_routes_by_session,
     build_overview,
@@ -156,6 +157,62 @@ class TestCollectRoutesBySession:
         result = _collect_routes_by_session([b"first", b"second"], ("1", "0"))
         assert result["1"][0].ship_id == 2
         assert result["0"][0].ship_id == 1
+
+
+class TestCollectFactoriesByIsland:
+    def test_empty_payloads_returns_empty(self) -> None:
+        assert _collect_factories_by_island([], {}) == {}
+
+    def test_skips_aggregates_with_no_instances(self, monkeypatch) -> None:
+        """instance ゼロの AreaManager は最終 dict に含めない．"""
+        import anno_save_analyzer.tui.state as state_mod
+        from anno_save_analyzer.trade.factories import FactoryAggregate
+
+        monkeypatch.setattr(
+            state_mod,
+            "list_factory_aggregates",
+            lambda inner: (FactoryAggregate(area_manager="AreaManager_999", instances=()),),
+        )
+        result = _collect_factories_by_island([b"x"], {})
+        assert result == {}
+
+    def test_uses_city_name_when_player_match_known(self, monkeypatch) -> None:
+        """``area_manager_to_city`` に登録された AM は city_name キーで保持．"""
+        import anno_save_analyzer.tui.state as state_mod
+        from anno_save_analyzer.trade.factories import FactoryAggregate, FactoryInstance
+
+        monkeypatch.setattr(
+            state_mod,
+            "list_factory_aggregates",
+            lambda inner: (
+                FactoryAggregate(
+                    area_manager="AreaManager_5",
+                    instances=(FactoryInstance(building_guid=100400, productivity=1.0),),
+                ),
+            ),
+        )
+        am_to_city = {"AreaManager_5": "岡山"}
+        result = _collect_factories_by_island([b"x"], am_to_city)
+        assert "岡山" in result
+        assert "AreaManager_5" not in result
+
+    def test_falls_back_to_area_manager_for_npc(self, monkeypatch) -> None:
+        """match していない AM はそのまま AreaManager_N キーで保持．"""
+        import anno_save_analyzer.tui.state as state_mod
+        from anno_save_analyzer.trade.factories import FactoryAggregate, FactoryInstance
+
+        monkeypatch.setattr(
+            state_mod,
+            "list_factory_aggregates",
+            lambda inner: (
+                FactoryAggregate(
+                    area_manager="AreaManager_99",
+                    instances=(FactoryInstance(building_guid=100400, productivity=0.5),),
+                ),
+            ),
+        )
+        result = _collect_factories_by_island([b"x"], {})
+        assert "AreaManager_99" in result
 
 
 class TestLoadInnerSessionsHelper:
