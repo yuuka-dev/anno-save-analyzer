@@ -6,8 +6,9 @@
 
 from __future__ import annotations
 
+import sys
 from pathlib import Path
-from unittest.mock import patch
+from unittest.mock import MagicMock, patch
 
 from anno_save_analyzer.gui import __main__ as gui_main
 
@@ -44,10 +45,9 @@ def test_gui_main_explicit_missing_path_returns_2(tmp_path: Path, capsys) -> Non
 def test_gui_main_save_omitted_picks_latest(tmp_path: Path, monkeypatch, capsys) -> None:
     """save 省略 + config 設定済 → 最新 save を選び GUI を起動．
 
-    QApplication / BalanceMainWindow / event loop すべて mock するため
-    実 Qt 環境を要さず default CI でも実行できる．``@pytest.mark.gui`` は
-    pytest-qt を伴う本物の widget 試験のためのマーカで，このような
-    smoke test には適用しない．
+    PySide6 が **install されてない CI 環境でも動かす** ため，``sys.modules``
+    に MagicMock を inject して ``from PySide6.QtGui import QFont`` 等の
+    遅延 import を吸収する．書記長 GUI extra (``[gui]``) は dev group のみ．
     """
     save_dir = tmp_path / "saves"
     save_dir.mkdir()
@@ -58,13 +58,24 @@ def test_gui_main_save_omitted_picks_latest(tmp_path: Path, monkeypatch, capsys)
     cfg.write_text(f'[paths]\nanno117_save_dir = "{save_dir}"\n', encoding="utf-8")
     monkeypatch.setenv("ANNO_SAVE_ANALYZER_CONFIG", str(cfg))
 
+    fake_pyside6 = MagicMock()
+    fake_qtgui = MagicMock()
+    fake_qtwidgets = MagicMock()
+    fake_qtwidgets.QApplication.instance.return_value = None
+    fake_main_window = MagicMock()
+
+    sys_modules_patch = {
+        "PySide6": fake_pyside6,
+        "PySide6.QtGui": fake_qtgui,
+        "PySide6.QtWidgets": fake_qtwidgets,
+        "anno_save_analyzer.gui.main_window": fake_main_window,
+    }
+
     with (
+        patch.dict(sys.modules, sys_modules_patch),
         patch.object(gui_main, "load_state", return_value=object()),
-        patch("PySide6.QtWidgets.QApplication") as qapp_cls,
-        patch("anno_save_analyzer.gui.main_window.BalanceMainWindow"),
         patch.object(gui_main, "_run_qt_event_loop", return_value=0) as loop_mock,
     ):
-        qapp_cls.instance.return_value = None
         rc = gui_main.main(["--title", "anno117"])
 
     assert rc == 0
