@@ -524,3 +524,47 @@ def test_tourist_tier_maps_to_consumption_table_tourists() -> None:
     assert p.product_guid == 200
     # 50 × 0.01 = 0.5
     assert p.consumed_per_minute == pytest.approx(0.5)
+
+
+# ---------- DLC tier mapping (#103) ----------
+
+
+@pytest.mark.parametrize(
+    ("tier_key", "consumption_name"),
+    [
+        ("jornaleros", "Jornaleros"),
+        ("obreros", "Obreros"),
+        ("artista", "Artista"),
+        ("explorer", "Explorers"),
+        ("technician", "Technicians"),
+        ("shepherd", "Shepherds"),
+        ("elder", "Elders"),
+        ("scholar", "Scholars"),
+    ],
+)
+def test_dlc_tier_keys_route_consumption(tier_key: str, consumption_name: str) -> None:
+    """generator が出す DLC tier key が ``ConsumptionTable`` 側の英語名で引ける (#103)．
+
+    ``buildings_anno1800.yaml`` の tier フィールドに 12 件の DLC residence が
+    乗ったあと，それらの住民消費が balance に乗ることを保証する．
+    旧仕様 (#103 修正前) は tier=None で全住民消費が 0 扱いになっていた．
+    """
+    consumption = _mk_consumption(
+        PopulationTier(
+            guid=15000000 + hash(tier_key) % 1000000,
+            name=consumption_name,
+            needs=(TierNeed(product_guid=200, tpmin=0.01),),
+        )
+    )
+    residences = [
+        _mk_residence(
+            am="A1",
+            residents=200,
+            tier_breakdown=(TierSummary(tier=tier_key, residence_count=20, resident_total=200),),
+        )
+    ]
+    table = build_balance_table(residences=residences, consumption=consumption)
+    products = table.islands[0].products
+    assert len(products) == 1, f"tier={tier_key!r} did not route consumption"
+    # 200 × 0.01 = 2.0
+    assert products[0].consumed_per_minute == pytest.approx(2.0)

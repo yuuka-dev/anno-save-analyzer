@@ -62,7 +62,12 @@ _KIND_RULES: tuple[tuple[str, str], ...] = (
     ("VisitorPier", "pier"),
 )
 
-# Residence tier 番号 → 正規 tier key．Anno 1800 は 5 tier (+ DLC で 6, 7)．
+# Residence tier 番号 → 正規 tier key．
+#
+# 旧世界 (base game) は ``residence_tier01`` ～ ``residence_tier05`` で
+# farmer / worker / artisan / engineer / investor の 5 tier．DLC で追加された
+# 新世界 / Hacienda / 北極圏 / エンベサ / Hotel / Skyline Tower 等は別系列の
+# internal_name を持つため，個別の regex / mapping で拾う必要がある (#103)．
 _RES_TIER_RE = re.compile(r"residence_tier(\d{2})")
 _TIER_KEY = {
     1: "farmer",
@@ -70,10 +75,29 @@ _TIER_KEY = {
     3: "artisan",
     4: "engineer",
     5: "investor",
-    # DLC
-    6: "jornaleros",
-    7: "obreros",
 }
+
+# 新世界 (Caribbean) — residence_colony01_tier01..03
+_COLONY01_RE = re.compile(r"residence_colony01_tier(\d{2})")
+_COLONY01_TIER = {1: "jornaleros", 2: "obreros", 3: "artista"}
+
+# Hacienda residence module (Tourist Season DLC) — 同 tier set
+_HACIENDA_RE = re.compile(r"hacienda residence module tier(\d{2})")
+_HACIENDA_TIER = _COLONY01_TIER
+
+# 北極圏 (The Passage DLC)
+_ARCTIC_RE = re.compile(r"residence_arctic_tier(\d{2})")
+_ARCTIC_TIER = {1: "explorer", 2: "technician"}
+
+# エンベサ (Land of Lions DLC) — colony02．scholar (tier3) は SOC DLC 用に予約．
+_COLONY02_RE = re.compile(r"residence_colony02_tier(\d{2})")
+_COLONY02_TIER = {1: "shepherd", 2: "elder", 3: "scholar"}
+
+# 名前ベース mapping — Hotel (Tourist Season DLC) と Skyline Tower (High Life DLC)．
+_NAME_TIER: tuple[tuple[str, str], ...] = (
+    ("hotel", "tourist"),
+    ("highlife_monument", "investor"),
+)
 
 
 def _kind_for(template: str) -> str | None:
@@ -84,10 +108,33 @@ def _kind_for(template: str) -> str | None:
 
 
 def _tier_for(internal_name: str) -> str | None:
-    match = _RES_TIER_RE.search(internal_name.lower())
-    if not match:
-        return None
-    return _TIER_KEY.get(int(match.group(1)))
+    """Residence の internal_name から tier key を推定する．
+
+    順に: 旧世界 / 新世界 (colony01) / Hacienda module / 北極圏 (arctic) /
+    エンベサ (colony02) / 名前ベース (Hotel, Skyline Tower) を試す．
+    どれにも合致しなければ ``None``．
+    """
+    lower = internal_name.lower()
+    match = _RES_TIER_RE.search(lower)
+    if match:
+        tier = _TIER_KEY.get(int(match.group(1)))
+        if tier is not None:
+            return tier
+    for regex, table in (
+        (_COLONY01_RE, _COLONY01_TIER),
+        (_HACIENDA_RE, _HACIENDA_TIER),
+        (_ARCTIC_RE, _ARCTIC_TIER),
+        (_COLONY02_RE, _COLONY02_TIER),
+    ):
+        match = regex.search(lower)
+        if match:
+            tier = table.get(int(match.group(1)))
+            if tier is not None:
+                return tier
+    for needle, tier_key in _NAME_TIER:
+        if needle in lower:
+            return tier_key
+    return None
 
 
 def extract_buildings(config_data: bytes) -> list[dict[str, Any]]:
