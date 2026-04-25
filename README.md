@@ -5,7 +5,7 @@
 [![release](https://img.shields.io/github/v/release/yuuka-dev/anno-save-analyzer?include_prereleases)](https://github.com/yuuka-dev/anno-save-analyzer/releases/latest)
 [![Python 3.12+](https://img.shields.io/badge/python-3.12%2B-blue)](https://www.python.org/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
-[![Status: alpha](https://img.shields.io/badge/status-alpha-orange)](docs/ROADMAP.md)
+[![Status: alpha](https://img.shields.io/badge/status-alpha-orange)](docs/source/roadmap.md)
 
 > **One-liner**: A terminal app that opens your *Anno 1800* / *Anno 117: Pax Romana* save file and shows you your **trade history** and **island stock levels** — information the game itself does not surface.
 
@@ -275,7 +275,7 @@ sample_anno117.a8s  (RDA V2.2 container)
       └─ meta / header / gamesetup.a7s  (handled by RDAArchive)
 ```
 
-See [docs/rda_format_spec.md](docs/rda_format_spec.md) and [docs/filedb_format_investigation.md](docs/filedb_format_investigation.md) for the full write-ups.
+See [docs/source/reference/rda_format_spec.md](docs/source/reference/rda_format_spec.md) and [docs/source/reference/filedb_format_investigation.md](docs/source/reference/filedb_format_investigation.md) for the full write-ups.
 
 ---
 
@@ -294,7 +294,7 @@ See [docs/rda_format_spec.md](docs/rda_format_spec.md) and [docs/filedb_format_i
 | v0.6 | Typed Pydantic models across the DOM (Island / Building / Population) | planned |
 | v1.0 | PyPI publish, English docs, stable API | planned |
 
-See [docs/ROADMAP.md](docs/ROADMAP.md) / [docs/ROADMAP.ja.md](docs/ROADMAP.ja.md) for the detailed milestones.
+See [docs/source/roadmap.md](docs/source/roadmap.md) / [docs/source/ja/roadmap.md](docs/source/ja/roadmap.md) for the detailed milestones.
 
 ---
 

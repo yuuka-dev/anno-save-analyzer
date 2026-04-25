@@ -1,0 +1,633 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) 2026, Proletariat Yuuka
+# This file is distributed under the same license as the anno-save-analyzer
+# package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2026.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: anno-save-analyzer 0.1\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-04-24 21:04+0900\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language: ja\n"
+"Language-Team: ja <LL@li.org>\n"
+"Plural-Forms: nplurals=1; plural=0;\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.18.0\n"
+
+#: ../../source/reference/filedb_format_investigation.md:1
+msgid "FileDB (BBDom) Format Investigation"
+msgstr ""
+
+#: ../../source/reference/filedb_format_investigation.md:3
+msgid ""
+"調査日: 2026-04-19. 対象: `sample.a7s` の内部 `data.a7s` を zlib "
+"解凍した後のバイナリ（173,321,048 B = 約 165 MB）．"
+msgstr ""
+
+#: ../../source/reference/filedb_format_investigation.md:5
+msgid ""
+"参照: [anno-mods/FileDBReader](https://github.com/anno-mods/FileDBReader) の"
+" `FileDBSerializer` 実装．特に `IO/VersionDetector.cs`, "
+"`IO/Parsing/Versions/BBStructureParser_V2.cs`, "
+"`IO/Parsing/BBDocumentParser.cs`, `Document/Versioning.cs`．"
+msgstr ""
+
+#: ../../source/reference/filedb_format_investigation.md:9
+msgid ""
+"本ドキュメントは clean-room Python 再実装に向けた spec まとめ．FileDBReader のコードは転載せず， "
+"読解結果を日本語で再構成する．"
+msgstr ""
+
+#: ../../source/reference/filedb_format_investigation.md:12
+msgid "1. バージョンとマジックバイト"
+msgstr ""
+
+#: ../../source/reference/filedb_format_investigation.md:14
+msgid "FileDB は **ファイル末尾 8 バイトを magic として持つ**（先頭ではない点に注意）．"
+msgstr ""
+
+#: ../../source/reference/filedb_format_investigation.md
+msgid "Version"
+msgstr ""
+
+#: ../../source/reference/filedb_format_investigation.md
+msgid "Magic (末尾 8B)"
+msgstr ""
+
+#: ../../source/reference/filedb_format_investigation.md
+msgid "備考"
+msgstr ""
+
+#: ../../source/reference/filedb_format_investigation.md
+msgid "V1"
+msgstr ""
+
+#: ../../source/reference/filedb_format_investigation.md
+msgid "（無し）"
+msgstr ""
+
+#: ../../source/reference/filedb_format_investigation.md
+msgid "判別不能．V2/V3 でマッチしなかった場合の fallback"
+msgstr ""
+
+#: ../../source/reference/filedb_format_investigation.md
+msgid "V2"
+msgstr ""
+
+#: ../../source/reference/filedb_format_investigation.md
+msgid "`08 00 00 00 FE FF FF FF`"
+msgstr ""
+
+#: ../../source/reference/filedb_format_investigation.md
+msgid "Anno 2070 / 2205 系"
+msgstr ""
+
+#: ../../source/reference/filedb_format_investigation.md
+msgid "V3"
+msgstr ""
+
+#: ../../source/reference/filedb_format_investigation.md
+msgid "`08 00 00 00 FD FF FF FF`"
+msgstr ""
+
+#: ../../source/reference/filedb_format_investigation.md
+msgid "**Anno 1800 セーブはこれ**"
+msgstr ""
+
+#: ../../source/reference/filedb_format_investigation.md:22
+#: ../../source/reference/filedb_format_investigation.md:51
+msgid "sample.a7s での実測"
+msgstr ""
+
+#: ../../source/reference/filedb_format_investigation.md:29
+msgid "2. ファイル全体レイアウト"
+msgstr ""
+
+#: ../../source/reference/filedb_format_investigation.md
+msgid "項目"
+msgstr ""
+
+#: ../../source/reference/filedb_format_investigation.md
+msgid "値"
+msgstr ""
+
+#: ../../source/reference/filedb_format_investigation.md
+msgid "TagsOffset"
+msgstr ""
+
+#: ../../source/reference/filedb_format_investigation.md
+msgid "173,302,664 (0x0A546388)"
+msgstr ""
+
+#: ../../source/reference/filedb_format_investigation.md
+msgid "AttribsOffset"
+msgstr ""
+
+#: ../../source/reference/filedb_format_investigation.md
+msgid "173,310,912 (0x0A5483C0)"
+msgstr ""
+
+#: ../../source/reference/filedb_format_investigation.md
+msgid "Tag 辞書サイズ"
+msgstr ""
+
+#: ../../source/reference/filedb_format_investigation.md
+msgid "8,248 B → **465 タグ**"
+msgstr ""
+
+#: ../../source/reference/filedb_format_investigation.md
+msgid "Attrib 辞書サイズ"
+msgstr ""
+
+#: ../../source/reference/filedb_format_investigation.md
+msgid "10,120 B → **558 属性**"
+msgstr ""
+
+#: ../../source/reference/filedb_format_investigation.md:60
+msgid "3. Tag / Attrib 辞書の構造"
+msgstr ""
+
+#: ../../source/reference/filedb_format_investigation.md:62
+msgid "V2 / V3 共通（`BBStructureParser_V2.ParseDictionary`）："
+msgstr ""
+
+#: ../../source/reference/filedb_format_investigation.md:76
+msgid ""
+"IDs と Names は同じ順序で対応する．Attrib 辞書の ID は **0x8000 (32768) 以上** の値を使うことで Tag"
+" ID と区別する（後述の DOM 走査ロジックで効く）．"
+msgstr ""
+
+#: ../../source/reference/filedb_format_investigation.md:78
+msgid "sample.a7s 辞書サンプル"
+msgstr ""
+
+#: ../../source/reference/filedb_format_investigation.md:80
+msgid "Tag 辞書（id 昇順から 15 件）"
+msgstr ""
+
+#: ../../source/reference/filedb_format_investigation.md:100
+msgid "Attrib 辞書（id 昇順から 15 件）"
+msgstr ""
+
+#: ../../source/reference/filedb_format_investigation.md:120
+msgid "興味深いタグ（Area / Quest / Trade 系の抜粋）"
+msgstr ""
+
+#: ../../source/reference/filedb_format_investigation.md:122
+msgid ""
+"`AreaCounter`, `AreaList`, `AreaOwner`, `AreaTriggered`, `AreaUniques`, "
+"`CharterRouteDescription`, `CurrentTradeStatus`, `GameSessions`, "
+"`LastTradesPerModule`, `MetaTrader`, `QuestAssignee`, `QuestBlockings`, "
+"`QuestData`, `QuestDelays`, `QuestDifficulty`, `QuestGUID`, "
+"`QuestHistory`, `QuestID`, `QuestInstanceFactory`, `QuestLatencies`, ..."
+msgstr ""
+
+#: ../../source/reference/filedb_format_investigation.md:128
+msgid "→ **本プロジェクトの目的（ルート / クエスト / 島解析）に必要なタグは実際に存在する**ことを確認．"
+msgstr ""
+
+#: ../../source/reference/filedb_format_investigation.md:130
+msgid "4. DOM セクションの走査"
+msgstr ""
+
+#: ../../source/reference/filedb_format_investigation.md:132
+msgid "DOM は `Tag` / `Attrib` / `Terminator` のフラットなストリーム．"
+msgstr ""
+
+#: ../../source/reference/filedb_format_investigation.md:134
+msgid "1 ノードの読み取り（`ReadNextOperation`）"
+msgstr ""
+
+#: ../../source/reference/filedb_format_investigation.md:141
+msgid "State 判定（`DetermineState`）"
+msgstr ""
+
+#: ../../source/reference/filedb_format_investigation.md
+msgid "id の値"
+msgstr ""
+
+#: ../../source/reference/filedb_format_investigation.md
+msgid "State"
+msgstr ""
+
+#: ../../source/reference/filedb_format_investigation.md
+msgid "意味"
+msgstr ""
+
+#: ../../source/reference/filedb_format_investigation.md
+msgid "`id >= 32768` (0x8000 以上)"
+msgstr ""
+
+#: ../../source/reference/filedb_format_investigation.md
+msgid "**Attrib**"
+msgstr ""
+
+#: ../../source/reference/filedb_format_investigation.md
+msgid "属性．この後 content が続く"
+msgstr ""
+
+#: ../../source/reference/filedb_format_investigation.md
+msgid "`0 < id < 32768`"
+msgstr ""
+
+#: ../../source/reference/filedb_format_investigation.md
+msgid "**Tag**"
+msgstr ""
+
+#: ../../source/reference/filedb_format_investigation.md
+msgid "新しい入れ子を開く"
+msgstr ""
+
+#: ../../source/reference/filedb_format_investigation.md
+msgid "`id <= 0`"
+msgstr ""
+
+#: ../../source/reference/filedb_format_investigation.md
+msgid "**Terminator**"
+msgstr ""
+
+#: ../../source/reference/filedb_format_investigation.md
+msgid "現在の Tag を閉じる"
+msgstr ""
+
+#: ../../source/reference/filedb_format_investigation.md
+msgid "その他"
+msgstr ""
+
+#: ../../source/reference/filedb_format_investigation.md
+msgid "Undefined"
+msgstr ""
+
+#: ../../source/reference/filedb_format_investigation.md
+msgid "エラー"
+msgstr ""
+
+#: ../../source/reference/filedb_format_investigation.md:150
+msgid "Attrib のコンテンツ読み取り"
+msgstr ""
+
+#: ../../source/reference/filedb_format_investigation.md:152
+msgid "V2 / V3 では **8 バイト境界にパディング**される："
+msgstr ""
+
+#: ../../source/reference/filedb_format_investigation.md:159
+msgid "V1 は block size = 0（パディング無し）．"
+msgstr ""
+
+#: ../../source/reference/filedb_format_investigation.md:161
+msgid "Terminator のペア規則"
+msgstr ""
+
+#: ../../source/reference/filedb_format_investigation.md:163
+msgid ""
+"各 Tag は対応する Terminator（id <= 0, bytesize = 0）で閉じる． DOM 全体の終端は "
+"`CurrentLevel` が `-1` に落ちた時点（ルートレベルの Tag を閉じる追加 Terminator）．"
+msgstr ""
+
+#: ../../source/reference/filedb_format_investigation.md:166
+msgid "5. 実データでの走査例"
+msgstr ""
+
+#: ../../source/reference/filedb_format_investigation.md:168
+msgid "sample.a7s の先頭 200 バイトを走査した結果："
+msgstr ""
+
+#: ../../source/reference/filedb_format_investigation.md:188
+msgid "**観察**："
+msgstr ""
+
+#: ../../source/reference/filedb_format_investigation.md:189
+msgid ""
+"`Attrib` の中身はプリミティブ型（int32 / int64 / UTF-8 / float / fixed struct）．型は "
+"tag/attrib 名から解釈する必要あり（FileDBReader では `FileFormats/*.xml` に interpreter "
+"定義がある）．"
+msgstr ""
+
+#: ../../source/reference/filedb_format_investigation.md:190
+msgid "入れ子は ECS / Entity-Component 的な構造．"
+msgstr ""
+
+#: ../../source/reference/filedb_format_investigation.md:191
+msgid "GUID は 36 文字の UTF-8 文字列（`\"xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx\"`）．"
+msgstr ""
+
+#: ../../source/reference/filedb_format_investigation.md:193
+msgid "6. エンコーディング・バイトオーダー"
+msgstr ""
+
+#: ../../source/reference/filedb_format_investigation.md
+msgid "規則"
+msgstr ""
+
+#: ../../source/reference/filedb_format_investigation.md
+msgid "バイトオーダー"
+msgstr ""
+
+#: ../../source/reference/filedb_format_investigation.md
+msgid "Little Endian 固定"
+msgstr ""
+
+#: ../../source/reference/filedb_format_investigation.md
+msgid "文字列（辞書内名前）"
+msgstr ""
+
+#: ../../source/reference/filedb_format_investigation.md
+msgid "UTF-8 null-terminated"
+msgstr ""
+
+#: ../../source/reference/filedb_format_investigation.md
+msgid "文字列（Attrib content 内）"
+msgstr ""
+
+#: ../../source/reference/filedb_format_investigation.md
+msgid "主に UTF-8．GUID / path などは固定長ではなく末尾 null 有無は interpreter 側で判断"
+msgstr ""
+
+#: ../../source/reference/filedb_format_investigation.md
+msgid "数値"
+msgstr ""
+
+#: ../../source/reference/filedb_format_investigation.md
+msgid "int32 / int64 / uint16 / float32 / float64 が混在．Attrib 名で切り分ける"
+msgstr ""
+
+#: ../../source/reference/filedb_format_investigation.md:202
+msgid "7. 未解決事項"
+msgstr ""
+
+#: ../../source/reference/filedb_format_investigation.md:204
+msgid ""
+"**Attrib 内部の型解釈** — 生バイトの段階では raw．実用化には「このタグ配下のこの attrib は int64」という "
+"interpreter 辞書が必要．FileDBReader の `FileFormats/*.xml` 互換のマッピングを移植する or "
+"本プロジェクトで独自の interpreter (YAML) を持つか検討．"
+msgstr ""
+
+#: ../../source/reference/filedb_format_investigation.md:205
+msgid ""
+"**SessionData / BinaryData** — 本層（FileDB）の decode "
+"はこれで完了だが，`<SessionData><BinaryData>` タグ配下の **Attrib として埋め込まれた再バイナリ** "
+"は別形式（CLAUDE.md に既述の「マトリョーシカ」最深層）．v0.3 の課題．"
+msgstr ""
+
+#: ../../source/reference/filedb_format_investigation.md:206
+msgid ""
+"**V1 判別の曖昧さ** — FileDBReader 自身も「V2/V3 じゃなければ V1」としてる．V1 保有 save は現行の "
+"Anno 1800 では出現しないはずだが，mod 経由の旧形式が来たら要注意．"
+msgstr ""
+
+#: ../../source/reference/filedb_format_investigation.md:208
+msgid "8. v0.2 実装方針"
+msgstr ""
+
+#: ../../source/reference/filedb_format_investigation.md
+msgid "Step"
+msgstr ""
+
+#: ../../source/reference/filedb_format_investigation.md
+msgid "内容"
+msgstr ""
+
+#: ../../source/reference/filedb_format_investigation.md
+msgid "依存"
+msgstr ""
+
+#: ../../source/reference/filedb_format_investigation.md
+msgid "1"
+msgstr ""
+
+#: ../../source/reference/filedb_format_investigation.md
+msgid "`parser.filedb.version` で末尾 magic から V1/V2/V3 判定"
+msgstr ""
+
+#: ../../source/reference/filedb_format_investigation.md
+msgid "既存 RDA parser"
+msgstr ""
+
+#: ../../source/reference/filedb_format_investigation.md
+msgid "2"
+msgstr ""
+
+#: ../../source/reference/filedb_format_investigation.md
+msgid "`parser.filedb.dictionary` で tag / attrib 辞書を decode"
+msgstr ""
+
+#: ../../source/reference/filedb_format_investigation.md
+msgid "Step 1"
+msgstr ""
+
+#: ../../source/reference/filedb_format_investigation.md
+msgid "3"
+msgstr ""
+
+#: ../../source/reference/filedb_format_investigation.md
+msgid "`parser.filedb.dom` で DOM を iterator / streaming で yield"
+msgstr ""
+
+#: ../../source/reference/filedb_format_investigation.md
+msgid "Step 2"
+msgstr ""
+
+#: ../../source/reference/filedb_format_investigation.md
+msgid "4"
+msgstr ""
+
+#: ../../source/reference/filedb_format_investigation.md
+msgid "`parser.filedb.xml` で lxml Element に変換（huge_tree=True）"
+msgstr ""
+
+#: ../../source/reference/filedb_format_investigation.md
+msgid "Step 3"
+msgstr ""
+
+#: ../../source/reference/filedb_format_investigation.md
+msgid "5"
+msgstr ""
+
+#: ../../source/reference/filedb_format_investigation.md
+msgid ""
+"Pydantic model 層（Area / Route / Quest）を docs/tag_mapping.yaml で "
+"interpreter 駆動"
+msgstr ""
+
+#: ../../source/reference/filedb_format_investigation.md
+msgid "Step 4"
+msgstr ""
+
+#: ../../source/reference/filedb_format_investigation.md:218
+msgid ""
+"メモリ制約：**165MB を一気にメモリに載せず，DOM は streaming で流す** 設計が重要．lxml の SAX-like な "
+"`iterparse` 的 API を模倣する．"
+msgstr ""
+
+#: ../../source/reference/filedb_format_investigation.md:220
+msgid "9. Anno 117: Pax Romana サンプルでの追加検証（2026-04-19 追補）"
+msgstr ""
+
+#: ../../source/reference/filedb_format_investigation.md:222
+msgid "書記長所有の ``sample_anno117.a8s`` (881KB) でも同様に解析を実施．"
+msgstr ""
+
+#: ../../source/reference/filedb_format_investigation.md
+msgid "Anno 1800 (`sample.a7s`)"
+msgstr ""
+
+#: ../../source/reference/filedb_format_investigation.md
+msgid "Anno 117 (`sample_anno117.a8s`)"
+msgstr ""
+
+#: ../../source/reference/filedb_format_investigation.md
+msgid "外殻 RDA magic"
+msgstr ""
+
+#: ../../source/reference/filedb_format_investigation.md
+msgid "``Resource File V2.2``"
+msgstr ""
+
+#: ../../source/reference/filedb_format_investigation.md
+msgid "**``Resource File V2.2``（完全同一）**"
+msgstr ""
+
+#: ../../source/reference/filedb_format_investigation.md
+msgid "RDA 内エントリ"
+msgstr ""
+
+#: ../../source/reference/filedb_format_investigation.md
+msgid "4 件（``meta/header/gamesetup/data.a7s``）"
+msgstr ""
+
+#: ../../source/reference/filedb_format_investigation.md
+msgid "**4 件（同名）**"
+msgstr ""
+
+#: ../../source/reference/filedb_format_investigation.md
+msgid "``data.a7s`` 展開後"
+msgstr ""
+
+#: ../../source/reference/filedb_format_investigation.md
+msgid "173,321,048 B"
+msgstr ""
+
+#: ../../source/reference/filedb_format_investigation.md
+msgid "17,715,512 B（約 10%）"
+msgstr ""
+
+#: ../../source/reference/filedb_format_investigation.md
+msgid "FileDB magic"
+msgstr ""
+
+#: ../../source/reference/filedb_format_investigation.md
+msgid "``08 00 00 00 FD FF FF FF`` → V3"
+msgstr ""
+
+#: ../../source/reference/filedb_format_investigation.md
+msgid "**同一 → V3**"
+msgstr ""
+
+#: ../../source/reference/filedb_format_investigation.md
+msgid "Tag 辞書件数"
+msgstr ""
+
+#: ../../source/reference/filedb_format_investigation.md
+msgid "465"
+msgstr ""
+
+#: ../../source/reference/filedb_format_investigation.md
+msgid "575"
+msgstr ""
+
+#: ../../source/reference/filedb_format_investigation.md
+msgid "Attrib 辞書件数"
+msgstr ""
+
+#: ../../source/reference/filedb_format_investigation.md
+msgid "558"
+msgstr ""
+
+#: ../../source/reference/filedb_format_investigation.md
+msgid "448"
+msgstr ""
+
+#: ../../source/reference/filedb_format_investigation.md
+msgid "DOM 先頭バイトパターン"
+msgstr ""
+
+#: ../../source/reference/filedb_format_investigation.md
+msgid "``00 00 00 00 02 00 00 00 04 00 00 00 01 80 00 00``"
+msgstr ""
+
+#: ../../source/reference/filedb_format_investigation.md
+msgid "**同一パターン**"
+msgstr ""
+
+#: ../../source/reference/filedb_format_investigation.md:234
+msgid "含意"
+msgstr ""
+
+#: ../../source/reference/filedb_format_investigation.md:236
+msgid "**フォーマット層（RDA → zlib → FileDB V3）は Anno 1800 / Anno 117 で完全同一**．"
+msgstr ""
+
+#: ../../source/reference/filedb_format_investigation.md:237
+msgid "差分は **タグ / 属性の辞書（ゲーム固有の意味論）** のみ．"
+msgstr ""
+
+#: ../../source/reference/filedb_format_investigation.md:238
+msgid "既存の v0.1.0 RDA parser は **追加実装なしで Anno 117 もそのまま読める**ことをテストで確認済み．"
+msgstr ""
+
+#: ../../source/reference/filedb_format_investigation.md:239
+msgid ""
+"v0.2 で FileDB parser を実装した時点で，**Anno 117 の DOM 走査と XML "
+"化も自動的に可能**．interpreter 層（どのタグがどの型か）を両ゲーム分で持つだけで済む．"
+msgstr ""
+
+#: ../../source/reference/filedb_format_investigation.md:241
+msgid "ロードマップへの影響"
+msgstr ""
+
+#: ../../source/reference/filedb_format_investigation.md:243
+msgid "元の roadmap では **Anno 117 対応は v1.x（バージョン未定の Future）** に置いていたが，実質的に："
+msgstr ""
+
+#: ../../source/reference/filedb_format_investigation.md:245
+msgid "v0.2 (FileDB parser) 完了時点で，Anno 117 の構造解析は**副産物として完了**．"
+msgstr ""
+
+#: ../../source/reference/filedb_format_investigation.md:246
+msgid "残作業は「Anno 117 固有のタグ解釈 + supply-chain の違い」程度．"
+msgstr ""
+
+#: ../../source/reference/filedb_format_investigation.md:247
+msgid "したがって **v1.0 リリース時点で Anno 117 alpha 対応は現実的**（roadmap 検討事項）．"
+msgstr ""
+
+#: ../../source/reference/filedb_format_investigation.md:249
+msgid "10. 参考・謝辞"
+msgstr ""
+
+#: ../../source/reference/filedb_format_investigation.md:251
+msgid ""
+"**FileDBReader** (GPL-v3) by [@anno-mods](https://github.com/anno-"
+"mods/FileDBReader) — 先駆的リバースエンジニアリング．"
+msgstr ""
+
+#: ../../source/reference/filedb_format_investigation.md:252
+msgid "**First version of FileDB unpacking** by @VeraAtVersus．"
+msgstr ""
+
+#: ../../source/reference/filedb_format_investigation.md:253
+msgid "**BB 独自形式のリバースエンジニアリング** by @lysannschlegel．"
+msgstr ""
+
+#: ../../source/reference/filedb_format_investigation.md:255
+msgid ""
+"本プロジェクトはこれら上流の成果を**仕様学習のみ**参照し，clean-room で Python "
+"再実装する．`refs/FileDBReader/` は読取専用のローカル参照として配置，`.gitignore` 済で成果物に同梱しない．"
+msgstr ""
+

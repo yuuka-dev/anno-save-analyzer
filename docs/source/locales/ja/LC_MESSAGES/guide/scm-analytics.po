@@ -1,0 +1,157 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) 2026, Proletariat Yuuka
+# This file is distributed under the same license as the anno-save-analyzer
+# package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2026.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: anno-save-analyzer 0.1\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-04-24 21:04+0900\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language: ja\n"
+"Language-Team: ja <LL@li.org>\n"
+"Plural-Forms: nplurals=1; plural=0;\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.18.0\n"
+
+#: ../../source/guide/scm-analytics.md:1
+msgid "SCM analytics (v0.5)"
+msgstr "SCM 分析 (v0.5)"
+
+#: ../../source/guide/scm-analytics.md:3
+msgid ""
+"A pandas-native analytics layer that turns every byte of your Anno save "
+"into decision-ready tables. The analyzers line up with the question "
+"*where is my bottleneck, and what do I do about it?*"
+msgstr ""
+"pandas ベースの分析層．Anno のセーブデータを意思決定に使える表に変換します．"
+"各 analyzer は *ボトルネックはどこで，どう対処すべきか* という問いに"
+"答えるように並んでいます．"
+
+#: ../../source/guide/scm-analytics.md:7
+msgid "The 10 analyzers"
+msgstr "analyzer 10 本"
+
+#: ../../source/guide/scm-analytics.md
+msgid "Function"
+msgstr "関数"
+
+#: ../../source/guide/scm-analytics.md
+msgid "Question it answers"
+msgstr "答える質問"
+
+#: ../../source/guide/scm-analytics.md
+#, python-brace-format
+msgid "{func}`~anno_save_analyzer.analysis.to_frames`"
+msgstr "{func}`~anno_save_analyzer.analysis.to_frames`"
+
+#: ../../source/guide/scm-analytics.md
+msgid "Give me tidy DataFrames."
+msgstr "整形済 DataFrame をちょうだい．"
+
+#: ../../source/guide/scm-analytics.md
+#, python-brace-format
+msgid "{func}`~anno_save_analyzer.analysis.deficit.deficit_heatmap`"
+msgstr "{func}`~anno_save_analyzer.analysis.deficit.deficit_heatmap`"
+
+#: ../../source/guide/scm-analytics.md
+msgid "Which island × product is red?"
+msgstr "どの島 × 物資が赤字？"
+
+#: ../../source/guide/scm-analytics.md
+#, python-brace-format
+msgid "{func}`~anno_save_analyzer.analysis.deficit.pareto`"
+msgstr "{func}`~anno_save_analyzer.analysis.deficit.pareto`"
+
+#: ../../source/guide/scm-analytics.md
+#, python-format
+msgid "Which 20% of products drive 80% of consumption?"
+msgstr "消費の 80% を占める 20% の物資はどれ？"
+
+#: ../../source/guide/scm-analytics.md
+#, python-brace-format
+msgid "{func}`~anno_save_analyzer.analysis.correlation.saturation_vs_deficit`"
+msgstr "{func}`~anno_save_analyzer.analysis.correlation.saturation_vs_deficit`"
+
+#: ../../source/guide/scm-analytics.md
+msgid "Is the deficit actually hurting satisfaction?"
+msgstr "その赤字は本当に満足度を下げてる？"
+
+#: ../../source/guide/scm-analytics.md
+#, python-brace-format
+msgid "{func}`~anno_save_analyzer.analysis.routes.rank_routes`"
+msgstr "{func}`~anno_save_analyzer.analysis.routes.rank_routes`"
+
+#: ../../source/guide/scm-analytics.md
+msgid "Which ship routes do the most work?"
+msgstr "どのルートが一番働いてる？"
+
+#: ../../source/guide/scm-analytics.md
+#, python-brace-format
+msgid "{func}`~anno_save_analyzer.analysis.persistence.classify_deficit`"
+msgstr "{func}`~anno_save_analyzer.analysis.persistence.classify_deficit`"
+
+#: ../../source/guide/scm-analytics.md
+msgid "Is this deficit chronic or transient?"
+msgstr "この赤字は慢性？一過性？"
+
+#: ../../source/guide/scm-analytics.md
+#, python-brace-format
+msgid "{func}`~anno_save_analyzer.analysis.sensitivity.route_leave_one_out`"
+msgstr "{func}`~anno_save_analyzer.analysis.sensitivity.route_leave_one_out`"
+
+#: ../../source/guide/scm-analytics.md
+msgid "If I remove one ship, what breaks?"
+msgstr "船 1 隻減らしたらどこが壊れる？"
+
+#: ../../source/guide/scm-analytics.md
+#, python-brace-format
+msgid "{func}`~anno_save_analyzer.analysis.forecast.consumption_forecast`"
+msgstr "{func}`~anno_save_analyzer.analysis.forecast.consumption_forecast`"
+
+#: ../../source/guide/scm-analytics.md
+msgid "How bad will the deficit get in N hours?"
+msgstr "N 時間後にどれくらい悪化する？"
+
+#: ../../source/guide/scm-analytics.md
+#, python-brace-format
+msgid "{func}`~anno_save_analyzer.analysis.prescribe.diagnose`"
+msgstr "{func}`~anno_save_analyzer.analysis.prescribe.diagnose`"
+
+#: ../../source/guide/scm-analytics.md
+msgid "**Give me a prescription per island × product.**"
+msgstr "**島 × 物資ごとの処方箋をちょうだい．**"
+
+#: ../../source/guide/scm-analytics.md
+#, python-brace-format
+msgid "{func}`~anno_save_analyzer.analysis.allocation.optimal_flow`"
+msgstr "{func}`~anno_save_analyzer.analysis.allocation.optimal_flow`"
+
+#: ../../source/guide/scm-analytics.md
+msgid "Optimal supplier → demander matching."
+msgstr "供給地 → 消費地の最適マッチング．"
+
+#: ../../source/guide/scm-analytics.md
+#, python-brace-format
+msgid "{func}`~anno_save_analyzer.analysis.optimize.optimize_routes`"
+msgstr "{func}`~anno_save_analyzer.analysis.optimize.optimize_routes`"
+
+#: ../../source/guide/scm-analytics.md
+msgid "VRP (ship routing) with capacity and distance."
+msgstr "capacity と距離を加味した VRP (船の経路最適化)．"
+
+#: ../../source/guide/scm-analytics.md:23
+msgid "Walk-through"
+msgstr "実例"
+
+#: ../../source/guide/scm-analytics.md:47
+#, python-brace-format
+msgid "For the full Decision Matrix see {doc}`decision-matrix`."
+msgstr "Decision Matrix の詳細は {doc}`decision-matrix` を参照．"
+

@@ -1,15 +1,30 @@
 """Decision Matrix — 書記長本命の処方箋エンジン (v0.5-H #88)．
 
 B-G の全分析 (balance / persistence / correlation / routes) を合成し，
-書記長の 3 分類を rule-based で判定する:
+書記長の 3 分類を rule-based で判定する．
 
-| 観測 | 判定 | action |
-|---|---|---|
-| 慢性 deficit × 高満足度 × 航路あり | 生産増一択 | ``increase_production`` |
-| 一過性 deficit × 低相関 × 航路弱い | 取引・融通 | ``trade_flex`` |
-| 航路強いのに deficit 残る | 商品構成見直し | ``rebalance_mix`` |
-| 黒字 / deficit 解決済 | — | ``ok`` |
-| データ不足 | — | ``monitor`` |
+.. list-table::
+   :header-rows: 1
+   :widths: 35 25 40
+
+   * - 観測パターン
+     - 判定
+     - action
+   * - 慢性 deficit × 高満足度 × 航路あり
+     - 生産増一択
+     - ``increase_production``
+   * - 一過性 deficit × 低相関 × 航路弱い
+     - 取引・融通
+     - ``trade_flex``
+   * - 航路強いのに deficit 残る
+     - 商品構成見直し
+     - ``rebalance_mix``
+   * - 黒字 / deficit 解決済
+     - —
+     - ``ok``
+   * - データ不足
+     - —
+     - ``monitor``
 
 Rule threshold は module 定数で公開して書記長がチューニングできるように．
 """

@@ -1,0 +1,656 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) 2026, Proletariat Yuuka
+# This file is distributed under the same license as the anno-save-analyzer
+# package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2026.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: anno-save-analyzer 0.1\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-04-24 21:04+0900\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language: ja\n"
+"Language-Team: ja <LL@li.org>\n"
+"Plural-Forms: nplurals=1; plural=0;\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.18.0\n"
+
+#: ../../source/reference/factory_extraction_spike.md:1
+msgid "Factory / Residence Extraction Spike (Anno 1800)"
+msgstr ""
+
+#: ../../source/reference/factory_extraction_spike.md:3
+msgid "調査日: 2026-04-23．対象: ``sample_anno1800.a7s`` (4,782,934 B)．"
+msgstr ""
+
+#: ../../source/reference/factory_extraction_spike.md:5
+msgid ""
+"目的: v0.4 「島ごとサプライチェーン balance 表」(#12) および「Residence tier breakdown」(#64) "
+"着手前に，Anno 1800 セーブ内部の **工場稼働率** と **住居 階層** がどの DOM パスに存在し，どの attrib "
+"型で格納されているかを確定する．"
+msgstr ""
+
+#: ../../source/reference/factory_extraction_spike.md:9
+msgid "TL;DR"
+msgstr ""
+
+#: ../../source/reference/factory_extraction_spike.md:11
+msgid ""
+"**Residence 抽出は既存 ``trade/population.py`` が Anno 1800 でそのまま動く**． "
+"改修不要．実測で書記長の 18 島中 17 島 (Arctic 未開発のため 1 島欠) を正しく 集計できることを確認した．"
+msgstr ""
+
+#: ../../source/reference/factory_extraction_spike.md:14
+msgid ""
+"**Factory 抽出は新規実装が必要**だが DOM パターンは Residence7 と同形． ``_walk_residences`` を"
+" ``_walk_factories`` に置き換える差分で実装できる．"
+msgstr ""
+
+#: ../../source/reference/factory_extraction_spike.md:16
+msgid ""
+"**工場稼働率 ``CurrentProductivity`` は f32**．通常 0.0–2.0 (200% バフ込み) だが DLC "
+"アイテムスタッキングで 3.0 以上も実在 (書記長 save で 300% 実測)． UI 側で ``* 100`` で % に換算する．"
+msgstr ""
+
+#: ../../source/reference/factory_extraction_spike.md:19
+msgid ""
+"**建物 GUID は objects > <1> 直下の ``guid`` attrib** (i32) にあり， Factory7 / "
+"Residence7 自身には乗っていない．名前解決は後続 issue (#67) で 生成する "
+"``buildings_anno1800.yaml`` を参照する (現行 ``items_anno1800.*.yaml`` は Product"
+" 専用で建物 GUID を持たない)．"
+msgstr ""
+
+#: ../../source/reference/factory_extraction_spike.md:24
+msgid "1. 事前条件 (既存実装で確定済)"
+msgstr ""
+
+#: ../../source/reference/factory_extraction_spike.md:26
+msgid ""
+"``parser/filedb/session.py`` の ``extract_sessions`` で外側 FileDB → 5 件の "
+"``SessionData > BinaryData`` → 各 session の inner FileDB V3 に再帰展開できる． v0.3"
+" で実装済み．今回の spike は **inner session を所与** として内部構造を 調査するフェーズ．"
+msgstr ""
+
+#: ../../source/reference/factory_extraction_spike.md:31
+msgid "Anno 1800 の session 順は ``trade/sessions.py`` の通り:"
+msgstr ""
+
+#: ../../source/reference/factory_extraction_spike.md
+msgid "index"
+msgstr ""
+
+#: ../../source/reference/factory_extraction_spike.md
+msgid "session"
+msgstr ""
+
+#: ../../source/reference/factory_extraction_spike.md
+msgid "書記長 save 実測 AreaManager 数"
+msgstr ""
+
+#: ../../source/reference/factory_extraction_spike.md
+msgid "PlayerIsland"
+msgstr ""
+
+#: ../../source/reference/factory_extraction_spike.md
+msgid "0"
+msgstr ""
+
+#: ../../source/reference/factory_extraction_spike.md
+msgid "Cape Trelawney"
+msgstr ""
+
+#: ../../source/reference/factory_extraction_spike.md
+msgid "57"
+msgstr ""
+
+#: ../../source/reference/factory_extraction_spike.md
+msgid "5"
+msgstr ""
+
+#: ../../source/reference/factory_extraction_spike.md
+msgid "1"
+msgstr ""
+
+#: ../../source/reference/factory_extraction_spike.md
+msgid "Old World"
+msgstr ""
+
+#: ../../source/reference/factory_extraction_spike.md
+msgid "76"
+msgstr ""
+
+#: ../../source/reference/factory_extraction_spike.md
+msgid "4"
+msgstr ""
+
+#: ../../source/reference/factory_extraction_spike.md
+msgid "2"
+msgstr ""
+
+#: ../../source/reference/factory_extraction_spike.md
+msgid "Enbesa"
+msgstr ""
+
+#: ../../source/reference/factory_extraction_spike.md
+msgid "44"
+msgstr ""
+
+#: ../../source/reference/factory_extraction_spike.md
+msgid "3"
+msgstr ""
+
+#: ../../source/reference/factory_extraction_spike.md
+msgid "New World"
+msgstr ""
+
+#: ../../source/reference/factory_extraction_spike.md
+msgid "60"
+msgstr ""
+
+#: ../../source/reference/factory_extraction_spike.md
+msgid "6"
+msgstr ""
+
+#: ../../source/reference/factory_extraction_spike.md
+msgid "Arctic"
+msgstr ""
+
+#: ../../source/reference/factory_extraction_spike.md
+msgid "68"
+msgstr ""
+
+#: ../../source/reference/factory_extraction_spike.md
+msgid "0 (未開発)"
+msgstr ""
+
+#: ../../source/reference/factory_extraction_spike.md:41
+msgid "2. Residence 抽出の動作確認"
+msgstr ""
+
+#: ../../source/reference/factory_extraction_spike.md:43
+msgid "既存 ``list_residence_aggregates(inner_session)`` を 5 session 全てに適用．"
+msgstr ""
+
+#: ../../source/reference/factory_extraction_spike.md:45
+msgid "session 0 (Cape Trelawney) の結果抜粋"
+msgstr ""
+
+#: ../../source/reference/factory_extraction_spike.md:55
+msgid ""
+"各 AM に対して ``PlayerIsland`` (``CityName``) の数と一致する件数が得られ， "
+"``CityAreaMatch`` の jaccard 結合も機能する見込み．書記長の島名 (``大都会岡山`` 等) がそのまま "
+"``PlayerIsland.city_name`` として取得できることを確認した．"
+msgstr ""
+
+#: ../../source/reference/factory_extraction_spike.md:59
+msgid "結論"
+msgstr ""
+
+#: ../../source/reference/factory_extraction_spike.md:61
+msgid ""
+"``trade/population.py`` は**ゲームタイトル非依存**として使える．Anno 117 と Anno 1800 の DOM "
+"構造は Residence7 階層で完全同形．"
+msgstr ""
+
+#: ../../source/reference/factory_extraction_spike.md:64
+msgid "3. Factory DOM 構造の特定"
+msgstr ""
+
+#: ../../source/reference/factory_extraction_spike.md:66
+msgid "3.1 objects > <1> 子タグの出現パターン"
+msgstr ""
+
+#: ../../source/reference/factory_extraction_spike.md:68
+msgid ""
+"session 0 の最大都市 ``AreaManager_8706`` 配下で ``GameObject > objects > <1>`` "
+"(= 1 建造物) の直下子タグ集合をユニーク count した結果 (上位)："
+msgstr ""
+
+#: ../../source/reference/factory_extraction_spike.md
+msgid "n"
+msgstr ""
+
+#: ../../source/reference/factory_extraction_spike.md
+msgid "子タグ set"
+msgstr ""
+
+#: ../../source/reference/factory_extraction_spike.md
+msgid "3007"
+msgstr ""
+
+#: ../../source/reference/factory_extraction_spike.md
+msgid "``Building, BuildingModule, FeedbackController, Mesh, ParticipantID``"
+msgstr ""
+
+#: ../../source/reference/factory_extraction_spike.md
+msgid "414"
+msgstr ""
+
+#: ../../source/reference/factory_extraction_spike.md
+msgid "``... Residence7 ...``"
+msgstr ""
+
+#: ../../source/reference/factory_extraction_spike.md
+msgid "243"
+msgstr ""
+
+#: ../../source/reference/factory_extraction_spike.md
+msgid "``BezierPath, ...`` (道路・装飾)"
+msgstr ""
+
+#: ../../source/reference/factory_extraction_spike.md
+msgid "41"
+msgstr ""
+
+#: ../../source/reference/factory_extraction_spike.md
+msgid "``... Electric, Factory7 ...``"
+msgstr ""
+
+#: ../../source/reference/factory_extraction_spike.md
+msgid "34"
+msgstr ""
+
+#: ../../source/reference/factory_extraction_spike.md
+msgid "``... Warehouse ...``"
+msgstr ""
+
+#: ../../source/reference/factory_extraction_spike.md
+msgid "30"
+msgstr ""
+
+#: ../../source/reference/factory_extraction_spike.md
+msgid "``... Factory7 ...`` (非電化)"
+msgstr ""
+
+#: ../../source/reference/factory_extraction_spike.md
+msgid "27"
+msgstr ""
+
+#: ../../source/reference/factory_extraction_spike.md
+msgid "``... BuffFactory ...`` (Pub / Market 類)"
+msgstr ""
+
+#: ../../source/reference/factory_extraction_spike.md
+msgid "22"
+msgstr ""
+
+#: ../../source/reference/factory_extraction_spike.md
+msgid "``... Factory7, ModuleOwner, Motorizable ...`` (石炭/原油依存，Infolayer なし)"
+msgstr ""
+
+#: ../../source/reference/factory_extraction_spike.md
+msgid ""
+"``... Factory7, ModuleOwner, Motorizable, Infolayer ...`` "
+"(石炭/原油依存，Infolayer あり)"
+msgstr ""
+
+#: ../../source/reference/factory_extraction_spike.md:83
+msgid ""
+"**Factory7** は 41 + 30 + 22 + 22 = **115 工場** (書記長最大都市のみ．Motorizable の 2 "
+"行は ``Infolayer`` 子タグ有無で分岐する shape 違い．Factory7 本体としては 同等)．session 0 全 "
+"AreaManager 合計では **250 件**確認．全 session では 1,000+ 想定． session 0 全 "
+"AreaManager 合計では **250 件**確認．全 session では 1,000+ 想定．"
+msgstr ""
+
+#: ../../source/reference/factory_extraction_spike.md:88
+msgid "派生形として:"
+msgstr ""
+
+#: ../../source/reference/factory_extraction_spike.md:90
+msgid "``Electric`` 兄弟 → 電力消費系"
+msgstr ""
+
+#: ../../source/reference/factory_extraction_spike.md:91
+msgid "``Motorizable`` 兄弟 → モーター化可能 (石炭/原油バフ対象)"
+msgstr ""
+
+#: ../../source/reference/factory_extraction_spike.md:92
+msgid ""
+"``BuffFactory`` → 住民需要を満たすタイプ (Pub / Variety Theater 等)． Factory7 "
+"とは別タグで表現される"
+msgstr ""
+
+#: ../../source/reference/factory_extraction_spike.md:95
+msgid "3.2 Factory7 ノード内部"
+msgstr ""
+
+#: ../../source/reference/factory_extraction_spike.md:97
+msgid "3 インスタンスで実測し同一構造を確認．"
+msgstr ""
+
+#: ../../source/reference/factory_extraction_spike.md:108
+msgid "3.3 CurrentProductivity の型確定"
+msgstr ""
+
+#: ../../source/reference/factory_extraction_spike.md:110
+msgid "session 0 の Factory7 250 件での実測:"
+msgstr ""
+
+#: ../../source/reference/factory_extraction_spike.md
+msgid "読み方"
+msgstr ""
+
+#: ../../source/reference/factory_extraction_spike.md
+msgid "min"
+msgstr ""
+
+#: ../../source/reference/factory_extraction_spike.md
+msgid "max"
+msgstr ""
+
+#: ../../source/reference/factory_extraction_spike.md
+msgid "mean"
+msgstr ""
+
+#: ../../source/reference/factory_extraction_spike.md
+msgid "妥当性"
+msgstr ""
+
+#: ../../source/reference/factory_extraction_spike.md
+msgid "i32"
+msgstr ""
+
+#: ../../source/reference/factory_extraction_spike.md
+msgid "-2,147,483,648"
+msgstr ""
+
+#: ../../source/reference/factory_extraction_spike.md
+msgid "1,088,421,888"
+msgstr ""
+
+#: ../../source/reference/factory_extraction_spike.md
+msgid "440,518,428"
+msgstr ""
+
+#: ../../source/reference/factory_extraction_spike.md
+msgid "✗ (明らかに overflow)"
+msgstr ""
+
+#: ../../source/reference/factory_extraction_spike.md
+msgid "f32"
+msgstr ""
+
+#: ../../source/reference/factory_extraction_spike.md
+msgid "0.0"
+msgstr ""
+
+#: ../../source/reference/factory_extraction_spike.md
+msgid "2.0"
+msgstr ""
+
+#: ../../source/reference/factory_extraction_spike.md
+msgid "〜0.51"
+msgstr ""
+
+#: ../../source/reference/factory_extraction_spike.md
+msgid "✓ (Anno の 200% バフ上限に一致)"
+msgstr ""
+
+#: ../../source/reference/factory_extraction_spike.md:117
+msgid "**``CurrentProductivity`` は f32 で確定**．UI 層で ``* 100`` → 整数 % 表示する．"
+msgstr ""
+
+#: ../../source/reference/factory_extraction_spike.md:119
+msgid "3.4 親エントリとの関係"
+msgstr ""
+
+#: ../../source/reference/factory_extraction_spike.md:121
+msgid ""
+"``Factory7`` 自身には建物 GUID が乗っていない．建物を特定するには親の ``objects > <1>`` 直下の "
+"``guid`` attrib を読む必要がある:"
+msgstr ""
+
+#: ../../source/reference/factory_extraction_spike.md:144
+msgid "Residence7 の場合も同じ階層に ``guid`` attrib があり，そこで住居 GUID を 取得できる (tier 判定に使用)．"
+msgstr ""
+
+#: ../../source/reference/factory_extraction_spike.md:147
+msgid "4. Residence Tier Breakdown (仮説)"
+msgstr ""
+
+#: ../../source/reference/factory_extraction_spike.md:149
+msgid "Anno 1800 の住居階層は 5 種類:"
+msgstr ""
+
+#: ../../source/reference/factory_extraction_spike.md
+msgid "Tier"
+msgstr ""
+
+#: ../../source/reference/factory_extraction_spike.md
+msgid "英名"
+msgstr ""
+
+#: ../../source/reference/factory_extraction_spike.md
+msgid "日本語"
+msgstr ""
+
+#: ../../source/reference/factory_extraction_spike.md
+msgid "Farmer"
+msgstr ""
+
+#: ../../source/reference/factory_extraction_spike.md
+msgid "農民"
+msgstr ""
+
+#: ../../source/reference/factory_extraction_spike.md
+msgid "Worker"
+msgstr ""
+
+#: ../../source/reference/factory_extraction_spike.md
+msgid "労働者"
+msgstr ""
+
+#: ../../source/reference/factory_extraction_spike.md
+msgid "Artisan"
+msgstr ""
+
+#: ../../source/reference/factory_extraction_spike.md
+msgid "職人"
+msgstr ""
+
+#: ../../source/reference/factory_extraction_spike.md
+msgid "Engineer"
+msgstr ""
+
+#: ../../source/reference/factory_extraction_spike.md
+msgid "エンジニア"
+msgstr ""
+
+#: ../../source/reference/factory_extraction_spike.md
+msgid "Investor"
+msgstr ""
+
+#: ../../source/reference/factory_extraction_spike.md
+msgid "投資家"
+msgstr ""
+
+#: ../../source/reference/factory_extraction_spike.md:159
+msgid ""
+"(+ DLC で Jornalero / Obrero / Shepherd / Elder / Explorer / Technician / "
+"Scholar 等の New World / Arctic / Enbesa 固有階層)"
+msgstr ""
+
+#: ../../source/reference/factory_extraction_spike.md:162
+msgid "4.1 判定ロジック"
+msgstr ""
+
+#: ../../source/reference/factory_extraction_spike.md:164
+msgid ""
+"``objects > <1>`` 直下の ``guid`` を読み，items.yaml で ``Template = Residence*``"
+" に該当する GUID を tier ごとに分類する．"
+msgstr ""
+
+#: ../../source/reference/factory_extraction_spike.md:167
+msgid "4.2 ブロッカー"
+msgstr ""
+
+#: ../../source/reference/factory_extraction_spike.md:169
+msgid ""
+"現行の ``data/items_anno1800.*.yaml`` は **Product GUID のみ**収録している "
+"(``scripts/generate_items_anno1800.py`` が ``Template=Product`` で絞っているため)．"
+" 住居建物 GUID は**含まれていない**．"
+msgstr ""
+
+#: ../../source/reference/factory_extraction_spike.md:173
+msgid ""
+"対策として別ファイル ``data/buildings_anno1800.*.yaml`` を "
+"``scripts/generate_buildings_anno1800.py`` で生成する．``Template`` フィールドを "
+"保持する形式にして，tier 判定 / factory 種別判定を一元化する．"
+msgstr ""
+
+#: ../../source/reference/factory_extraction_spike.md:177
+msgid "5. 未確認事項 (今回の spike 範囲外)"
+msgstr ""
+
+#: ../../source/reference/factory_extraction_spike.md:179
+msgid "5.1 生産物と消費物の解決"
+msgstr ""
+
+#: ../../source/reference/factory_extraction_spike.md:181
+msgid ""
+"Factory7 直下には生産品目 (output) の GUID が**直接記録されていない**． 建物 GUID → "
+"``assets.xml`` の ``FactoryBase > RawMaterial`` / ``Product`` から "
+"推定する形になる．これも buildings YAML の生成時に解決して埋め込む．"
+msgstr ""
+
+#: ../../source/reference/factory_extraction_spike.md:185
+msgid "5.2 労働力 (Workforce)"
+msgstr ""
+
+#: ../../source/reference/factory_extraction_spike.md:187
+msgid ""
+"各工場が要求する workforce は ``ProductionChain`` / ``Workforce`` 兄弟タグ "
+"候補が複数ある．residence tier から供給される workforce と突合するには追加 spike が必要．**v0.4 の MVP"
+" では workforce 制約は後回し** (Calculator 本家も 手動入力扱いなので同等で良い)．"
+msgstr ""
+
+#: ../../source/reference/factory_extraction_spike.md:192
+msgid "5.3 Warehouse / BuffFactory"
+msgstr ""
+
+#: ../../source/reference/factory_extraction_spike.md:194
+msgid ""
+"``Warehouse`` 子タグを持つ建物は**在庫バッファ**．StorageTrends は既存実装で 取得できているので balance "
+"engine 側で参照するだけ"
+msgstr ""
+
+#: ../../source/reference/factory_extraction_spike.md:196
+msgid ""
+"``BuffFactory`` (Pub / Market / Variety Theater 等) は Factory7 と別系統． 住民需要の"
+" \"public service\" 系の満足度に寄与するため，need saturation 側 (既存の "
+"``AverageNeedSaturation``) で既にカバーされている"
+msgstr ""
+
+#: ../../source/reference/factory_extraction_spike.md:200
+msgid "5.4 AI player の工場"
+msgstr ""
+
+#: ../../source/reference/factory_extraction_spike.md:202
+msgid ""
+"NPC session (session 4 Arctic 等) でも AreaManager_* が存在する．AI プレイヤー "
+"の工場データも取得可能だが，プレイヤー vs NPC 判定は ``CityName`` attrib の 有無で行う (既存 "
+"``list_player_islands`` と同じ手法)．"
+msgstr ""
+
+#: ../../source/reference/factory_extraction_spike.md:206
+msgid "6. 実装への示唆"
+msgstr ""
+
+#: ../../source/reference/factory_extraction_spike.md:208
+msgid "6.1 モジュール配置"
+msgstr ""
+
+#: ../../source/reference/factory_extraction_spike.md:210
+msgid ""
+"新規ファイル ``src/anno_save_analyzer/trade/factories.py`` "
+"を作る．``population.py`` と並置することで:"
+msgstr ""
+
+#: ../../source/reference/factory_extraction_spike.md:213
+msgid "``list_factory_aggregates(inner_session) -> tuple[FactoryAggregate, ...]``"
+msgstr ""
+
+#: ../../source/reference/factory_extraction_spike.md:214
+msgid ""
+"``FactoryAggregate`` Pydantic モデル: ``area_manager / building_guid / count"
+" / mean_productivity / paused_count``"
+msgstr ""
+
+#: ../../source/reference/factory_extraction_spike.md:217
+msgid "を提供する．``population.py`` の ``_walk_residences`` とほぼ同じ state machine で実装可能．"
+msgstr ""
+
+#: ../../source/reference/factory_extraction_spike.md:220
+msgid "6.2 Balance Engine (#12 本体)"
+msgstr ""
+
+#: ../../source/reference/factory_extraction_spike.md:222
+msgid "依存関係:"
+msgstr ""
+
+#: ../../source/reference/factory_extraction_spike.md:233
+msgid ""
+"消費レートは Calculator の ``consumption.js`` (tier × product の per-minute rate)"
+" を Node 実行で抽出して ``data/consumption_anno1800.yaml`` に commit． 生産レートは "
+"``assets.xml`` から直接抽出して ``buildings_anno1800.yaml`` に 同梱する (Calculator "
+"は二次ソースとして参照のみ)．"
+msgstr ""
+
+#: ../../source/reference/factory_extraction_spike.md:238
+msgid "6.3 テスト戦略"
+msgstr ""
+
+#: ../../source/reference/factory_extraction_spike.md:240
+msgid "``tests/trade/test_factories.py`` — unit (合成 inner bytes で state machine)"
+msgstr ""
+
+#: ../../source/reference/factory_extraction_spike.md:241
+msgid ""
+"``tests/trade/test_anno1800_factories_smoke.py`` — 実 save で件数・平均値 アサーション "
+"(tests/trade/test_anno1800_smoke.py と同形式)"
+msgstr ""
+
+#: ../../source/reference/factory_extraction_spike.md:243
+msgid ""
+"新設 ``tests/integration/`` — save → factories + population + balance の "
+"end-to-end パイプライン確認"
+msgstr ""
+
+#: ../../source/reference/factory_extraction_spike.md:246
+msgid "6.4 Coverage 維持"
+msgstr ""
+
+#: ../../source/reference/factory_extraction_spike.md:248
+msgid ""
+"純関数層 (factories.py / balance.py) は 100% を死守．TUI / GUI 追加で 90% "
+"ゲートを下回らないように pragma: no cover を UI イベントループ内 callback に限定する (既存方針継続)．"
+msgstr ""
+
+#: ../../source/reference/factory_extraction_spike.md:252
+msgid "7. 参考"
+msgstr ""
+
+#: ../../source/reference/factory_extraction_spike.md:254
+msgid "既存実装: ``src/anno_save_analyzer/trade/population.py`` (本 spike の骨格)"
+msgstr ""
+
+#: ../../source/reference/factory_extraction_spike.md:255
+msgid "類似 spike: ``docs/session_binary_investigation.md`` (SessionData 再帰展開の発見)"
+msgstr ""
+
+#: ../../source/reference/factory_extraction_spike.md:256
+msgid "``docs/filedb_format_investigation.md`` (FileDB V3 仕様)"
+msgstr ""
+
+#: ../../source/reference/factory_extraction_spike.md:257
+msgid ""
+"Anno1800Calculator (NiHoel, MIT): "
+"https://github.com/NiHoel/Anno1800Calculator — ``js/consumption.js`` + "
+"``js/params.js`` に tier × product 消費レート"
+msgstr ""
+

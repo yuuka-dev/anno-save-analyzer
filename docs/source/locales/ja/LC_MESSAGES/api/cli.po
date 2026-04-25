@@ -1,0 +1,65 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) 2026, Proletariat Yuuka
+# This file is distributed under the same license as the anno-save-analyzer
+# package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2026.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: anno-save-analyzer 0.1\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-04-24 21:04+0900\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language: ja\n"
+"Language-Team: ja <LL@li.org>\n"
+"Plural-Forms: nplurals=1; plural=0;\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.18.0\n"
+
+#: ../../source/api/cli.rst:2
+msgid "cli — command line interface"
+msgstr ""
+
+#: anno_save_analyzer.cli.state:1 of
+msgid "``anno-save-analyzer state`` — save の全抽出結果を JSON に吐く．"
+msgstr ""
+
+#: anno_save_analyzer.cli.state:3 of
+msgid ""
+"書記長が pandas / jupyter で分析を回すための 1 本の canonical なダンプ． 内容は Overview + 島ごとの "
+"(tier_breakdown / factories / supply balance) + 全 TradeEvent．"
+msgstr ""
+
+#: anno_save_analyzer.cli.state:7 of
+msgid "Usage::"
+msgstr ""
+
+#: anno_save_analyzer.cli.state:11 of
+msgid "出力は整形済 UTF-8 (日本語 raw)．"
+msgstr ""
+
+#: anno_save_analyzer.cli.state.dump_state:1 of
+msgid "Load the save and dump a single JSON document to ``--out``．"
+msgstr ""
+
+#: ../../source/api/cli.rst
+msgid "Return type"
+msgstr ""
+
+#: anno_save_analyzer.cli.state.dump_state:3
+#: anno_save_analyzer.cli.state.register:3 of
+msgid ":sphinx_autodoc_typehints_type:`\\:py\\:obj\\:\\`None\\``"
+msgstr ""
+
+#: ../../source/api/cli.rst
+msgid "Parameters"
+msgstr ""
+
+#: anno_save_analyzer.cli.state.register:1 of
+msgid "Register ``state`` subcommand onto the root typer app."
+msgstr ""
+

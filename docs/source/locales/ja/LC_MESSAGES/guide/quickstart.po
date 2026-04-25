@@ -1,0 +1,174 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) 2026, Proletariat Yuuka
+# This file is distributed under the same license as the anno-save-analyzer
+# package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2026.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: anno-save-analyzer 0.1\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-04-25 15:36+0900\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language: ja\n"
+"Language-Team: ja <LL@li.org>\n"
+"Plural-Forms: nplurals=1; plural=0;\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.18.0\n"
+
+#: ../../source/guide/quickstart.md:1
+msgid "Quickstart"
+msgstr "クイックスタート"
+
+#: ../../source/guide/quickstart.md:3
+msgid "Install, open a save, and get analysis-ready data in under 5 minutes."
+msgstr "インストールからセーブを開いて分析可能状態までを 5 分以内で．"
+
+#: ../../source/guide/quickstart.md:5
+msgid "Install"
+msgstr "インストール"
+
+#: ../../source/guide/quickstart.md:7
+msgid "Install with the extras you need:"
+msgstr "必要な extra を選んでインストール："
+
+#: ../../source/guide/quickstart.md:17
+msgid "Locate your save"
+msgstr "セーブファイルの場所"
+
+#: ../../source/guide/quickstart.md
+msgid "Game"
+msgstr "ゲーム"
+
+#: ../../source/guide/quickstart.md
+msgid "Default save folder (Windows)"
+msgstr "デフォルトのセーブフォルダ (Windows)"
+
+#: ../../source/guide/quickstart.md
+msgid "Anno 1800"
+msgstr "Anno 1800"
+
+#: ../../source/guide/quickstart.md
+msgid "``%USERPROFILE%\\Documents\\Anno 1800\\accounts\\<id>\\savegame\\``"
+msgstr "``%USERPROFILE%\\Documents\\Anno 1800\\accounts\\<id>\\savegame\\``"
+
+#: ../../source/guide/quickstart.md
+msgid "Anno 117"
+msgstr "Anno 117"
+
+#: ../../source/guide/quickstart.md
+msgid ""
+"``%USERPROFILE%\\Documents\\Anno 117 - Pax "
+"Romana\\accounts\\<id>\\savegame\\``"
+msgstr ""
+"``%USERPROFILE%\\Documents\\Anno 117 - Pax "
+"Romana\\accounts\\<id>\\savegame\\``"
+
+#: ../../source/guide/quickstart.md:24
+msgid ""
+"Copy a ``.a7s`` (Anno 1800) or ``.a8s`` (Anno 117) file somewhere "
+"convenient. The tool is **read-only** — it never modifies your save."
+msgstr ""
+"``.a7s`` (Anno 1800) または ``.a8s`` (Anno 117) をどこか作業ディレクトリにコピーしてください．本ツールは"
+" **読み取り専用** ─ セーブを書き換えません．"
+
+#: ../../source/guide/quickstart.md:27
+msgid "Auto-pick the latest save via `config.toml` (optional)"
+msgstr "`config.toml` で最新 save を自動選択 (任意)"
+
+#: ../../source/guide/quickstart.md:29
+msgid ""
+"If you do not want to type the save path every time, register your save "
+"directories once in your user config file. The CLI / GUI will then pick "
+"the **most recently modified** ``.a7s`` / ``.a8s`` under the directory "
+"matching ``--title``."
+msgstr ""
+"毎回 save のパスを打つのが面倒なら，ユーザー設定ファイルに save ディレクトリ"
+"を一度登録しておいてください．CLI / GUI は ``--title`` に対応するディレクトリ"
+"配下から **最新 mtime** の ``.a7s`` / ``.a8s`` を自動で選びます．"
+
+#: ../../source/guide/quickstart.md
+msgid "OS"
+msgstr "OS"
+
+#: ../../source/guide/quickstart.md
+msgid "Path"
+msgstr "パス"
+
+#: ../../source/guide/quickstart.md
+msgid "Linux / WSL2"
+msgstr "Linux / WSL2"
+
+#: ../../source/guide/quickstart.md
+msgid "``~/.config/anno-save-analyzer/config.toml`` (XDG)"
+msgstr "``~/.config/anno-save-analyzer/config.toml`` (XDG)"
+
+#: ../../source/guide/quickstart.md
+msgid "macOS"
+msgstr "macOS"
+
+#: ../../source/guide/quickstart.md
+msgid "``~/.config/anno-save-analyzer/config.toml``"
+msgstr "``~/.config/anno-save-analyzer/config.toml``"
+
+#: ../../source/guide/quickstart.md
+msgid "Windows"
+msgstr "Windows"
+
+#: ../../source/guide/quickstart.md
+msgid "``%APPDATA%\\anno-save-analyzer\\config.toml``"
+msgstr "``%APPDATA%\\anno-save-analyzer\\config.toml``"
+
+#: ../../source/guide/quickstart.md:47
+msgid "With that in place, the save argument becomes optional:"
+msgstr "これを設定しておけば，save 引数は省略可能になります："
+
+#: ../../source/guide/quickstart.md:57
+msgid ""
+"An explicit save path always wins over the config lookup. The TUI also "
+"writes other UI preferences (locale, theme, chart window) to the same "
+"file, so it will be created automatically the first time you change a "
+"setting in-app — you can just open it later and add ``[paths]``."
+msgstr ""
+"save パスを明示的に渡した場合は，常に config より優先されます．TUI は他の UI "
+"設定 (locale / theme / chart window) も同じファイルに書き込むため，アプリ内で"
+"一度設定を変更すればファイルは自動生成されます．後から開いて ``[paths]`` を"
+"追記すればええです．"
+
+#: ../../source/guide/quickstart.md:62
+msgid "Launch the TUI"
+msgstr "TUI を起動"
+
+#: ../../source/guide/quickstart.md:68
+msgid ""
+"Use ``Ctrl+T`` to switch screens (Overview → Trade Statistics → Supply "
+"Balance). ``Ctrl+L`` toggles English/Japanese."
+msgstr ""
+"``Ctrl+T`` で画面切替 (Overview → Trade Statistics → Supply "
+"Balance)．``Ctrl+L`` で英日切替．"
+
+#: ../../source/guide/quickstart.md:71
+msgid "Export the full state as JSON"
+msgstr "全 state を JSON エクスポート"
+
+#: ../../source/guide/quickstart.md:78
+#, python-brace-format
+msgid ""
+"The JSON contains overview + islands + tier breakdown + balance + every "
+"TradeEvent. Load it with `pandas.read_json` / `pandas.json_normalize` and"
+" you are analysis-ready (see {doc}`scm-analytics`)."
+msgstr ""
+"出力 JSON には概要・島情報・tier 別内訳・需給バランス・全 TradeEvent が含まれます．`pandas.read_json` /"
+" `pandas.json_normalize` で読み込めば即分析可能です ({doc}`scm-analytics` を参照)．"
+
+#: ../../source/guide/quickstart.md:82
+msgid "One-liner Python API"
+msgstr "Python API (ワンライナー)"
+
+#~ msgid "An explicit save path always wins over the ``.env`` lookup."
+#~ msgstr "save パスを明示的に渡した場合は，常に ``.env`` より優先されます．"
+

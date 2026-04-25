@@ -1,0 +1,500 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) 2026, Proletariat Yuuka
+# This file is distributed under the same license as the anno-save-analyzer
+# package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2026.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: anno-save-analyzer 0.1\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-04-24 21:04+0900\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language: ja\n"
+"Language-Team: ja <LL@li.org>\n"
+"Plural-Forms: nplurals=1; plural=0;\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.18.0\n"
+
+#: ../../source/reference/rda_format_spec.md:1
+msgid "RDA File Format Specification (V2.0 / V2.2)"
+msgstr ""
+
+#: ../../source/reference/rda_format_spec.md:3
+msgid ""
+"本ドキュメントは lysannschlegel/RDAExplorer の C# "
+"実装（`refs/RDAExplorer/src/RDAExplorer/`）を精読し， 自力で再構成した RDA アーカイブフォーマット仕様書"
+"．clean-room 実装の根拠資料．"
+msgstr ""
+
+#: ../../source/reference/rda_format_spec.md:6
+msgid ""
+"対象: Anno 1404 / 2070 / 2205 / 1800 が採用する `.rda` コンテナ（`.a7s` セーブも同形式）． "
+"本プロジェクト（anno-save-analyzer）の v0.1.0 では **V2.2 の読取のみ**を実装する．"
+msgstr ""
+
+#: ../../source/reference/rda_format_spec.md:9
+msgid "1. 全体構造"
+msgstr ""
+
+#: ../../source/reference/rda_format_spec.md:11
+msgid ""
+"RDA は **「固定ヘッダ → データ領域 → ブロックチェーン」** の 3 層構造． "
+"ブロックは末尾ではなく自身の直前に自分のディレクトリ（DirEntry 配列）を持ち，`nextBlock` "
+"で次のブロックへ連結される片方向リンクリスト．"
+msgstr ""
+
+#: ../../source/reference/rda_format_spec.md:38
+msgid ""
+"**重要**: BlockInfo は常に自身の直前にディレクトリを置く． したがって Directory の先頭 = `blockOffset "
+"- directorySize`． `MemoryResident` flag が立つ場合は更に `directorySize - (2 * "
+"uintSize)` 分遡って packed data の header を読む．"
+msgstr ""
+
+#: ../../source/reference/rda_format_spec.md:42
+msgid "2. バイト順・型"
+msgstr ""
+
+#: ../../source/reference/rda_format_spec.md
+msgid "項目"
+msgstr ""
+
+#: ../../source/reference/rda_format_spec.md
+msgid "値"
+msgstr ""
+
+#: ../../source/reference/rda_format_spec.md
+msgid "バイトオーダ"
+msgstr ""
+
+#: ../../source/reference/rda_format_spec.md
+msgid "Little Endian 固定"
+msgstr ""
+
+#: ../../source/reference/rda_format_spec.md
+msgid "文字列（ファイル名）"
+msgstr ""
+
+#: ../../source/reference/rda_format_spec.md
+msgid "UTF-16LE, null padded, 固定 520B"
+msgstr ""
+
+#: ../../source/reference/rda_format_spec.md
+msgid "文字列（magic, V2.2）"
+msgstr ""
+
+#: ../../source/reference/rda_format_spec.md
+msgid "UTF-8, `\"Resource File V2.2\"`"
+msgstr ""
+
+#: ../../source/reference/rda_format_spec.md
+msgid "文字列（magic, V2.0）"
+msgstr ""
+
+#: ../../source/reference/rda_format_spec.md
+msgid "UTF-16LE, `\"Resource File V2.0\"`"
+msgstr ""
+
+#: ../../source/reference/rda_format_spec.md
+msgid "UInt (V2.2)"
+msgstr ""
+
+#: ../../source/reference/rda_format_spec.md
+msgid "uint64 (8B)"
+msgstr ""
+
+#: ../../source/reference/rda_format_spec.md
+msgid "UInt (V2.0)"
+msgstr ""
+
+#: ../../source/reference/rda_format_spec.md
+msgid "uint32 (4B)"
+msgstr ""
+
+#: ../../source/reference/rda_format_spec.md
+msgid "Timestamp"
+msgstr ""
+
+#: ../../source/reference/rda_format_spec.md
+msgid "UInt (V2.2=uint64), Unix epoch seconds"
+msgstr ""
+
+#: ../../source/reference/rda_format_spec.md:54
+msgid "magic の encoding 差異はバージョン判別の核心．先頭 2 バイトで判定可能:"
+msgstr ""
+
+#: ../../source/reference/rda_format_spec.md:56
+msgid "`52 00` (`R\\0`) → UTF-16LE → V2.0"
+msgstr ""
+
+#: ../../source/reference/rda_format_spec.md:57
+msgid "`52 65` (`Re`) → UTF-8 → V2.2"
+msgstr ""
+
+#: ../../source/reference/rda_format_spec.md:59
+msgid "3. FileHeader"
+msgstr ""
+
+#: ../../source/reference/rda_format_spec.md:71
+msgid "バージョン別差異"
+msgstr ""
+
+#: ../../source/reference/rda_format_spec.md
+msgid "Version"
+msgstr ""
+
+#: ../../source/reference/rda_format_spec.md
+msgid "magic encoding"
+msgstr ""
+
+#: ../../source/reference/rda_format_spec.md
+msgid "magic bytes"
+msgstr ""
+
+#: ../../source/reference/rda_format_spec.md
+msgid "unknown size"
+msgstr ""
+
+#: ../../source/reference/rda_format_spec.md
+msgid "uint size"
+msgstr ""
+
+#: ../../source/reference/rda_format_spec.md
+msgid "Header size"
+msgstr ""
+
+#: ../../source/reference/rda_format_spec.md
+msgid "V2.0"
+msgstr ""
+
+#: ../../source/reference/rda_format_spec.md
+msgid "UTF-16LE"
+msgstr ""
+
+#: ../../source/reference/rda_format_spec.md
+msgid "36B"
+msgstr ""
+
+#: ../../source/reference/rda_format_spec.md
+msgid "1008B"
+msgstr ""
+
+#: ../../source/reference/rda_format_spec.md
+msgid "4B (u32)"
+msgstr ""
+
+#: ../../source/reference/rda_format_spec.md
+msgid "1048B"
+msgstr ""
+
+#: ../../source/reference/rda_format_spec.md
+msgid "V2.2"
+msgstr ""
+
+#: ../../source/reference/rda_format_spec.md
+msgid "UTF-8"
+msgstr ""
+
+#: ../../source/reference/rda_format_spec.md
+msgid "18B"
+msgstr ""
+
+#: ../../source/reference/rda_format_spec.md
+msgid "766B"
+msgstr ""
+
+#: ../../source/reference/rda_format_spec.md
+msgid "8B (u64)"
+msgstr ""
+
+#: ../../source/reference/rda_format_spec.md
+msgid "792B"
+msgstr ""
+
+#: ../../source/reference/rda_format_spec.md:78
+msgid "※ 上表で「Header size」は magic + unknown + firstBlockOffset の合計．"
+msgstr ""
+
+#: ../../source/reference/rda_format_spec.md:80
+msgid "4. BlockInfo"
+msgstr ""
+
+#: ../../source/reference/rda_format_spec.md:82
+msgid "ファイル中の任意位置（末尾ではない点に注意）に置かれる 32B (V2.2) / 20B (V2.0) の構造体．"
+msgstr ""
+
+#: ../../source/reference/rda_format_spec.md:96
+msgid "flags ビット定義"
+msgstr ""
+
+#: ../../source/reference/rda_format_spec.md
+msgid "bit"
+msgstr ""
+
+#: ../../source/reference/rda_format_spec.md
+msgid "名前"
+msgstr ""
+
+#: ../../source/reference/rda_format_spec.md
+msgid "意味"
+msgstr ""
+
+#: ../../source/reference/rda_format_spec.md
+msgid "0"
+msgstr ""
+
+#: ../../source/reference/rda_format_spec.md
+msgid "1"
+msgstr ""
+
+#: ../../source/reference/rda_format_spec.md
+msgid "Compressed"
+msgstr ""
+
+#: ../../source/reference/rda_format_spec.md
+msgid "directory と各 file データが zlib 圧縮"
+msgstr ""
+
+#: ../../source/reference/rda_format_spec.md
+msgid "2"
+msgstr ""
+
+#: ../../source/reference/rda_format_spec.md
+msgid "Encrypted"
+msgstr ""
+
+#: ../../source/reference/rda_format_spec.md
+msgid "directory と各 file データが XOR LCG 暗号化"
+msgstr ""
+
+#: ../../source/reference/rda_format_spec.md
+msgid "4"
+msgstr ""
+
+#: ../../source/reference/rda_format_spec.md
+msgid "MemoryResident"
+msgstr ""
+
+#: ../../source/reference/rda_format_spec.md
+msgid "ブロック内全ファイルを一塊で圧縮（packed）"
+msgstr ""
+
+#: ../../source/reference/rda_format_spec.md
+msgid "3"
+msgstr ""
+
+#: ../../source/reference/rda_format_spec.md
+msgid "8"
+msgstr ""
+
+#: ../../source/reference/rda_format_spec.md
+msgid "Deleted"
+msgstr ""
+
+#: ../../source/reference/rda_format_spec.md
+msgid "削除マーカ．ブロック自体を skip（directory もデータも読まない）"
+msgstr ""
+
+#: ../../source/reference/rda_format_spec.md:105
+msgid "`Deleted` が立つ場合: このブロックは読み飛ばし，`nextBlock` だけ辿る．"
+msgstr ""
+
+#: ../../source/reference/rda_format_spec.md:106
+msgid "`MemoryResident` が立つ場合:"
+msgstr ""
+
+#: ../../source/reference/rda_format_spec.md:107
+msgid "Compressed/Encrypted は通常ファイル flag として扱わず，packed 全体の属性として扱う．"
+msgstr ""
+
+#: ../../source/reference/rda_format_spec.md:108
+msgid ""
+"`offset - directorySize - (2 * uintSize)` を起点に `compressedSize, "
+"uncompressedSize` を読んで packed data の位置を特定．"
+msgstr ""
+
+#: ../../source/reference/rda_format_spec.md:109
+msgid "各 DirEntry.offset は **packed data 内の相対 offset**．"
+msgstr ""
+
+#: ../../source/reference/rda_format_spec.md:111
+msgid "5. DirEntry"
+msgstr ""
+
+#: ../../source/reference/rda_format_spec.md:113
+msgid ""
+"ディレクトリ領域は `DirEntry` 構造体の配列． ブロックの flags に Compressed/Encrypted "
+"が立っていれば，directory 全体も zlib / XOR で変換されているため読取時に復号・解凍が必要．"
+msgstr ""
+
+#: ../../source/reference/rda_format_spec.md:129
+msgid "ディレクトリサイズ整合性"
+msgstr ""
+
+#: ../../source/reference/rda_format_spec.md:135
+msgid "これが満たされない場合は壊れたアーカイブと判断する．"
+msgstr ""
+
+#: ../../source/reference/rda_format_spec.md:137
+msgid "6. zlib 圧縮"
+msgstr ""
+
+#: ../../source/reference/rda_format_spec.md:139
+msgid ""
+"C# 実装は `zlib.DLL` の `uncompress` を使う．Python では `zlib.decompress(data)` "
+"で置き換え可．"
+msgstr ""
+
+#: ../../source/reference/rda_format_spec.md:140
+msgid "圧縮は **raw zlib stream**（先頭 `0x78 0x9C` などの zlib header あり）．gzip header なし．"
+msgstr ""
+
+#: ../../source/reference/rda_format_spec.md:141
+msgid ""
+"Anno 1800 セーブ内の `data.a7s` は FileDB コンテナを zlib で包んだもので，本ライブラリの責務は**一段外側の "
+"zlib 展開のみ**．"
+msgstr ""
+
+#: ../../source/reference/rda_format_spec.md:143
+msgid "7. XOR LCG 暗号化 (Encrypted flag)"
+msgstr ""
+
+#: ../../source/reference/rda_format_spec.md:145
+msgid "`Misc/BinaryExtension.cs` 参照．2 バイト単位の LCG ベース XOR．"
+msgstr ""
+
+#: ../../source/reference/rda_format_spec.md:155
+msgid "バッファ長が奇数の場合，末尾 1 バイトはそのまま付け足す．"
+msgstr ""
+
+#: ../../source/reference/rda_format_spec.md:157
+msgid "セーブファイル（`.a7s`）では通常 Encrypted は立たない想定だが，実装時は検出したらエラー or 警告で後回しで良い．"
+msgstr ""
+
+#: ../../source/reference/rda_format_spec.md:159
+msgid "8. 読取アルゴリズム（Python 移植用疑似コード）"
+msgstr ""
+
+#: ../../source/reference/rda_format_spec.md:219
+msgid "9. ファイルデータ取り出し"
+msgstr ""
+
+#: ../../source/reference/rda_format_spec.md:232
+msgid "MemoryResident の場合，base は packed data の先頭 offset，`rda_file.offset` は相対値．"
+msgstr ""
+
+#: ../../source/reference/rda_format_spec.md:234
+msgid "10. sample.a7s 実測値"
+msgstr ""
+
+#: ../../source/reference/rda_format_spec.md:236
+msgid "本プロジェクト同梱の `sample.a7s` （Anno 1800 の実セーブ）を検証用リファレンスとして利用:"
+msgstr ""
+
+#: ../../source/reference/rda_format_spec.md
+msgid "ファイル size"
+msgstr ""
+
+#: ../../source/reference/rda_format_spec.md
+msgid "3,732,794 B"
+msgstr ""
+
+#: ../../source/reference/rda_format_spec.md
+msgid "magic"
+msgstr ""
+
+#: ../../source/reference/rda_format_spec.md
+msgid "`\"Resource File V2.2\"` (V2.2)"
+msgstr ""
+
+#: ../../source/reference/rda_format_spec.md
+msgid "header 末尾 (`0x310`) の firstBlockOffset"
+msgstr ""
+
+#: ../../source/reference/rda_format_spec.md
+msgid "`0x5F1 = 1521`"
+msgstr ""
+
+#: ../../source/reference/rda_format_spec.md
+msgid "末尾 32B の BlockInfo"
+msgstr ""
+
+#: ../../source/reference/rda_format_spec.md
+msgid ""
+"flags=0, fileCount=1, directorySize=0x230=560, decompressedSize=0x230, "
+"nextBlock=0x38F53A (=EOF)"
+msgstr ""
+
+#: ../../source/reference/rda_format_spec.md:245
+msgid ""
+"末尾ブロックは非圧縮・非暗号化で DirEntry 1 件分（560B）のみ．最終ブロックの `nextBlock` "
+"がファイル末尾を指してチェーンが切れる． 先頭ブロックから順に辿って DirEntry を集積し，期待される 4 エントリ "
+"(`meta.a7s`, `header.a7s`, `gamesetup.a7s`, `data.a7s`) を得る想定．"
+msgstr ""
+
+#: ../../source/reference/rda_format_spec.md:248
+msgid "11. 実装時の注意点"
+msgstr ""
+
+#: ../../source/reference/rda_format_spec.md:250
+msgid ""
+"**バイトオーダはすべて LE**（C# `BinaryReader` 既定）．Python では `struct.unpack(\"<Q\", "
+"...)` 等．"
+msgstr ""
+
+#: ../../source/reference/rda_format_spec.md:251
+msgid "**ファイル名は固定 520B の UTF-16LE**．decode 後 `\\x00` を strip する．"
+msgstr ""
+
+#: ../../source/reference/rda_format_spec.md:252
+msgid "**BlockInfo は自分の offset の直前 directoryBytes 分が directory 本体**（トリッキー）．"
+msgstr ""
+
+#: ../../source/reference/rda_format_spec.md:253
+msgid "**uint サイズはバージョン依存**．V2.0 は uint32，V2.2 は uint64．"
+msgstr ""
+
+#: ../../source/reference/rda_format_spec.md:254
+msgid "**Deleted ブロックも nextBlock は有効**．skip しつつ chain を継続．"
+msgstr ""
+
+#: ../../source/reference/rda_format_spec.md:255
+msgid "**MemoryResident は v0.1.0 では最小限対応**．セーブデータ（`.a7s`）では通常不要だが，万一遭遇したらエラー出す．"
+msgstr ""
+
+#: ../../source/reference/rda_format_spec.md:256
+msgid "**暗号化ブロックは v0.1.0 では未対応**．遭遇したら明示的に NotImplementedError．"
+msgstr ""
+
+#: ../../source/reference/rda_format_spec.md:257
+msgid "**Streaming**: セーブは数百 MB になりうるため，`mmap` もしくは個別 seek で読み，全部を bytes に載せない．"
+msgstr ""
+
+#: ../../source/reference/rda_format_spec.md:258
+msgid ""
+"**directorySize == 0** の空ブロック（fileCount=0）は，C# "
+"側は空ディレクトリとして普通に処理する．同じ扱いで良い．"
+msgstr ""
+
+#: ../../source/reference/rda_format_spec.md:260
+msgid "12. 参考"
+msgstr ""
+
+#: ../../source/reference/rda_format_spec.md:262
+msgid "上流: https://github.com/lysannschlegel/RDAExplorer (GPL-v3)"
+msgstr ""
+
+#: ../../source/reference/rda_format_spec.md:263
+msgid "本実装はフォーマット仕様のみ学習し clean-room で書き直す．ソースは転載しない．"
+msgstr ""
+
+#: ../../source/reference/rda_format_spec.md:264
+msgid ""
+"謝辞: README に `Based on the reverse engineering work of @lysannschlegel's "
+"RDAExplorer` を記載．"
+msgstr ""
+
