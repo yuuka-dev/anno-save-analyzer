@@ -21,7 +21,12 @@ from anno_save_analyzer.trade.aggregate import filter_events
 from anno_save_analyzer.trade.models import GameTitle
 
 from .i18n import Localizer
-from .screens import OverviewScreen, SupplyBalanceScreen, TradeStatisticsScreen
+from .screens import (
+    OverviewScreen,
+    ProductionOverviewScreen,
+    SupplyBalanceScreen,
+    TradeStatisticsScreen,
+)
 from .state import TuiState, load_state
 from .theme import USSR_TITLE_PREFIX, theme_css
 
@@ -109,10 +114,18 @@ class TradeApp(App[None]):
                 SupplyBalanceScreen(self._state, self._localizer),
                 name="supply_balance",
             )
+        # Production overview は factories_by_island に実体があるときだけ．
+        # Anno 1800 限定 (factories は 1800 専用 YAML 経由で recipe lookup する)．
+        if self._state.factories_by_island:
+            self.install_screen(
+                ProductionOverviewScreen(self._state, self._localizer),
+                name="production_overview",
+            )
         self.push_screen("overview")
 
     def action_switch_main_screen(self) -> None:
-        # overview → statistics → supply_balance (Anno 1800 のみ) → overview の循環．
+        # overview → statistics → supply_balance → production_overview → overview
+        # の循環 (supply_balance / production_overview は Anno 1800 のみ)．
         # Textual の ``Screen.name`` は install 時 key を自動設定しないため type で判定．
         order: list[tuple[type, str]] = [
             (OverviewScreen, "overview"),
@@ -120,6 +133,8 @@ class TradeApp(App[None]):
         ]
         if self._state.balance_table is not None:
             order.append((SupplyBalanceScreen, "supply_balance"))
+        if self._state.factories_by_island:
+            order.append((ProductionOverviewScreen, "production_overview"))
         current_type = type(self.screen)
         idx = 0
         for i, (screen_type, _) in enumerate(order):
@@ -144,6 +159,8 @@ class TradeApp(App[None]):
         installed_names = ["overview", "statistics"]
         if self._state.balance_table is not None:
             installed_names.append("supply_balance")
+        if self._state.factories_by_island:
+            installed_names.append("production_overview")
         for name in installed_names:
             screen = self.get_screen(name)
             if hasattr(screen, "set_localizer"):

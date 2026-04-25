@@ -34,7 +34,7 @@ from anno_save_analyzer.trade.balance import SupplyBalanceTable, build_balance_t
 from anno_save_analyzer.trade.buildings import BuildingDictionary
 from anno_save_analyzer.trade.consumption import ConsumptionTable
 from anno_save_analyzer.trade.extract import extract_from_outer, load_outer_filedb
-from anno_save_analyzer.trade.factories import list_factory_aggregates
+from anno_save_analyzer.trade.factories import FactoryAggregate, list_factory_aggregates
 from anno_save_analyzer.trade.factory_recipes import FactoryRecipeTable
 from anno_save_analyzer.trade.models import TradeEvent
 from anno_save_analyzer.trade.population import (
@@ -102,6 +102,11 @@ class TuiState:
     # area_manager → city_name (プレイヤー島のみ)．Jaccard match 成功した AM のみ
     # 登録．SupplyBalanceScreen の表示分類に使う．
     area_manager_to_city: dict[str, str] = field(default_factory=dict)
+    # 島名 (CityName マッチ済) または area_manager (NPC / 未マッチ) → 工場集計．
+    # ProductionOverviewScreen が「島ごとの工場一覧」を出す元データ．キーは
+    # ``area_manager_to_city`` で city_name に変換できる場合は city_name，
+    # それ以外は area_manager をそのまま使う (Supply Balance 画面と同じ規約)．
+    factories_by_island: dict[str, FactoryAggregate] = field(default_factory=dict)
 
 
 def build_overview(
@@ -216,6 +221,9 @@ def load_state(
     # Jaccard match 成功した AM → city_name map (label 分類用)．
     am_to_city: dict[str, str] = {m.area_manager: m.city_name for m in city_area_matches}
 
+    progress("listing factories by island")
+    factories_by_island = _collect_factories_by_island(inner_payloads, am_to_city)
+
     return TuiState(
         save_path=save_path,
         title=title,
@@ -235,6 +243,7 @@ def load_state(
         balance_table=balance_table,
         area_manager_to_session_key=am_to_session_key,
         area_manager_to_city=am_to_city,
+        factories_by_island=factories_by_island,
     )
 
 
@@ -356,6 +365,30 @@ def _try_build_balance_table(
         consumption=consumption,
     )
     return table, am_to_session_key
+
+
+def _collect_factories_by_island(
+    inner_payloads: list[bytes],
+    area_manager_to_city: dict[str, str],
+) -> dict[str, FactoryAggregate]:
+    """全 session 横断で AreaManager 単位の工場集計を島キーで束ねる．
+
+    ProductionOverviewScreen の左 tree が「session > island」階層を引くために
+    island 名 (城市マッチ済なら city_name，さもなくば area_manager) を key に
+    する．同名の島が複数 session に出る稀なケースは後勝ち．本 build は
+    UI 側のみで使うため :func:`_try_build_balance_table` の factory 抽出と
+    共通化はせず，関心毎を分けて維持する．
+    """
+    out: dict[str, FactoryAggregate] = {}
+    for inner in inner_payloads:
+        if not inner:
+            continue
+        for agg in list_factory_aggregates(inner):
+            if not agg.instances:
+                continue
+            key = area_manager_to_city.get(agg.area_manager, agg.area_manager)
+            out[key] = agg
+    return out
 
 
 def _collect_population_by_city(
