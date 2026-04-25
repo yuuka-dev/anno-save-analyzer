@@ -2,11 +2,41 @@
 
 from __future__ import annotations
 
+import importlib.util
+import sys
 from pathlib import Path
 
 import pytest
 
 from anno_save_analyzer.trade.buildings import BuildingDictionary, known_kinds
+
+
+def _load_generator_module():
+    """scripts/generate_buildings_anno1800.py を package 外から import する．
+
+    `scripts/` は Python package ではないので importlib で直接 spec から読む．
+    依存している `generate_items_anno1800` も同じディレクトリで隣接 import
+    されるので，先に sys.path に scripts/ を入れる．
+
+    終了時は ``sys.path`` をスナップショットから完全復元する (generator 自身が
+    ``sys.path.insert`` するため，1 件 ``remove`` だけだと後続テストに副作用が
+    残る — Copilot 指摘 PR #106)．
+    """
+    scripts_dir = Path(__file__).resolve().parents[2] / "scripts"
+    saved_path = list(sys.path)
+    sys.path.insert(0, str(scripts_dir))
+    try:
+        spec = importlib.util.spec_from_file_location(
+            "generate_buildings_anno1800",
+            scripts_dir / "generate_buildings_anno1800.py",
+        )
+        assert spec is not None and spec.loader is not None
+        module = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(module)
+        return module
+    finally:
+        sys.path[:] = saved_path
+
 
 # ---------- 実データ smoke ----------
 
@@ -184,3 +214,58 @@ def test_invalid_yaml_root_in_locale_raises_value_error(tmp_path: Path) -> None:
     )
     with pytest.raises(ValueError, match="buildings_anno1800.ja.yaml"):
         BuildingDictionary.load(data_dir=tmp_path, locales=("ja", "en"))
+
+
+# ---------- generator `_tier_for` パターン別テスト (#103) ----------
+
+
+@pytest.mark.parametrize(
+    ("internal_name", "expected_tier"),
+    [
+        # 旧世界 (base game) — 既存挙動の保証
+        ("residence_tier01", "farmer"),
+        ("residence_tier02", "worker"),
+        ("residence_tier03", "artisan"),
+        ("residence_tier04", "engineer"),
+        ("residence_tier05", "investor"),
+        # 新世界 (Caribbean) colony01
+        ("residence_colony01_tier01", "jornaleros"),
+        ("residence_colony01_tier02", "obreros"),
+        ("residence_colony01_tier03", "artista"),
+        # Hacienda residence module (Tourist Season DLC)．大文字混在もケースして
+        # `.lower()` で吸収できることを確認．
+        ("Hacienda residence module tier01", "jornaleros"),
+        ("Hacienda residence module tier02", "obreros"),
+        ("Hacienda residence module tier03", "artista"),
+        # 北極圏 (The Passage DLC)
+        ("residence_arctic_tier01", "explorer"),
+        ("residence_arctic_tier02", "technician"),
+        # エンベサ (Land of Lions DLC) colony02．scholar (tier3) は
+        # SOC DLC の asset で確認できないが mapping は予約．
+        ("residence_colony02_tier01", "shepherd"),
+        ("residence_colony02_tier02", "elder"),
+        ("residence_colony02_tier03", "scholar"),
+        # 名前ベース — Hotel と Skyline Tower
+        ("Hotel", "tourist"),
+        ("HighLife_monument_03(residence)", "investor"),
+    ],
+)
+def test_generator_tier_for_resolves_dlc_residences(internal_name: str, expected_tier: str) -> None:
+    """``_tier_for`` が 6 系列すべての residence pattern で tier を返す (#103)．"""
+    module = _load_generator_module()
+    assert module._tier_for(internal_name) == expected_tier
+
+
+@pytest.mark.parametrize(
+    "internal_name",
+    [
+        "factory_lumberjack_01",  # residence でない
+        "residence_tier99",  # 旧世界 mapping 範囲外
+        "",  # 空文字
+        "warehouse_01",  # 名前 needle に当たらない
+    ],
+)
+def test_generator_tier_for_returns_none_when_no_match(internal_name: str) -> None:
+    """どの pattern にも一致しなければ ``None`` を返す．"""
+    module = _load_generator_module()
+    assert module._tier_for(internal_name) is None

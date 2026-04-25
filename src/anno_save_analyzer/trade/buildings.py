@@ -52,8 +52,10 @@ class BuildingEntry(BaseModel):
     """元 assets.xml の ``<Template>`` 値．細分種別 (``ResidenceBuilding7_Arctic``
     等) を見たい場合はこちらを参照．"""
     tier: str | None = None
-    """Residence のみ．``farmer`` / ``worker`` / ``artisan`` / ``engineer``
-    / ``investor`` / ``jornaleros`` / ``obreros``．判定不能で未設定の可能性もある．"""
+    """Residence のみ．旧世界 ``farmer`` / ``worker`` / ``artisan`` / ``engineer``
+    / ``investor``，新世界 ``jornaleros`` / ``obreros`` / ``artista``，北極圏
+    ``explorer`` / ``technician``，エンベサ ``shepherd`` / ``elder`` /
+    ``scholar``，観光客 ``tourist``．判定不能で未設定の可能性もある．"""
 
     model_config = {"frozen": True}
 

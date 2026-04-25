@@ -6,6 +6,7 @@
   name: "Skyline Tower"
   kind: residence
   template: "ResidenceBuilding-Unique"
+  tier: investor
 2397:
   name: "Furnace"
   kind: factory
@@ -30,6 +31,7 @@
   name: "Artista Residence"
   kind: residence
   template: "ResidenceBuilding7_Colony"
+  tier: artista
 5457:
   name: "Nandu Farm"
   kind: farm
@@ -130,6 +132,7 @@
   name: "Hacienda Artista Quarters"
   kind: residence
   template: "ResidenceBuilding7_Colony"
+  tier: artista
 6264:
   name: "Beach"
   kind: buff_factory
@@ -262,10 +265,12 @@
   name: "Hacienda Jornalero Quarters"
   kind: residence
   template: "ResidenceBuilding7_Colony"
+  tier: jornaleros
 24793:
   name: "Hacienda Obrera Quarters"
   kind: residence
   template: "ResidenceBuilding7_Colony"
+  tier: obreros
 24794:
   name: "Hacienda Farm"
   kind: farm
@@ -486,10 +491,12 @@
   name: "Jornalero Residence"
   kind: residence
   template: "ResidenceBuilding7_Colony"
+  tier: jornaleros
 101255:
   name: "Obrero Residence"
   kind: residence
   template: "ResidenceBuilding7_Colony"
+  tier: obreros
 101258:
   name: "Chapel"
   kind: public_service
@@ -570,10 +577,12 @@
   name: "Explorer Shelter"
   kind: residence
   template: "ResidenceBuilding7_Arctic"
+  tier: explorer
 112652:
   name: "Technician Shelter"
   kind: residence
   template: "ResidenceBuilding7_Arctic"
+  tier: technician
 112666:
   name: "Whaling Station"
   kind: factory
@@ -638,10 +647,12 @@
   name: "Shepherd Residence"
   kind: residence
   template: "ResidenceBuilding7_Colony"
+  tier: shepherd
 114437:
   name: "Elder Residence"
   kind: residence
   template: "ResidenceBuilding7_Colony"
+  tier: elder
 114439:
   name: "Sanga Farm"
   kind: farm
@@ -955,6 +966,7 @@
   name: "Hotel"
   kind: residence
   template: "ResidenceBuilding7_Hotel"
+  tier: tourist
 601882:
   name: "Investor Skyscraper: Level 1"
   kind: residence
