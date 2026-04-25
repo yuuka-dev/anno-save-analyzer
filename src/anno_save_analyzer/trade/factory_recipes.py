@@ -72,6 +72,21 @@ class FactoryRecipe(BaseModel):
             out[o.product_guid] = out.get(o.product_guid, 0.0) + productivity * self.tpmin * amt
         return out
 
+    def consumed_per_minute(self, productivity: float) -> dict[int, float]:
+        """``productivity`` で 1 factory の /min **入力** 消費量を product 別に返す．
+
+        中間物資 (豚 → 缶詰肉 等) の実消費量を計算する．``produced_per_minute``
+        の対称形で input 側を集計．``tpmin`` 未定義なら空．``input.amount`` が
+        ``None`` の場合は 1.0 とみなす (output 側と揃える)．
+        """
+        if self.tpmin is None:
+            return {}
+        out: dict[int, float] = {}
+        for i in self.inputs:
+            amt = i.amount if i.amount is not None else 1.0
+            out[i.product_guid] = out.get(i.product_guid, 0.0) + productivity * self.tpmin * amt
+        return out
+
 
 class FactoryRecipeTable(BaseModel):
     """factory GUID → FactoryRecipe のテーブル．"""

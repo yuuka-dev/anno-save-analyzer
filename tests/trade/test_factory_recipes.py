@@ -91,6 +91,64 @@ def test_produced_per_minute_default_output_amount() -> None:
     assert r.produced_per_minute(1.0) == {100: pytest.approx(2.0)}
 
 
+# ---------- consumed_per_minute (#96) ----------
+
+
+def test_consumed_per_minute_basic() -> None:
+    """input 1 個，amount=1，tpmin=2，productivity=1 → 2 /min 消費．"""
+    r = FactoryRecipe(
+        guid=1,
+        name="Cannery",
+        tpmin=2.0,
+        inputs=(RecipeInput(product_guid=400, amount=1.0),),
+    )
+    assert r.consumed_per_minute(1.0) == {400: pytest.approx(2.0)}
+    assert r.consumed_per_minute(0.5) == {400: pytest.approx(1.0)}
+
+
+def test_consumed_per_minute_multi_input() -> None:
+    """複数 input を別 product として加算．"""
+    r = FactoryRecipe(
+        guid=1,
+        name="Steel",
+        tpmin=1.0,
+        inputs=(
+            RecipeInput(product_guid=400, amount=1.0),
+            RecipeInput(product_guid=500, amount=2.0),
+        ),
+    )
+    out = r.consumed_per_minute(1.0)
+    assert out == {400: pytest.approx(1.0), 500: pytest.approx(2.0)}
+
+
+def test_consumed_per_minute_no_inputs_returns_empty() -> None:
+    """input 0 個 (raw extractor) は空 dict．"""
+    r = FactoryRecipe(guid=1, name="Hunter", tpmin=2.0)
+    assert r.consumed_per_minute(1.0) == {}
+
+
+def test_consumed_per_minute_missing_tpmin() -> None:
+    """tpmin 未定義なら空．"""
+    r = FactoryRecipe(
+        guid=1,
+        name="F",
+        tpmin=None,
+        inputs=(RecipeInput(product_guid=400, amount=1.0),),
+    )
+    assert r.consumed_per_minute(1.0) == {}
+
+
+def test_consumed_per_minute_default_input_amount() -> None:
+    """input.amount が None の場合は 1.0 とみなす (output 側と揃える)．"""
+    r = FactoryRecipe(
+        guid=1,
+        name="F",
+        tpmin=2.0,
+        inputs=(RecipeInput(product_guid=400, amount=None),),
+    )
+    assert r.consumed_per_minute(1.0) == {400: pytest.approx(2.0)}
+
+
 # ---------- 合成 YAML ----------
 
 
