@@ -63,9 +63,7 @@ def latest_save(title: GameTitle, cfg: UserConfig | None = None) -> Path | None:
     return max(saves, key=lambda p: p.stat().st_mtime)
 
 
-def resolve_save(
-    save: Path | None, title: GameTitle, cfg: UserConfig | None = None
-) -> Path | None:
+def resolve_save(save: Path | None, title: GameTitle, cfg: UserConfig | None = None) -> Path | None:
     """CLI 引数 ``save`` の解決ロジック．
 
     - ``save`` 明示指定 → そのまま

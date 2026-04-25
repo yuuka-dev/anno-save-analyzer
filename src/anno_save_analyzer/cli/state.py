@@ -56,9 +56,7 @@ def dump_state(  # noqa: PLR0913,B008 — CLI entrypoint．typer.Argument/Option
     title_enum = GameTitle(title)
     resolved = resolve_save(save, title_enum)
     if resolved is None:
-        field = (
-            "anno1800_save_dir" if title_enum is GameTitle.ANNO_1800 else "anno117_save_dir"
-        )
+        field = "anno1800_save_dir" if title_enum is GameTitle.ANNO_1800 else "anno117_save_dir"
         typer.secho(
             f"ERROR: save not specified and [paths] {field} is unset or empty. "
             "Either pass the save path explicitly or set it in your config.toml.",

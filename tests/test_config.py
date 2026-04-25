@@ -179,8 +179,7 @@ class TestPathsConfig:
         save_config(cfg, path)
         loaded = load_config(path)
         assert (
-            loaded.paths.anno1800_save_dir
-            == r"C:\Users\u\Documents\Anno 1800\accounts\1\savegame"
+            loaded.paths.anno1800_save_dir == r"C:\Users\u\Documents\Anno 1800\accounts\1\savegame"
         )
         assert loaded.paths.anno117_save_dir == "/home/u/.steam/anno117/savegame"
 

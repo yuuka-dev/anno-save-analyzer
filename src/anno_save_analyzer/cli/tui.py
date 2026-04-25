@@ -76,9 +76,7 @@ def _launch(
             raise typer.Exit(code=2)
         resolved = resolve_save(None, title.to_title())
         if resolved is None:
-            field = (
-                "anno1800_save_dir" if title == GameTitleArg.ANNO_1800 else "anno117_save_dir"
-            )
+            field = "anno1800_save_dir" if title == GameTitleArg.ANNO_1800 else "anno117_save_dir"
             typer.secho(
                 f"No save found. Set [paths] {field} in your config.toml "
                 "to a directory containing .a7s/.a8s files.",

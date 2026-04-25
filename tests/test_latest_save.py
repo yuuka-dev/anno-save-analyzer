@@ -42,17 +42,13 @@ class TestSaveDirFor:
         assert save_dir_for(GameTitle.ANNO_117, cfg=cfg) == tmp_path
         assert save_dir_for(GameTitle.ANNO_1800, cfg=cfg) is None
 
-    def test_loads_default_config_when_cfg_omitted(
-        self, tmp_path: Path, monkeypatch
-    ) -> None:
+    def test_loads_default_config_when_cfg_omitted(self, tmp_path: Path, monkeypatch) -> None:
         # ANNO_SAVE_ANALYZER_CONFIG で config.toml を差し替え，呼び出し側が
         # ``cfg`` を渡さなくても load_config 経由で読まれることを確認．
         cfg_path = tmp_path / "config.toml"
         save_dir = tmp_path / "saves"
         save_dir.mkdir()
-        cfg_path.write_text(
-            f'[paths]\nanno1800_save_dir = "{save_dir}"\n', encoding="utf-8"
-        )
+        cfg_path.write_text(f'[paths]\nanno1800_save_dir = "{save_dir}"\n', encoding="utf-8")
         monkeypatch.setenv("ANNO_SAVE_ANALYZER_CONFIG", str(cfg_path))
         assert save_dir_for(GameTitle.ANNO_1800) == save_dir
 

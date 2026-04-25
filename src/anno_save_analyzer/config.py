@@ -185,11 +185,15 @@ def _render_toml(cfg: UserConfig) -> str:
     lines.append("")
     lines.append("[paths]")
     if paths.anno1800_save_dir is None:
-        lines.append('# anno1800_save_dir = "C:\\\\Users\\\\<you>\\\\Documents\\\\Anno 1800\\\\accounts\\\\<id>\\\\savegame"')
+        lines.append(
+            '# anno1800_save_dir = "C:\\\\Users\\\\<you>\\\\Documents\\\\Anno 1800\\\\accounts\\\\<id>\\\\savegame"'
+        )
     else:
         lines.append(f'anno1800_save_dir = "{_quote(paths.anno1800_save_dir)}"')
     if paths.anno117_save_dir is None:
-        lines.append('# anno117_save_dir = "C:\\\\Users\\\\<you>\\\\Documents\\\\Anno 117 - Pax Romana\\\\accounts\\\\<id>\\\\savegame"')
+        lines.append(
+            '# anno117_save_dir = "C:\\\\Users\\\\<you>\\\\Documents\\\\Anno 117 - Pax Romana\\\\accounts\\\\<id>\\\\savegame"'
+        )
     else:
         lines.append(f'anno117_save_dir = "{_quote(paths.anno117_save_dir)}"')
     return "\n".join(lines) + "\n"
