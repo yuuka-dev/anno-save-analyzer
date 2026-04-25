@@ -215,6 +215,48 @@ class TestCollectFactoriesByIsland:
         assert "AreaManager_99" in result
 
 
+class TestTryBuildBalanceTableLocale:
+    """``_try_build_balance_table`` が ``FactoryRecipeTable.load`` に locale を透過する (#102)．"""
+
+    def test_locale_ja_passes_en_ja_locales(self, monkeypatch) -> None:
+        from anno_save_analyzer.trade.buildings import BuildingDictionary
+        from anno_save_analyzer.tui import state as state_mod
+
+        captured: dict[str, object] = {}
+
+        def fake_recipe_load(cls, *, locales=("en",)):
+            captured["recipe_locales"] = locales
+            return state_mod.FactoryRecipeTable(recipes={})
+
+        def fake_consumption_load(cls, *, data_dir=None):
+            return state_mod.ConsumptionTable(tiers=())
+
+        monkeypatch.setattr(state_mod.FactoryRecipeTable, "load", classmethod(fake_recipe_load))
+        monkeypatch.setattr(state_mod.ConsumptionTable, "load", classmethod(fake_consumption_load))
+        bd = BuildingDictionary(entries={})
+        state_mod._try_build_balance_table(GameTitle.ANNO_1800, [], bd, locale="ja")
+        assert captured["recipe_locales"] == ("en", "ja")
+
+    def test_locale_en_passes_en_only(self, monkeypatch) -> None:
+        from anno_save_analyzer.trade.buildings import BuildingDictionary
+        from anno_save_analyzer.tui import state as state_mod
+
+        captured: dict[str, object] = {}
+
+        def fake_recipe_load(cls, *, locales=("en",)):
+            captured["recipe_locales"] = locales
+            return state_mod.FactoryRecipeTable(recipes={})
+
+        def fake_consumption_load(cls, *, data_dir=None):
+            return state_mod.ConsumptionTable(tiers=())
+
+        monkeypatch.setattr(state_mod.FactoryRecipeTable, "load", classmethod(fake_recipe_load))
+        monkeypatch.setattr(state_mod.ConsumptionTable, "load", classmethod(fake_consumption_load))
+        bd = BuildingDictionary(entries={})
+        state_mod._try_build_balance_table(GameTitle.ANNO_1800, [], bd, locale="en")
+        assert captured["recipe_locales"] == ("en",)
+
+
 class TestLoadInnerSessionsHelper:
     def test_reads_a8s_via_extract_inner_filedb(
         self, tmp_path: Path, tui_state, monkeypatch
