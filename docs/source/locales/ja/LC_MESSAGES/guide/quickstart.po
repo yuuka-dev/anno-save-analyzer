@@ -9,7 +9,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: anno-save-analyzer 0.1\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-04-25 01:06+0900\n"
+"POT-Creation-Date: 2026-04-25 15:36+0900\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: ja\n"
@@ -77,33 +77,73 @@ msgstr ""
 " **読み取り専用** ─ セーブを書き換えません．"
 
 #: ../../source/guide/quickstart.md:27
-msgid "Auto-pick the latest save via `.env` (optional)"
-msgstr "`.env` で最新 save を自動選択 (任意)"
+msgid "Auto-pick the latest save via `config.toml` (optional)"
+msgstr "`config.toml` で最新 save を自動選択 (任意)"
 
 #: ../../source/guide/quickstart.md:29
 msgid ""
-"If you do not want to type the save path every time, drop a ``.env`` in "
-"the repo root pointing at your save directories. The CLI / GUI will pick "
+"If you do not want to type the save path every time, register your save "
+"directories once in your user config file. The CLI / GUI will then pick "
 "the **most recently modified** ``.a7s`` / ``.a8s`` under the directory "
 "matching ``--title``."
 msgstr ""
-"毎回 save のパスを打つのが面倒なら，repo root に ``.env`` を置いて save "
-"ディレクトリを指定してください．CLI / GUI は ``--title`` に対応するディレクトリ"
+"毎回 save のパスを打つのが面倒なら，ユーザー設定ファイルに save ディレクトリ"
+"を一度登録しておいてください．CLI / GUI は ``--title`` に対応するディレクトリ"
 "配下から **最新 mtime** の ``.a7s`` / ``.a8s`` を自動で選びます．"
 
-#: ../../source/guide/quickstart.md:40
+#: ../../source/guide/quickstart.md
+msgid "OS"
+msgstr "OS"
+
+#: ../../source/guide/quickstart.md
+msgid "Path"
+msgstr "パス"
+
+#: ../../source/guide/quickstart.md
+msgid "Linux / WSL2"
+msgstr "Linux / WSL2"
+
+#: ../../source/guide/quickstart.md
+msgid "``~/.config/anno-save-analyzer/config.toml`` (XDG)"
+msgstr "``~/.config/anno-save-analyzer/config.toml`` (XDG)"
+
+#: ../../source/guide/quickstart.md
+msgid "macOS"
+msgstr "macOS"
+
+#: ../../source/guide/quickstart.md
+msgid "``~/.config/anno-save-analyzer/config.toml``"
+msgstr "``~/.config/anno-save-analyzer/config.toml``"
+
+#: ../../source/guide/quickstart.md
+msgid "Windows"
+msgstr "Windows"
+
+#: ../../source/guide/quickstart.md
+msgid "``%APPDATA%\\anno-save-analyzer\\config.toml``"
+msgstr "``%APPDATA%\\anno-save-analyzer\\config.toml``"
+
+#: ../../source/guide/quickstart.md:47
 msgid "With that in place, the save argument becomes optional:"
 msgstr "これを設定しておけば，save 引数は省略可能になります："
 
-#: ../../source/guide/quickstart.md:50
-msgid "An explicit save path always wins over the ``.env`` lookup."
-msgstr "save パスを明示的に渡した場合は，常に ``.env`` より優先されます．"
+#: ../../source/guide/quickstart.md:57
+msgid ""
+"An explicit save path always wins over the config lookup. The TUI also "
+"writes other UI preferences (locale, theme, chart window) to the same "
+"file, so it will be created automatically the first time you change a "
+"setting in-app — you can just open it later and add ``[paths]``."
+msgstr ""
+"save パスを明示的に渡した場合は，常に config より優先されます．TUI は他の UI "
+"設定 (locale / theme / chart window) も同じファイルに書き込むため，アプリ内で"
+"一度設定を変更すればファイルは自動生成されます．後から開いて ``[paths]`` を"
+"追記すればええです．"
 
-#: ../../source/guide/quickstart.md:52
+#: ../../source/guide/quickstart.md:62
 msgid "Launch the TUI"
 msgstr "TUI を起動"
 
-#: ../../source/guide/quickstart.md:58
+#: ../../source/guide/quickstart.md:68
 msgid ""
 "Use ``Ctrl+T`` to switch screens (Overview → Trade Statistics → Supply "
 "Balance). ``Ctrl+L`` toggles English/Japanese."
@@ -111,11 +151,11 @@ msgstr ""
 "``Ctrl+T`` で画面切替 (Overview → Trade Statistics → Supply "
 "Balance)．``Ctrl+L`` で英日切替．"
 
-#: ../../source/guide/quickstart.md:61
+#: ../../source/guide/quickstart.md:71
 msgid "Export the full state as JSON"
 msgstr "全 state を JSON エクスポート"
 
-#: ../../source/guide/quickstart.md:68
+#: ../../source/guide/quickstart.md:78
 #, python-brace-format
 msgid ""
 "The JSON contains overview + islands + tier breakdown + balance + every "
@@ -125,7 +165,10 @@ msgstr ""
 "出力 JSON には概要・島情報・tier 別内訳・需給バランス・全 TradeEvent が含まれます．`pandas.read_json` /"
 " `pandas.json_normalize` で読み込めば即分析可能です ({doc}`scm-analytics` を参照)．"
 
-#: ../../source/guide/quickstart.md:72
+#: ../../source/guide/quickstart.md:82
 msgid "One-liner Python API"
 msgstr "Python API (ワンライナー)"
+
+#~ msgid "An explicit save path always wins over the ``.env`` lookup."
+#~ msgstr "save パスを明示的に渡した場合は，常に ``.env`` より優先されます．"
 

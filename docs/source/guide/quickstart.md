@@ -24,30 +24,40 @@ pip install -e ".[tui,gui,optimizer]"
 Copy a ``.a7s`` (Anno 1800) or ``.a8s`` (Anno 117) file somewhere convenient.
 The tool is **read-only** — it never modifies your save.
 
-## Auto-pick the latest save via `.env` (optional)
+## Auto-pick the latest save via `config.toml` (optional)
 
-If you do not want to type the save path every time, drop a ``.env`` in the
-repo root pointing at your save directories. The CLI / GUI will pick the
-**most recently modified** ``.a7s`` / ``.a8s`` under the directory matching
-``--title``.
+If you do not want to type the save path every time, register your save
+directories once in your user config file. The CLI / GUI will then pick
+the **most recently modified** ``.a7s`` / ``.a8s`` under the directory
+matching ``--title``.
 
-```bash
-# .env (copy from .env.example and edit)
-ANNO_1800_SAVE_DIR=/mnt/c/Users/<you>/Documents/Anno 1800/accounts/<id>/savegame
-ANNO_117_SAVE_DIR=/mnt/c/Users/<you>/Documents/Anno 117 - Pax Romana/accounts/<id>/savegame
+| OS | Path |
+| --- | --- |
+| Linux / WSL2 | ``~/.config/anno-save-analyzer/config.toml`` (XDG) |
+| macOS | ``~/.config/anno-save-analyzer/config.toml`` |
+| Windows | ``%APPDATA%\anno-save-analyzer\config.toml`` |
+
+```toml
+# config.toml
+[paths]
+anno1800_save_dir = "C:\\Users\\<you>\\Documents\\Anno 1800\\accounts\\<id>\\savegame"
+anno117_save_dir = "/mnt/c/Users/<you>/Documents/Anno 117 - Pax Romana/accounts/<id>/savegame"
 ```
 
 With that in place, the save argument becomes optional:
 
 ```bash
-# Auto-pick the newest .a7s under ANNO_1800_SAVE_DIR
+# Auto-pick the newest .a7s under [paths] anno1800_save_dir
 anno-save-analyzer tui --title anno1800 --locale ja
 
-# Same for Anno 117 (reads ANNO_117_SAVE_DIR, picks newest .a8s)
+# Same for Anno 117 (reads anno117_save_dir, picks newest .a8s)
 anno-save-analyzer tui --title anno117
 ```
 
-An explicit save path always wins over the ``.env`` lookup.
+An explicit save path always wins over the config lookup. The TUI also
+writes other UI preferences (locale, theme, chart window) to the same
+file, so it will be created automatically the first time you change a
+setting in-app — you can just open it later and add ``[paths]``.
 
 ## Launch the TUI
 
