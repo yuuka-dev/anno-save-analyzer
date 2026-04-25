@@ -21,6 +21,7 @@ from anno_save_analyzer.trade.factories import FactoryAggregate, FactoryInstance
 from anno_save_analyzer.trade.factory_recipes import (
     FactoryRecipe,
     FactoryRecipeTable,
+    RecipeInput,
     RecipeOutput,
 )
 from anno_save_analyzer.trade.population import (
@@ -189,15 +190,16 @@ def test_tier_not_in_map_is_skipped() -> None:
     assert table.islands[0].products == ()
 
 
-# ---------- observed need filter (unlock 未達の除外) ----------
+# ---------- standard need: observed 無関係に住民居れば加算 (#96) ----------
 
 
-def test_unlock_not_met_need_excluded_when_not_observed() -> None:
-    """``product_saturations`` に無い need は unlock 未達と見なし加算しない．
+def test_standard_needs_added_regardless_of_product_saturations() -> None:
+    """standard need は ``product_saturations`` に関係なく住民居れば加算 (#96)．
 
-    Calculator の Farmer tier には Fish と Biscuits 両方が候補として並ぶが
-    書記長の save で Biscuits が要求されてない (ConsumptionStates に未登録)
-    場合は消費に乗らない．
+    旧仕様: observed filter で saturation 観測済 need のみ加算 → 新世界 /
+    Scholars 等の need が消費 0 になる副作用．
+    新仕様 (#96): standard need は住民居れば全加算．bonus は除外継続．
+    正確な unlock gate は #99 で ``unlock_condition_guid`` ベースに再導入予定．
     """
     consumption = _mk_consumption(
         PopulationTier(
@@ -205,7 +207,7 @@ def test_unlock_not_met_need_excluded_when_not_observed() -> None:
             name="Farmers",
             needs=(
                 TierNeed(product_guid=200, tpmin=0.01),  # Fish: 観測済
-                TierNeed(product_guid=400, tpmin=0.02),  # Biscuits: 未観測 = unlock 外
+                TierNeed(product_guid=400, tpmin=0.02),  # Biscuits: 未観測でも加算される
             ),
         )
     )
@@ -213,21 +215,16 @@ def test_unlock_not_met_need_excluded_when_not_observed() -> None:
         _mk_residence(
             residents=100,
             tier_breakdown=(TierSummary(tier="farmer", residence_count=10, resident_total=100),),
-            observed_products=(200,),  # Fish のみ観測
+            observed_products=(200,),  # Fish のみ観測 — もう影響しない
         )
     ]
     table = build_balance_table(residences=residences, consumption=consumption)
     guids = {p.product_guid for p in table.islands[0].products}
-    assert 200 in guids
-    assert 400 not in guids
+    assert guids == {200, 400}
 
 
-def test_no_observed_products_falls_back_to_all_needs() -> None:
-    """``product_saturations`` 空なら tier.needs を全加算 (既存互換 fallback)．
-
-    都市再建直後など save に tier_breakdown だけあって ConsumptionStates が
-    populate されてないケースで 0 加算にならないようにする．
-    """
+def test_standard_needs_added_with_no_observations() -> None:
+    """``product_saturations`` 空でも standard need は加算 (旧 fallback と同等)．"""
     consumption = _mk_consumption(
         PopulationTier(
             guid=15000000,
@@ -242,12 +239,11 @@ def test_no_observed_products_falls_back_to_all_needs() -> None:
         _mk_residence(
             residents=100,
             tier_breakdown=(TierSummary(tier="farmer", residence_count=10, resident_total=100),),
-            observed_products=(),  # 観測ゼロ
+            observed_products=(),
         )
     ]
     table = build_balance_table(residences=residences, consumption=consumption)
     guids = {p.product_guid for p in table.islands[0].products}
-    # fallback: 両方の need が加算される
     assert guids == {200, 400}
 
 
@@ -378,3 +374,153 @@ def test_factories_on_island_without_recipe_do_not_crash() -> None:
     recipes = _mk_recipes()  # 空 table
     table = build_balance_table(residences=residences, factories=factories, recipes=recipes)
     assert table.islands[0].products == ()
+
+
+# ---------- 中間物資消費 (#96) ----------
+
+
+def test_intermediate_product_consumed_by_factory_inputs() -> None:
+    """缶詰肉工場が豚を消費する．豚の balance に消費が乗る．
+
+    旧仕様: 豚は生産 +5, 消費 0 → 大幅黒字 (虚像)．
+    新仕様 (#96): 缶詰肉工場の input から豚の消費を計上．
+    """
+    PIG = 200
+    CAN = 300
+    recipes = _mk_recipes(
+        FactoryRecipe(
+            guid=1,
+            name="Pig farm",
+            tpmin=2.0,
+            outputs=(RecipeOutput(product_guid=PIG, amount=1.0),),
+        ),
+        FactoryRecipe(
+            guid=2,
+            name="Cannery",
+            tpmin=1.0,
+            outputs=(RecipeOutput(product_guid=CAN, amount=1.0),),
+            inputs=(RecipeInput(product_guid=PIG, amount=1.5),),
+        ),
+    )
+    residences = [_mk_residence(am="A1", residents=0)]
+    factories = [
+        _mk_factory(
+            am="A1",
+            instances=(
+                FactoryInstance(building_guid=1, productivity=1.0),  # +2 pig/min
+                FactoryInstance(building_guid=2, productivity=1.0),  # -1.5 pig/min, +1 can/min
+            ),
+        )
+    ]
+    table = build_balance_table(residences=residences, factories=factories, recipes=recipes)
+    by_guid = {p.product_guid: p for p in table.islands[0].products}
+    pig = by_guid[PIG]
+    assert pig.produced_per_minute == pytest.approx(2.0)
+    assert pig.consumed_per_minute == pytest.approx(1.5)
+    assert pig.delta_per_minute == pytest.approx(0.5)
+    can = by_guid[CAN]
+    assert can.produced_per_minute == pytest.approx(1.0)
+    assert can.consumed_per_minute == 0.0
+
+
+def test_intermediate_consumption_combines_with_population_consumption() -> None:
+    """同一物資が住民にも工場入力にも消費される場合，両方加算される．"""
+    FISH = 200
+    consumption = _mk_consumption(
+        PopulationTier(
+            guid=15000000, name="Farmers", needs=(TierNeed(product_guid=FISH, tpmin=0.01),)
+        )
+    )
+    recipes = _mk_recipes(
+        FactoryRecipe(
+            guid=1,
+            name="Fish meal",
+            tpmin=1.0,
+            outputs=(RecipeOutput(product_guid=999, amount=1.0),),
+            inputs=(RecipeInput(product_guid=FISH, amount=2.0),),
+        )
+    )
+    residences = [
+        _mk_residence(
+            am="A1",
+            residents=100,
+            tier_breakdown=(TierSummary(tier="farmer", residence_count=10, resident_total=100),),
+        )
+    ]
+    factories = [
+        _mk_factory(am="A1", instances=(FactoryInstance(building_guid=1, productivity=1.0),))
+    ]
+    table = build_balance_table(
+        residences=residences, factories=factories, recipes=recipes, consumption=consumption
+    )
+    by_guid = {p.product_guid: p for p in table.islands[0].products}
+    fish = by_guid[FISH]
+    # 住民 100 × 0.01 + 工場 1 × 1.0 × 2.0 = 1.0 + 2.0 = 3.0
+    assert fish.consumed_per_minute == pytest.approx(3.0)
+
+
+def test_intermediate_consumption_scales_with_productivity() -> None:
+    """factory の productivity が input 消費にも反映される．"""
+    INPUT = 200
+    recipes = _mk_recipes(
+        FactoryRecipe(
+            guid=1,
+            name="Refinery",
+            tpmin=1.0,
+            outputs=(RecipeOutput(product_guid=999, amount=1.0),),
+            inputs=(RecipeInput(product_guid=INPUT, amount=1.0),),
+        )
+    )
+    residences = [_mk_residence(am="A1", residents=0)]
+    factories = [
+        _mk_factory(am="A1", instances=(FactoryInstance(building_guid=1, productivity=0.5),))
+    ]
+    table = build_balance_table(residences=residences, factories=factories, recipes=recipes)
+    by_guid = {p.product_guid: p for p in table.islands[0].products}
+    # 0.5 × 1.0 × 1.0 = 0.5
+    assert by_guid[INPUT].consumed_per_minute == pytest.approx(0.5)
+
+
+def test_intermediate_consumption_input_amount_none_defaults_to_one() -> None:
+    """``RecipeInput.amount = None`` は 1.0 として扱う (output 側と揃える)．"""
+    recipes = _mk_recipes(
+        FactoryRecipe(
+            guid=1,
+            name="Mystery factory",
+            tpmin=2.0,
+            outputs=(RecipeOutput(product_guid=999, amount=1.0),),
+            inputs=(RecipeInput(product_guid=200, amount=None),),
+        )
+    )
+    residences = [_mk_residence(am="A1", residents=0)]
+    factories = [
+        _mk_factory(am="A1", instances=(FactoryInstance(building_guid=1, productivity=1.0),))
+    ]
+    table = build_balance_table(residences=residences, factories=factories, recipes=recipes)
+    by_guid = {p.product_guid: p for p in table.islands[0].products}
+    # 1.0 × 2.0 × 1.0 (default amount) = 2.0
+    assert by_guid[200].consumed_per_minute == pytest.approx(2.0)
+
+
+# ---------- Tourists mapping (#96) ----------
+
+
+def test_tourist_tier_maps_to_consumption_table_tourists() -> None:
+    """``"tourist"`` tier key が consumption の ``Tourists`` を引ける (#96)．"""
+    consumption = _mk_consumption(
+        PopulationTier(
+            guid=999999, name="Tourists", needs=(TierNeed(product_guid=200, tpmin=0.01),)
+        )
+    )
+    residences = [
+        _mk_residence(
+            am="A1",
+            residents=50,
+            tier_breakdown=(TierSummary(tier="tourist", residence_count=5, resident_total=50),),
+        )
+    ]
+    table = build_balance_table(residences=residences, consumption=consumption)
+    p = table.islands[0].products[0]
+    assert p.product_guid == 200
+    # 50 × 0.01 = 0.5
+    assert p.consumed_per_minute == pytest.approx(0.5)

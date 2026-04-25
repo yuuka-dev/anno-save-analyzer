@@ -38,6 +38,12 @@ class TierNeed(BaseModel):
     is_bonus_need: bool = False
     """Spirits / Rum のような住人 upgrade 不要の嗜好品系．"""
     dlcs: tuple[str, ...] = Field(default_factory=tuple)
+    unlock_condition_guid: int | None = None
+    """この need が unlock されるための条件 (人口閾値 + 公共施設 etc) の
+    Asset GUID．現状は全 ``None``．#99 で ``assets.xml`` の
+    ``UnlockCondition`` を抽出して埋める予定．埋まれば balance 側で
+    「unlock 未達 need は除外」の正確な gate が効くようになる．
+    """
 
     model_config = {"frozen": True}
 
@@ -146,6 +152,7 @@ def _tier_from_dict(data: dict[str, Any]) -> PopulationTier:
 
 
 def _need_from_dict(data: dict[str, Any]) -> TierNeed:
+    raw_unlock = data.get("unlock_condition_guid")
     return TierNeed(
         product_guid=int(data["product_guid"]),
         tpmin=data.get("tpmin"),
@@ -153,4 +160,5 @@ def _need_from_dict(data: dict[str, Any]) -> TierNeed:
         happiness=int(data.get("happiness") or 0),
         is_bonus_need=bool(data.get("is_bonus_need")),
         dlcs=tuple(data.get("dlcs") or ()),
+        unlock_condition_guid=int(raw_unlock) if raw_unlock is not None else None,
     )

@@ -95,6 +95,44 @@ def test_load_from_custom_data_dir(tmp_path: Path) -> None:
     assert table.display_name(100, "ja") == "おもちゃ"
 
 
+def test_unlock_condition_guid_default_is_none() -> None:
+    """``TierNeed.unlock_condition_guid`` は default ``None`` で，現状全 need が None．
+
+    schema slot は #99 で ``assets.xml`` 由来の値を埋める前提．今は全 None．
+    balance gate は将来の ``unlock_condition_guid`` ベースに切替予定．
+    """
+    need = TierNeed(product_guid=1)
+    assert need.unlock_condition_guid is None
+
+
+def test_unlock_condition_guid_round_trips_via_yaml(tmp_path: Path) -> None:
+    """YAML に ``unlock_condition_guid`` フィールドを書けば load 後保持される (将来 #99 用)．"""
+    _write_yaml(
+        tmp_path / "consumption_anno1800.en.yaml",
+        {
+            "tiers": [
+                {
+                    "guid": 100,
+                    "name": "Toy",
+                    "full_house": 4,
+                    "dlcs": [],
+                    "needs": [
+                        {
+                            "product_guid": 200,
+                            "tpmin": 0.01,
+                            "unlock_condition_guid": 999000,
+                        }
+                    ],
+                }
+            ]
+        },
+    )
+    table = ConsumptionTable.load(data_dir=tmp_path)
+    tier = table.get_tier(100)
+    assert tier is not None
+    assert tier.needs[0].unlock_condition_guid == 999000
+
+
 def test_load_without_ja_file_still_works(tmp_path: Path) -> None:
     """``ja`` YAML が無くても en だけで load できる．"""
     _write_yaml(

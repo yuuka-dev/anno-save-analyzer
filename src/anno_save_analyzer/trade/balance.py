@@ -14,16 +14,18 @@
 
 - **生産量 (ton/min)** = Σ over factory instances of
   ``productivity × recipe.tpmin × output.amount``
-- **消費量 (ton/min)** = Σ over tier × needs of
-  ``tier.resident_total × need.tpmin``
-  - ``is_bonus_need`` の物資は通常消費に含めない
-  - **unlock 未達の物資は除外**．Calculator の ``tier.needs`` は tier の
-    潜在的な全 need 候補．書記長の島で実際 unlock されてるかは
-    ``ResidenceAggregate.product_saturations`` (save の ``ConsumptionStates``
-    観測値) で判定し，観測されてない need は加算しない (「ビスケット
-    要求されてないのに消費加算される」問題の修正)．observe ゼロの島は
-    tier.needs を素直に使う (都市再建直後など tier breakdown だけで推定
-    したいフォールバック)．
+- **消費量 (ton/min)** = 住民消費 + 工場入力消費の合計
+  - **住民消費** = Σ over tier × needs of ``tier.resident_total × need.tpmin``
+    - ``is_bonus_need`` の物資は default で除外 (``include_bonus_needs=False``)
+    - standard need (``is_bonus_need=False``) は **住民数 > 0 なら全加算**．
+      過去は ``ResidenceAggregate.product_saturations`` (save 観測値) で
+      filter していたが，新世界 / 北極圏 / エンベサ / Scholars 等の need
+      が一度も観測されてないと消費 0 扱いになる副作用があった (#96)．
+      正確な unlock gate は #99 で ``unlock_condition_guid`` を埋めて行う．
+    - bonus need の per-residence ON/OFF 反映は #97 で対応予定
+  - **工場入力消費** = Σ over factory instances of
+    ``productivity × recipe.tpmin × input.amount``
+    - 中間物資 (豚 → 缶詰肉，鉄鉱 → 鋼鉄 等) を計上
 - **delta** = produced - consumed
 
 複数島の集計は ``SupplyBalanceTable.aggregate`` で area_manager 集合を指定
@@ -57,6 +59,7 @@ _TIER_KEY_TO_CONSUMPTION_NAME: dict[str, str] = {
     "technician": "Technicians",
     "scholar": "Scholars",
     "artista": "Artista",
+    "tourist": "Tourists",
 }
 
 
@@ -174,8 +177,13 @@ def build_balance_table(
     factories_by_am: dict[str, FactoryAggregate] = {f.area_manager: f for f in factories}
     islands: list[IslandBalance] = []
     for res in residences:
-        produced = _produced_for_island(factories_by_am.get(res.area_manager), recipes)
-        consumed = _consumed_for_island(res, consumption, include_bonus_needs=include_bonus_needs)
+        factory_agg = factories_by_am.get(res.area_manager)
+        produced = _produced_for_island(factory_agg, recipes)
+        consumed_pop = _consumed_for_island(
+            res, consumption, include_bonus_needs=include_bonus_needs
+        )
+        consumed_intermediate = _consumed_intermediate_for_island(factory_agg, recipes)
+        consumed = _merge_sums(consumed_pop, consumed_intermediate)
         guids = sorted(set(produced) | set(consumed))
         products = tuple(
             ProductBalance(
@@ -212,6 +220,28 @@ def _produced_for_island(
     return totals
 
 
+def _consumed_intermediate_for_island(
+    factories: FactoryAggregate | None,
+    recipes: FactoryRecipeTable | None,
+) -> dict[int, float]:
+    """工場の入力 (中間物資) 消費を集計．
+
+    豚 → 缶詰肉，鉄鉱 → 鋼鉄 等のチェーン中間品が「誰にも消費されない」
+    扱いになる問題 (#96) の修正．``recipe.consumed_per_minute`` を
+    factory instance ごとに加算する．
+    """
+    if factories is None or recipes is None:
+        return {}
+    totals: dict[int, float] = {}
+    for inst in factories.instances:
+        recipe = recipes.get(inst.building_guid)
+        if recipe is None:
+            continue
+        for guid, rate in recipe.consumed_per_minute(inst.productivity).items():
+            totals[guid] = totals.get(guid, 0.0) + rate
+    return totals
+
+
 def _consumed_for_island(
     residence: ResidenceAggregate,
     consumption: ConsumptionTable | None,
@@ -220,13 +250,6 @@ def _consumed_for_island(
 ) -> dict[int, float]:
     if consumption is None or not residence.tier_breakdown:
         return {}
-    # 観測済 need で filter．``product_saturations`` に登録されている物資が
-    # save の ``ConsumptionStates`` で実際消費記録のある need = unlock 済．
-    # None (観測ゼロ) の場合は tier.needs を素直に加算 (既存互換の fallback)．
-    observed: set[int] | None = None
-    if residence.product_saturations:
-        observed = {ps.product_guid for ps in residence.product_saturations}
-
     totals: dict[int, float] = {}
     # 事前に consumption の tier を英語名で index して繰り返し linear search を回避
     tier_by_name: dict[str, PopulationTier] = {t.name: t for t in consumption.tiers}
@@ -242,9 +265,23 @@ def _consumed_for_island(
                 continue
             if need.is_bonus_need and not include_bonus_needs:
                 continue
-            if observed is not None and need.product_guid not in observed:
-                continue
+            # standard need は住民居れば加算 (#96)．以前は ``product_saturations``
+            # で filter していたが新世界 / Scholars 等の need が消費 0 になる
+            # 副作用があった．正確な unlock gate は #99 で
+            # ``need.unlock_condition_guid`` を埋めて行う予定．
             totals[need.product_guid] = (
                 totals.get(need.product_guid, 0.0) + ts.resident_total * need.tpmin
             )
     return totals
+
+
+def _merge_sums(a: dict[int, float], b: dict[int, float]) -> dict[int, float]:
+    """2 つの ``{guid: rate}`` を加算マージ．副作用なし．"""
+    if not b:
+        return a
+    if not a:
+        return dict(b)
+    out = dict(a)
+    for guid, rate in b.items():
+        out[guid] = out.get(guid, 0.0) + rate
+    return out
