@@ -52,15 +52,26 @@ def latest_save(title: GameTitle, cfg: UserConfig | None = None) -> Path | None:
 
     Anno 1800 → ``.a7s`` / Anno 117 → ``.a8s``．該当 dir が無い or ファイル
     0 件なら ``None``．
+
+    Anno は autosave 中に旧 save を delete → rename するため ``glob`` と
+    ``stat`` の間でファイルが消える race がある．lazy iteration + 個別
+    ``FileNotFoundError`` 握り潰しで再現可能性を最小化する．
     """
     dir_ = save_dir_for(title, cfg=cfg)
     if dir_ is None:
         return None
     suffix = _SUFFIX_BY_TITLE[title]
-    saves = list(dir_.glob(f"*{suffix}"))
-    if not saves:
-        return None
-    return max(saves, key=lambda p: p.stat().st_mtime)
+    latest: Path | None = None
+    latest_mtime: float | None = None
+    for path in dir_.glob(f"*{suffix}"):
+        try:
+            mtime = path.stat().st_mtime
+        except FileNotFoundError:
+            continue
+        if latest_mtime is None or mtime > latest_mtime:
+            latest = path
+            latest_mtime = mtime
+    return latest
 
 
 def resolve_save(save: Path | None, title: GameTitle, cfg: UserConfig | None = None) -> Path | None:

@@ -6,7 +6,7 @@ env vars ではなく ``UserConfig`` を組み立てて渡す方針．installed 
 
 from __future__ import annotations
 
-import time
+import os
 from pathlib import Path
 
 import pytest
@@ -18,6 +18,13 @@ from anno_save_analyzer.trade.models import GameTitle
 
 def _cfg(**paths: str | None) -> UserConfig:
     return UserConfig(paths=PathsConfig(**paths))
+
+
+def _set_mtime(path: Path, when: float) -> None:
+    """``os.utime`` で mtime を明示的に固定．粗 FS ts (HFS+/exFAT) でも
+    順序が決定論的になる．``time.sleep`` 依存を排除．
+    """
+    os.utime(path, (when, when))
 
 
 class TestSaveDirFor:
@@ -59,8 +66,9 @@ class TestLatestSave:
         old = tmp_path / "old.a7s"
         new = tmp_path / "new.a7s"
         old.write_bytes(b"x")
-        time.sleep(0.05)
         new.write_bytes(b"y")
+        _set_mtime(old, 1_000_000.0)
+        _set_mtime(new, 2_000_000.0)
         assert latest_save(GameTitle.ANNO_1800, cfg=cfg) == new
 
     def test_ignores_other_extensions(self, tmp_path: Path) -> None:
@@ -83,6 +91,29 @@ class TestLatestSave:
         cfg = _cfg()
         assert latest_save(GameTitle.ANNO_1800, cfg=cfg) is None
 
+    def test_skips_files_that_disappear_between_glob_and_stat(
+        self, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        """autosave 中に旧 save が delete → rename される race を吸収する．"""
+        cfg = _cfg(anno1800_save_dir=str(tmp_path))
+        survivor = tmp_path / "survivor.a7s"
+        ghost = tmp_path / "ghost.a7s"
+        survivor.write_bytes(b"x")
+        ghost.write_bytes(b"y")
+        _set_mtime(survivor, 1_000_000.0)
+        _set_mtime(ghost, 2_000_000.0)  # 本来こちらが選ばれるはず
+
+        original_stat = Path.stat
+
+        def stat_with_ghost_gone(self: Path, *args, **kwargs):
+            if self == ghost:
+                raise FileNotFoundError(f"{self} disappeared")
+            return original_stat(self, *args, **kwargs)
+
+        monkeypatch.setattr(Path, "stat", stat_with_ghost_gone)
+        # ghost は stat 失敗するので survivor が返る
+        assert latest_save(GameTitle.ANNO_1800, cfg=cfg) == survivor
+
 
 class TestResolveSave:
     def test_explicit_path_returned_as_is(self, tmp_path: Path) -> None:
@@ -92,10 +123,13 @@ class TestResolveSave:
 
     def test_none_falls_back_to_latest(self, tmp_path: Path) -> None:
         cfg = _cfg(anno1800_save_dir=str(tmp_path))
-        (tmp_path / "one.a7s").write_bytes(b"x")
-        time.sleep(0.05)
-        (tmp_path / "two.a7s").write_bytes(b"y")
-        assert resolve_save(None, GameTitle.ANNO_1800, cfg=cfg) == tmp_path / "two.a7s"
+        one = tmp_path / "one.a7s"
+        two = tmp_path / "two.a7s"
+        one.write_bytes(b"x")
+        two.write_bytes(b"y")
+        _set_mtime(one, 1_000_000.0)
+        _set_mtime(two, 2_000_000.0)
+        assert resolve_save(None, GameTitle.ANNO_1800, cfg=cfg) == two
 
     def test_none_returns_none_when_nothing_found(self) -> None:
         assert resolve_save(None, GameTitle.ANNO_1800, cfg=_cfg()) is None

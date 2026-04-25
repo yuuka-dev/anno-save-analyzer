@@ -58,8 +58,10 @@ def dump_state(  # noqa: PLR0913,B008 — CLI entrypoint．typer.Argument/Option
     if resolved is None:
         field = "anno1800_save_dir" if title_enum is GameTitle.ANNO_1800 else "anno117_save_dir"
         typer.secho(
-            f"ERROR: save not specified and [paths] {field} is unset or empty. "
-            "Either pass the save path explicitly or set it in your config.toml.",
+            f"ERROR: could not auto-select a save from [paths] {field}. "
+            "The setting may be unset, the configured directory may not exist, "
+            "or it may contain no matching .a7s/.a8s files. "
+            "Either pass the save path explicitly or fix your config.toml.",
             err=True,
             fg=typer.colors.RED,
         )

@@ -53,8 +53,10 @@ def main(argv: list[str] | None = None) -> int:
     if resolved is None:
         field = "anno1800_save_dir" if title is GameTitle.ANNO_1800 else "anno117_save_dir"
         print(
-            f"ERROR: save not specified and [paths] {field} is unset or empty. "
-            "Pass the save path or set it in your config.toml.",
+            f"ERROR: could not auto-select a save from [paths] {field}. "
+            "The setting may be unset, the configured directory may not exist, "
+            "or it may contain no matching .a7s/.a8s files. "
+            "Pass the save path or fix your config.toml.",
             file=sys.stderr,
         )
         return 2

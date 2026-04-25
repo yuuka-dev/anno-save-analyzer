@@ -78,8 +78,9 @@ def _launch(
         if resolved is None:
             field = "anno1800_save_dir" if title == GameTitleArg.ANNO_1800 else "anno117_save_dir"
             typer.secho(
-                f"No save found. Set [paths] {field} in your config.toml "
-                "to a directory containing .a7s/.a8s files.",
+                f"No save found from [paths] {field}. The setting may be unset, "
+                "the configured directory may not exist, or it may contain no "
+                ".a7s/.a8s files. Pass the save path or fix your config.toml.",
                 err=True,
                 fg=typer.colors.RED,
             )
