@@ -17,8 +17,13 @@ def _load_generator_module():
     `scripts/` は Python package ではないので importlib で直接 spec から読む．
     依存している `generate_items_anno1800` も同じディレクトリで隣接 import
     されるので，先に sys.path に scripts/ を入れる．
+
+    終了時は ``sys.path`` をスナップショットから完全復元する (generator 自身が
+    ``sys.path.insert`` するため，1 件 ``remove`` だけだと後続テストに副作用が
+    残る — Copilot 指摘 PR #106)．
     """
     scripts_dir = Path(__file__).resolve().parents[2] / "scripts"
+    saved_path = list(sys.path)
     sys.path.insert(0, str(scripts_dir))
     try:
         spec = importlib.util.spec_from_file_location(
@@ -30,7 +35,7 @@ def _load_generator_module():
         spec.loader.exec_module(module)
         return module
     finally:
-        sys.path.remove(str(scripts_dir))
+        sys.path[:] = saved_path
 
 
 # ---------- 実データ smoke ----------

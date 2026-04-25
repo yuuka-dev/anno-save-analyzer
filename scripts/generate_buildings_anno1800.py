@@ -9,7 +9,14 @@ MVP 範囲:
 - name (en/ja) — texts_<lang>.xml から GUID-direct lookup (items と同パターン)
 - kind — ``residence`` / ``factory`` / ``farm`` / ``warehouse`` /
   ``public_service`` / ``buff_factory``
-- tier — Residence のみ．internal Name ``residence_tier0N`` から 1..7 を推定
+- tier — Residence のみ．internal Name から 6 系列の判定で正規化:
+
+  * 旧世界  ``residence_tier01..05`` → farmer / worker / artisan / engineer / investor
+  * 新世界  ``residence_colony01_tier01..03`` → jornaleros / obreros / artista
+  * Hacienda  ``Hacienda residence module tier01..03`` → 同 (jornaleros / obreros / artista)
+  * 北極  ``residence_arctic_tier01..02`` → explorer / technician
+  * エンベサ  ``residence_colony02_tier01..03`` → shepherd / elder / scholar (3 は SOC DLC，未確認時は予約)
+  * 単独建物  ``Hotel`` → tourist，``HighLife_monument_*(residence)`` (Skyline Tower) → investor
 
 **非 MVP**: workforce_provided / workforce_required / inputs / outputs /
 production chain は別 issue (#66, #12) で FactoryBase / ProductionChain
