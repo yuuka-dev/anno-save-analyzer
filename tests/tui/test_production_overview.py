@@ -253,7 +253,7 @@ class TestProductionFilters:
             )
             if session_node is None:
                 # fixture には session 1 つ以上あるはずだが，無ければ skip
-                return
+                pytest.skip("No session node found in the production overview tree")
             screen.on_tree_node_selected(Tree.NodeSelected(session_node))
             await pilot.pause()
             table = screen.query_one(DataTable)
