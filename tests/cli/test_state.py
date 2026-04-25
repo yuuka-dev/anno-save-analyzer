@@ -121,7 +121,7 @@ def test_state_command_compact_indent(
 
 
 def test_state_command_missing_save_fails(runner: CliRunner, tmp_path: Path) -> None:
-    """存在しない save path は click の ``exists=True`` で落ちる．"""
+    """明示指定された save path が存在しない場合は exit 2 + 明確なエラー．"""
     out = tmp_path / "state.json"
     result = runner.invoke(
         app,
@@ -135,4 +135,44 @@ def test_state_command_missing_save_fails(runner: CliRunner, tmp_path: Path) -> 
         ],
     )
     assert result.exit_code != 0
+    assert "save file not found" in result.output
     assert not out.exists()
+
+
+def test_state_command_save_omitted_no_config_fails(
+    runner: CliRunner, tmp_path: Path, monkeypatch
+) -> None:
+    """save 省略 + config の ``[paths]`` 未設定 → exit 2 + ガイドメッセージ．"""
+    cfg = tmp_path / "cfg.toml"
+    cfg.write_text("[ui]\nlocale = 'en'\n", encoding="utf-8")
+    monkeypatch.setenv("ANNO_SAVE_ANALYZER_CONFIG", str(cfg))
+    out = tmp_path / "state.json"
+    result = runner.invoke(
+        app, ["state", "--title", "anno117", "--out", str(out)]
+    )
+    assert result.exit_code == 2
+    assert "anno117_save_dir" in result.output
+    assert "config.toml" in result.output
+
+
+def test_state_command_save_omitted_picks_latest_from_config(
+    runner: CliRunner, synthetic_save: Path, tmp_path: Path, monkeypatch
+) -> None:
+    """save 省略 + ``[paths] anno117_save_dir`` 設定 → 最新 ``.a8s`` を自動選択．"""
+    save_dir = tmp_path / "saves"
+    save_dir.mkdir()
+    target = save_dir / "auto.a8s"
+    target.write_bytes(synthetic_save.read_bytes())
+
+    cfg = tmp_path / "cfg.toml"
+    cfg.write_text(
+        f'[paths]\nanno117_save_dir = "{save_dir}"\n', encoding="utf-8"
+    )
+    monkeypatch.setenv("ANNO_SAVE_ANALYZER_CONFIG", str(cfg))
+
+    out = tmp_path / "state.json"
+    result = runner.invoke(app, ["state", "--title", "anno117", "--out", str(out)])
+    assert result.exit_code == 0, result.output
+    assert "Auto-selected latest save" in result.output
+    assert "auto.a8s" in result.output
+    assert out.exists()
