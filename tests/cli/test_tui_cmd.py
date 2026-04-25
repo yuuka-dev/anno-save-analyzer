@@ -191,9 +191,7 @@ class TestTuiCommand:
         assert result.exit_code == 2
         assert "anno1800_save_dir" in result.output
 
-    def test_tui_save_omitted_picks_latest_from_config(
-        self, tmp_path: Path, monkeypatch
-    ) -> None:
+    def test_tui_save_omitted_picks_latest_from_config(self, tmp_path: Path, monkeypatch) -> None:
         """save 省略 + config 設定済 → 最新 save を自動選択して TUI 起動．"""
         save_dir = tmp_path / "saves"
         save_dir.mkdir()
@@ -201,9 +199,7 @@ class TestTuiCommand:
         save.write_bytes(_make_save(tmp_path).read_bytes())
 
         cfg = tmp_path / "cfg.toml"
-        cfg.write_text(
-            f'[paths]\nanno117_save_dir = "{save_dir}"\n', encoding="utf-8"
-        )
+        cfg.write_text(f'[paths]\nanno117_save_dir = "{save_dir}"\n', encoding="utf-8")
         monkeypatch.setenv("ANNO_SAVE_ANALYZER_CONFIG", str(cfg))
 
         with patch("anno_save_analyzer.tui.TradeApp.run"):

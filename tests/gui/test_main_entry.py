@@ -41,9 +41,7 @@ def test_gui_main_explicit_missing_path_returns_2(tmp_path: Path, capsys) -> Non
     assert "save file not found" in capsys.readouterr().err
 
 
-def test_gui_main_save_omitted_picks_latest(
-    tmp_path: Path, monkeypatch, capsys
-) -> None:
+def test_gui_main_save_omitted_picks_latest(tmp_path: Path, monkeypatch, capsys) -> None:
     """save 省略 + config 設定済 → 最新 save を選び GUI を起動．
 
     QApplication / BalanceMainWindow / event loop すべて mock するため
@@ -57,9 +55,7 @@ def test_gui_main_save_omitted_picks_latest(
     save.write_bytes(_synth_save(tmp_path).read_bytes())
 
     cfg = tmp_path / "cfg.toml"
-    cfg.write_text(
-        f'[paths]\nanno117_save_dir = "{save_dir}"\n', encoding="utf-8"
-    )
+    cfg.write_text(f'[paths]\nanno117_save_dir = "{save_dir}"\n', encoding="utf-8")
     monkeypatch.setenv("ANNO_SAVE_ANALYZER_CONFIG", str(cfg))
 
     with (

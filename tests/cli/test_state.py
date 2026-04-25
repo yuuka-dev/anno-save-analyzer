@@ -147,9 +147,7 @@ def test_state_command_save_omitted_no_config_fails(
     cfg.write_text("[ui]\nlocale = 'en'\n", encoding="utf-8")
     monkeypatch.setenv("ANNO_SAVE_ANALYZER_CONFIG", str(cfg))
     out = tmp_path / "state.json"
-    result = runner.invoke(
-        app, ["state", "--title", "anno117", "--out", str(out)]
-    )
+    result = runner.invoke(app, ["state", "--title", "anno117", "--out", str(out)])
     assert result.exit_code == 2
     assert "anno117_save_dir" in result.output
     assert "config.toml" in result.output
@@ -165,9 +163,7 @@ def test_state_command_save_omitted_picks_latest_from_config(
     target.write_bytes(synthetic_save.read_bytes())
 
     cfg = tmp_path / "cfg.toml"
-    cfg.write_text(
-        f'[paths]\nanno117_save_dir = "{save_dir}"\n', encoding="utf-8"
-    )
+    cfg.write_text(f'[paths]\nanno117_save_dir = "{save_dir}"\n', encoding="utf-8")
     monkeypatch.setenv("ANNO_SAVE_ANALYZER_CONFIG", str(cfg))
 
     out = tmp_path / "state.json"
